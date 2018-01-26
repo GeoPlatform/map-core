@@ -126,6 +126,10 @@
         }
 
 
+        getKey () {
+            return this._key;
+        }
+
 
         //-----------------
         getLayerStateIndex (layerId) {
@@ -888,47 +892,33 @@
 
         /**
          * Retrieve a map's descriptor from the registry
-         * @param mapId identifier of map
-         * @param callback(err, map)
+         * @param {string} mapId identifier of map
+         * @return {Promise} resolving the map object
          */
-        fetchMap (mapId, callback) {
+        fetchMap (mapId) {
             //Having to send cache busting parameter to avoid CORS header cache
             // not sending correct Origin value
-            GeoPlatform.MapService.get(mapId)
-            .then(map => { callback(null, map); })
-            .catch( e=> {
-                callback(new Error(e.message || "The registry returned an error"));
-            });
+            return GeoPlatform.MapService.get(mapId);
         }
 
         /**
          * Retrieve a map's descriptor and load it as the
          * current map managed by this service
-         * @param mapId identifier of map
-         * @param callback(err, map)
+         * @param {string} mapId identifier of map
+         * @return {Promise} resolving the map object
          */
-        loadMap (mapId, callback) {
+        loadMap (mapId) {
 
-            this.fetchMap(mapId, (err, map) => {
-                if(err) {
-                    callback(new Error("There was an error loading the requested map: " + err.message));
-                    return;
-                }
+            return this.fetchMap(mapId).then(map => {
+
                 if(!map) {
-                    console.log("Error importing map: returned object was null");
-                    callback(new Error("There was an error loading the requested map"));
-                    return;
+                    throw new Error("The requested map came back null");
 
                 } else if(typeof(map) === 'string') {
-                    console.log("Error importing map: " + map);
-                    callback(new Error("There was an error loading the requested map: " + map));
-                    return;
+                    throw new Error("The requested map came back as a string");
 
                 } else if(map.message) {
-                    console.log("Error importing map: " + map.message);
-                    callback(new Error("There was an error loading the requested map: " + map.message));
-                    return;
-
+                    throw new Error("There was an error loading the requested map: " + map.message);
                 }
 
 
@@ -948,7 +938,13 @@
 
                 //load the map into the viewer
                 this.loadMapFromObj(map);
-                callback(null, map);
+
+                return map;
+            })
+            .catch( err => {
+                let e = new Error("MapInstance.loadMap() - " +
+                    "The requested map could not be loaded because " + err.message);
+                return Q.reject(e);
             });
         }
 
