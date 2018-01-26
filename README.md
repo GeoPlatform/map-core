@@ -11,3 +11,40 @@ This library requires the following dependencies be present in your application:
 - esri-leaflet (2.1+)
 - leaflet.markercluster (1.X+)
 - leaflet-timedimension (1.X+)
+
+
+## Usage
+
+```javascript
+
+let mapInstance = L.GeoPlatform.MapFactory();
+
+//load map using its ID
+mapInstance.loadMap(mapId);
+
+//manually add new layers
+let layers = [];
+let geoplatformLayer = { ... }; //layer from GP API
+layers.push(L.GeoPlatform.LayerFactory(geoplatformLayer));
+mapInstance.addLayers(layers);
+
+//add features using GeoJSON
+let geoJson = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [-78,39]
+            }
+        }
+    ]
+};
+mapInstance.addFeatures(geoJson);
+
+
+//save map
+mapInstance.saveMap().then( mapObj => {...}).catch(e => {...});
+
+```
