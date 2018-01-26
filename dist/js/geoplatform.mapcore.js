@@ -129,7 +129,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /*
  * Fetches the set of supported Service types from UAL and
- * makes them available via GeoPlatform.ServiceTypes 
+ * makes them available via GeoPlatform.ServiceTypes
  */
 
 (function (jQuery, Q, GeoPlatform) {
@@ -165,6 +165,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     key = 'ESRI_' + key.toUpperCase() + '_SERVER';
                 } else if (~label.indexOf("Feed")) {
                     key = "FEED";
+                    type.supported = true;
                 } else {
                     key = label;
                 }

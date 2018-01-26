@@ -36,7 +36,15 @@ configuration variables. It expects `window.GeoPlatform` to exist at runtime.
 #### Creating a new map instance
 
 ```javascript
+//create a Leaflet Map
+let leafletMap = L.Map('#map', { ... });
+
+//create a map instance
 let mapInstance = L.GeoPlatform.MapFactory();
+
+//bind leaflet map to the map instance so the leaflet
+// map can be modified through the map instance api
+mapInstance.setMap(leafletMap);
 ```
 
 #### Listening for events
