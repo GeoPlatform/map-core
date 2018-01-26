@@ -2264,10 +2264,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             return _this5;
         }
 
-        //-----------------
-
-
         _createClass(MapInstance, [{
+            key: "getKey",
+            value: function getKey() {
+                return this._key;
+            }
+
+            //-----------------
+
+        }, {
             key: "getLayerStateIndex",
             value: function getLayerStateIndex(layerId) {
                 return this._layerStates.indexOfObj(layerId, function (id, state) {
@@ -3161,51 +3166,38 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             /**
              * Retrieve a map's descriptor from the registry
-             * @param mapId identifier of map
-             * @param callback(err, map)
+             * @param {string} mapId identifier of map
+             * @return {Promise} resolving the map object
              */
 
         }, {
             key: "fetchMap",
-            value: function fetchMap(mapId, callback) {
+            value: function fetchMap(mapId) {
                 //Having to send cache busting parameter to avoid CORS header cache
                 // not sending correct Origin value
-                GeoPlatform.MapService.get(mapId).then(function (map) {
-                    callback(null, map);
-                }).catch(function (e) {
-                    callback(new Error(e.message || "The registry returned an error"));
-                });
+                return GeoPlatform.MapService.get(mapId);
             }
 
             /**
              * Retrieve a map's descriptor and load it as the
              * current map managed by this service
-             * @param mapId identifier of map
-             * @param callback(err, map)
+             * @param {string} mapId identifier of map
+             * @return {Promise} resolving the map object
              */
 
         }, {
             key: "loadMap",
-            value: function loadMap(mapId, callback) {
+            value: function loadMap(mapId) {
                 var _this11 = this;
 
-                this.fetchMap(mapId, function (err, map) {
-                    if (err) {
-                        callback(new Error("There was an error loading the requested map: " + err.message));
-                        return;
-                    }
+                return this.fetchMap(mapId).then(function (map) {
+
                     if (!map) {
-                        console.log("Error importing map: returned object was null");
-                        callback(new Error("There was an error loading the requested map"));
-                        return;
+                        throw new Error("The requested map came back null");
                     } else if (typeof map === 'string') {
-                        console.log("Error importing map: " + map);
-                        callback(new Error("There was an error loading the requested map: " + map));
-                        return;
+                        throw new Error("The requested map came back as a string");
                     } else if (map.message) {
-                        console.log("Error importing map: " + map.message);
-                        callback(new Error("There was an error loading the requested map: " + map.message));
-                        return;
+                        throw new Error("There was an error loading the requested map: " + map.message);
                     }
 
                     //loading a map by its ID, so we need to increment it's view count
@@ -3225,7 +3217,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                     //load the map into the viewer
                     _this11.loadMapFromObj(map);
-                    callback(null, map);
+
+                    return map;
+                }).catch(function (err) {
+                    var e = new Error("MapInstance.loadMap() - " + "The requested map could not be loaded because " + err.message);
+                    return Q.reject(e);
                 });
             }
 
