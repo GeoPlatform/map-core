@@ -4,6 +4,9 @@ work with GeoPlatform Map, Layer, and Service objects.
 
 ## Dependencies
 This library requires the following dependencies be present in your application:
+
+### Third Party Dependencies
+
 - jquery (2.1+)
 - q (1.5+)
 - leaflet (1.X+)
@@ -12,16 +15,31 @@ This library requires the following dependencies be present in your application:
 - leaflet.markercluster (1.X+)
 - leaflet-timedimension (1.X+)
 
+### GeoPlatform Dependencies
+- ng-common
+
+### Miscellaneous Dependencies
+
+Map core should be included in your app _after_ you provided environment-specific
+configuration variables. It expects `window.GeoPlatform` to exist at runtime.
+
+```html
+<script src="config.js"></script>
+<script src="geoplatform.common.js"></script>
+<script src="geoplatform.mapcore.js"></script>
+```
 
 ## Usage
 
-### Creating a new map instance
+### Maps
+
+#### Creating a new map instance
 
 ```javascript
 let mapInstance = L.GeoPlatform.MapFactory();
 ```
 
-### Listening for events
+#### Listening for events
 
 ```javascript
 
@@ -31,7 +49,7 @@ mapInstance.on('layers:changed', () => {
 });
 ```
 
-### Modifying map state
+#### Modifying map state
 
 ```javascript
 //center on lat,lng with zoom
@@ -39,7 +57,7 @@ mapInstance.setView(39, -76, 5);
 mapInstance.setZoom(3); //update zoom
 ```
 
-### Loading a GeoPlatform Map object
+#### Loading a GeoPlatform Map object
 
 ```javascript
 mapInstance.loadMap(mapId).then( mapObj => {
@@ -54,7 +72,7 @@ mapInstance.loadMap(mapId).then( mapObj => {
 });
 ```
 
-### Disposing of a Map Instance
+#### Disposing of a Map Instance
 When no longer needed, you should dispose of the map instance.
 ```javascript
 mapInstance.destroyMap();
@@ -62,7 +80,19 @@ mapInstance.destroyMap();
 
 ### Layers
 
-#### Adding new layers
+#### Creating Leaflet instances for GeoPlatform Layer objects
+Map core provides a factory for converting GeoPlatform Layer objects
+into Leaflet layer instances. This factory uses the layer's metadata to
+determine the appropriate Leaflet class to instantiate. In most cases, the
+service type of the Service linked to the Layer is used to make this determination.  
+The list of supported map service types can be accessed using `GeoPlatform.ServiceTypes`.
+
+```javascript
+let gpLayer = { type: "Layer", services: [{...}], ... };
+let leafletLayer = L.GeoPlatform.LayerFactory(gpLayer);
+```
+
+#### Adding new layers to a map instance
 ```javascript
 let layers = [];
 let geoplatformLayer = { ... }; //layer from GP API
@@ -70,12 +100,12 @@ layers.push(L.GeoPlatform.LayerFactory(geoplatformLayer));
 mapInstance.addLayers(layers);
 ```
 
-#### Removing layers
+#### Removing layers from a map instance
 ```javascript
 mapInstance.removeLayer(gpLayerId);
 ```
 
-#### Re-ordering layers
+#### Re-ordering layers in a map instance
 ```javascript
 let layers = mapInstance.getLayers();
 //move layer to bottom
@@ -98,6 +128,11 @@ let leafletLayer = mapInstance.getLeafletLayerFor(gpLayerObj);
 
 ### Features
 
+Map core feature support uses GeoJSON-encoded feature information. Each feature
+should be uniquely identified using a property named `id` inside the
+feature's `properties` object. Optionally, custom style information may be provided
+using the `style` property (see below).
+
 #### Adding Features
 ```javascript
 let geoJson = {
@@ -105,6 +140,16 @@ let geoJson = {
     "features": [
         {
             "type": "Feature",
+            "properties": {
+                "id": "1",
+                "label": "Feature Label",
+                "style": {
+                    "stroke": '#00f',
+                    "opacity": 1.0,
+                    "fill": '#0f0',
+                    "fillOpacity": 0.3
+                }
+            },
             "geometry": {
                 "type": "Point",
                 "coordinates": [-78,39]

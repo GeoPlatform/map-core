@@ -1,7 +1,7 @@
 
 /*
  * Fetches the set of supported Service types from UAL and
- * makes them available via GeoPlatform.ServiceTypes 
+ * makes them available via GeoPlatform.ServiceTypes
  */
 
 ( function(jQuery, Q, GeoPlatform) {
@@ -42,6 +42,7 @@
 
                 } else if(~label.indexOf("Feed")) {
                     key = "FEED";
+                    type.supported = true;
 
                 } else {
                     key = label;
