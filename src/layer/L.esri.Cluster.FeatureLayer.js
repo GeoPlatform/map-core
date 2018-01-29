@@ -8,7 +8,7 @@
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('leaflet'), require('esri-leaflet')) :
 	typeof define === 'function' && define.amd ? define(['exports', 'leaflet', 'esri-leaflet'], factory) :
 	(factory((global.L = global.L || {}, global.L.esri = global.L.esri || {}, global.L.esri.Cluster = global.L.esri.Cluster || {}),global.L,global.L.esri));
-}(window, function (exports,L,esriLeaflet) { 'use strict';
+}(this||window, function (exports,L,esriLeaflet) { 'use strict';
 
 	L = 'default' in L ? L['default'] : L;
 

@@ -1,5 +1,31 @@
 
-(function(jQuery, L/*eaflet*/, GeoPlatform) {
+(function (root, factory) {
+    if(typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "L"/*eaflet*/, "GeoPlatform"],
+            function(jQuery, L, GeoPlatform) {
+                return (root.ESRITileLayer = factory(jQuery, L, GeoPlatform));
+            });
+    } else if(typeof module === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = (
+            root.ESRITileLayer = factory(
+                require("jquery"),
+                require('L'),
+                require('GeoPlatform')
+            )
+        );
+    } else {
+        GeoPlatform.ESRITileLayer = factory(jQuery, L/*eaflet*/, GeoPlatform);
+    }
+}(this||window, function(jQuery, L/*eaflet*/, GeoPlatform) {
+
+//(function(jQuery, L/*eaflet*/, GeoPlatform) {
 
 
     if(!L) {
@@ -88,4 +114,8 @@
         return result;
     };
 
-})(jQuery, L/*eaflet*/,GeoPlatform);
+// })(jQuery, L/*eaflet*/,GeoPlatform);
+
+    return L.GeoPlatform.featurePopupTemplate;
+
+}));

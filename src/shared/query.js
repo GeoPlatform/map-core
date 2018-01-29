@@ -1,5 +1,27 @@
 
-( function(GeoPlatform) {
+(function (root, factory) {
+    if(typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["GeoPlatform"],
+            function(GeoPlatform) {
+                return (root.Query = factory(GeoPlatform));
+            });
+    } else if(typeof module === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = (
+            root.Query = factory(require('GeoPlatform'))
+        );
+    } else {
+        GeoPlatform.Query = factory(GeoPlatform);
+    }
+}(this||window, function(GeoPlatform) {
+
+//( function(GeoPlatform) {
 
 
     class Query {
@@ -585,11 +607,15 @@
     }
 
 
-    GeoPlatform.Query = Query;
+    // GeoPlatform.Query = Query;
 
     GeoPlatform.QueryFactory = function() {
-        return new GeoPlatform.Query();
+        return new Query();
     };
 
 
-}) (GeoPlatform);
+// }) (GeoPlatform);
+
+    return Query;
+
+}));

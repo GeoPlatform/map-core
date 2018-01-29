@@ -16,7 +16,26 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * makes available
  */
 
-(function (jQuery, L /*eaflet*/, GeoPlatform) {
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jQuery", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, L, GeoPlatform) {
+            return root.MousePositionControl = factory(jQuery, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.MousePositionControl = factory(require("jquery"), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.MousePositionControl = factory(jQuery, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, L /*eaflet*/, GeoPlatform) {
+
+    //(function(jQuery, L/*eaflet*/, GeoPlatform) {
 
     if (!L) throw new Error("Missing Leaflet");
 
@@ -35,9 +54,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         };
     }
-})(jQuery, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, L /*eaflet*/, GeoPlatform) {
+    // })(jQuery, L/*eaflet*/, GeoPlatform);
+
+    return L.GeoPlatform;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, L, GeoPlatform) {
+            return root.ESRITileLayer = factory(jQuery, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.ESRITileLayer = factory(require("jquery"), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.ESRITileLayer = factory(jQuery, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, L /*eaflet*/, GeoPlatform) {
+
+    //(function(jQuery, L/*eaflet*/, GeoPlatform) {
+
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -102,11 +145,174 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         result += '</div>';
         return result;
     };
-})(jQuery, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+    // })(jQuery, L/*eaflet*/,GeoPlatform);
 
-    'use strict';
+    return L.GeoPlatform.featurePopupTemplate;
+});
+
+// class JQueryAjaxHandler {
+//
+//     constructor() {}
+//
+//     execute(request) {
+//         let deferred = Q.defer();
+//         this.request.success = function(data) {
+//             deferred.resolve(data);
+//         };
+//         this.request.error = function(xhr,status,message) {
+//             deferred.reject(new Error(message));
+//         };
+//         jQuery.ajax(request);
+//         return deferred.promise;
+//     }
+// }
+//
+//
+// class NGAjaxHandler {
+//
+//     constructor() {
+//         if(typeof(angular) === 'undefined')
+//             throw new Error("Angular not defined");
+//     }
+//
+//     execute(request) {
+//         let $http = angular.injector().get('$http');
+//         if(typeof($http) === 'undefined')
+//             throw new Error("Angular $http not resolved");
+//         return $http(request);
+//     }
+//
+// }
+
+
+// class AjaxRequest {
+//
+//     constructor(url, options) {
+//         this.request = {
+//             method: "GET",
+//             url: url
+//         };
+//         this.options(options);
+//     }
+//
+//     url(url) {
+//         this.request.url = url;
+//         return this;
+//     }
+//
+//     method(method) {
+//         this.request.method = method;
+//         return this;
+//     }
+//
+//     data(data) {
+//         this.request.data = data;
+//         return this;
+//     }
+//
+//     options(options) {
+//         for(let p in options) {
+//             this.request[p] = options[p];
+//         }
+//         return this;
+//     }
+//
+//     execute() { throw new Exception("Must use a subclass of AjaxRequest"); }
+//
+// }
+
+
+// /**
+//  *      new jQueryAjaxRequest(url)
+//  *      .dataType('json')
+//  *      .execute()
+//  *      .then( response => {} )
+//  *      .catch( e => {} );
+//  */
+// class jQueryAjaxRequest extends AjaxRequest {
+//
+//     constructor(url, options) {
+//         super(url, options);
+//     }
+//
+//     dataType (type) {
+//         this.request.dataType = type;
+//         return this;
+//     }
+//
+//     processData (bool) {
+//         this.request.processData = true === bool;
+//         return this;
+//     }
+//
+//     contentType (type) {
+//         this.request.contentType = type;
+//         return this;
+//     }
+//
+//     execute() {
+//         let deferred = Q.defer();
+//         this.request.success = function(data) {
+//             deferred.resolve(data);
+//         };
+//         this.request.error = function(xhr,status,message) {
+//             deferred.reject(new Error(message));
+//         };
+//         jQuery.ajax(this.request);
+//         return deferred.promise;
+//     }
+//
+// }
+
+
+// /*
+//  *      new NGAjaxRequest(url)
+//  *      .execute()
+//  *      .then( response => {} )
+//  *      .catch( e => {} );
+//  */
+// class NGAjaxRequest extends AjaxRequest {
+//
+//     constructor(url, options) {
+//         super(url, options);
+//         if(typeof(angular) === 'undefined')
+//             throw new Error("Angular not defined");
+//     }
+//
+//     params(params) {
+//         this.request.params = params;
+//         return this;
+//     }
+//
+//     execute() {
+//         let $http = angular.injector().get('$http');
+//         if(typeof($http) === 'undefined')
+//             throw new Error("Angular $http not resolved");
+//         return $http(this.request);
+//     }
+//
+// }
+
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.ItemService = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.ItemService = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.ItemService = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
 
     /**
      * ItemService
@@ -132,7 +338,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      *      GeoPlatform.ItemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
      */
-
     var ItemService = function () {
         function ItemService() {
             _classCallCheck(this, ItemService);
@@ -289,13 +494,322 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return ItemService;
     }();
 
-    GeoPlatform.ItemService = ItemService;
-    GeoPlatform.itemService = function () {
-        return new GeoPlatform.ItemService();
-    };
-})(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    // GeoPlatform.ItemService = ItemService;
 
-(function (GeoPlatform) {
+
+    GeoPlatform.itemService = function () {
+        return new ItemService();
+    };
+
+    return ItemService;
+});
+
+// ( function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+//
+//     'use strict';
+//
+//     /**
+//      * ItemService
+//      * service for working with the GeoPlatform API to
+//      * retrieve and manipulate items.
+//      *
+//      * Ex Searching Items
+//      *      let params = { q: 'test' };
+//      *      GeoPlatform.ItemService.search(params).then(response=>{
+//      *          console.log(response.results.length + " of " + response.totalResults);
+//      *      }).catch(e=>{...});
+//      *
+//      * Ex Fetch Item:
+//      *      GeoPlatform.ItemService.get(itemId).then(item=>{...}).catch(e=>{...});
+//      *
+//      * Ex Saving Item:
+//      *      GeoPlatform.ItemService.save(item).then(item=>{...}).catch(e=>{...});
+//      *
+//      * Ex Deleting Item:
+//      *      GeoPlatform.ItemService.remove(itemId).then(()=>{...}).catch(e=>{...});
+//      *
+//      * Ex Patching Item:
+//      *      GeoPlatform.ItemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
+//      *
+//      */
+//     class ItemService {
+//
+//         constructor() {
+//             this.baseUrl = GeoPlatform.ualUrl + '/api/items';
+//         }
+//
+//         /**
+//          * @param {string} id - identifier of item to fetch
+//          * @return {Promise} resolving Item object or an error
+//          */
+//         get (id) {
+//             let d = Q.defer();
+//             let opts = {
+//                 method: "GET",
+//                 url: this.baseUrl + '/' + id,
+//                 dataType: 'json',
+//                 success: function(data) { d.resolve(data); },
+//                 error: function(xhr, status, message) {
+//                     let m = `GeoPlatform.ItemService.save() - Error fetching item: ${message}`;
+//                     let err = new Error(m);
+//                     d.reject(err);
+//                 }
+//             };
+//             jQuery.ajax(opts);
+//             return d.promise;
+//         }
+//
+//         /**
+//          * @param {Object} itemObj - item to create or update
+//          * @return {Promise} resolving Item object or an error
+//          */
+//         save (itemObj) {
+//             let d = Q.defer();
+//             let opts = {
+//                 method: "POST",
+//                 url: this.baseUrl,
+//                 dataType: 'json',
+//                 data: itemObj,
+//                 processData: false,
+//                 contentType: 'application/json',
+//                 success: function(data) { d.resolve(data); },
+//                 error: function(xhr, status, message) {
+//                     let m = `GeoPlatform.ItemService.save() - Error saving item: ${message}`;
+//                     let err = new Error(m);
+//                     d.reject(err);
+//                 }
+//             };
+//             if(itemObj.id) {
+//                 opts.method = "PUT";
+//                 opts.url += '/' + itemObj.id;
+//             }
+//             jQuery.ajax(opts);
+//             return d.promise;
+//         }
+//
+//         /**
+//          * @param {string} id - identifier of item to delete
+//          * @return {Promise} resolving true if successful or an error
+//          */
+//         remove (id) {
+//             let d = Q.defer();
+//             let opts = {
+//                 method: "DELETE",
+//                 url: this.baseUrl + '/' + id,
+//                 success: function(data) { d.resolve(true); },
+//                 error: function(xhr, status, message) {
+//                     let m = `GeoPlatform.ItemService.save() - Error deleting item: ${message}`;
+//                     let err = new Error(m);
+//                     d.reject(err);
+//                 }
+//             };
+//             jQuery.ajax(opts);
+//             return d.promise;
+//         }
+//
+//         /**
+//          * @param {string} id - identifier of item to patch
+//          * @param {Object} patch - HTTP-PATCH compliant set of properties to patch
+//          * @return {Promise} resolving Item object or an error
+//          */
+//         patch (id, patch) {
+//             let d = Q.defer();
+//             let opts = {
+//                 method: "PATCH",
+//                 url: this.baseUrl + '/' + id,
+//                 dataType: 'json',
+//                 data: patch,
+//                 processData: false,
+//                 contentType: 'application/json',
+//                 success: function(data) { d.resolve(data); },
+//                 error: function(xhr, status, message) {
+//                     let m = `GeoPlatform.ItemService.save() - Error patching item: ${message}`;
+//                     let err = new Error(m);
+//                     d.reject(err);
+//                 }
+//             };
+//             jQuery.ajax(opts);
+//             return d.promise;
+//         }
+//
+//         search (arg) {
+//
+//             let params = arg;
+//
+//             if(arg && typeof(arg.getQuery) !== 'undefined') {
+//                 //if passed a GeoPlatform.Query object,
+//                 // convert to parameters object
+//                 params = arg.getQuery();
+//             }
+//
+//             let d = Q.defer();
+//             let opts = {
+//                 method: "GET",
+//                 url: this.baseUrl,
+//                 dataType: 'json',
+//                 data: params||{},
+//                 success: function(data) { d.resolve(data); },
+//                 error: function(xhr, status, message) {
+//                     let m = `GeoPlatform.ItemService.search() - Error searching items: ${message}`;
+//                     let err = new Error(m);
+//                     d.reject(err);
+//                 }
+//             };
+//             jQuery.ajax(opts);
+//             return d.promise;
+//         }
+//
+//     }
+//
+//
+//     GeoPlatform.ItemService = ItemService;
+//     GeoPlatform.itemService = function() {
+//         return new GeoPlatform.ItemService();
+//     };
+//
+//
+//
+//
+//     class ItemServiceFactory {
+//         constructor() {
+//             this.services = {};
+//         }
+//         register(key, service, isDefault) {
+//             this.services[key] = service;
+//             if(isDefault) {
+//                 let defKey = 'default';
+//                 this.services[defKey] = service;
+//             }
+//         }
+//         get (key) {
+//             key = key || 'default';
+//             let service = this.services[key];
+//             if(service) {
+//                 return new service;
+//             }
+//             return null;
+//         }
+//     }
+//
+//     GeoPlatform.ItemServiceFactory = new ItemServiceFactory();
+//     GeoPlatform.ItemServiceFactory.register('jquery', ItemService, true);
+//
+//
+//
+//
+//
+//
+//     /**
+//      *
+//      */
+//     class NGItemService extends ItemService {
+//
+//         constructor() {
+//             super();
+//         }
+//
+//         resolveHttp() {
+//             if(typeof(angular) === 'undefined')
+//                 throw new Error("Angular not defined");
+//             let $http = angular.injector().get('$http');
+//             if(typeof($http) === 'undefined')
+//                 throw new Error("Angular $http not resolved");
+//             return $http;
+//         }
+//
+//         get (id) {
+//             let $http = this.resolveHttp();
+//             return $http.get(this.baseUrl + '/' + id);
+//         }
+//
+//         /**
+//          * @param {Object} itemObj - item to create or update
+//          * @return {Promise} resolving Item object or an error
+//          */
+//         save (itemObj) {
+//             let $http = this.resolveHttp();
+//             let opts = {
+//                 method: "POST",
+//                 url: this.baseUrl,
+//                 data: itemObj
+//             };
+//             if(itemObj.id) {
+//                 opts.method = "PUT";
+//                 opts.url += '/' + itemObj.id;
+//             }
+//             return $http(opts);
+//         }
+//
+//         /**
+//          * @param {string} id - identifier of item to delete
+//          * @return {Promise} resolving true if successful or an error
+//          */
+//         remove (id) {
+//             let $http = this.resolveHttp();
+//             return $http.delete(this.baseUrl + '/' + id);
+//         }
+//
+//         /**
+//          * @param {string} id - identifier of item to patch
+//          * @param {Object} patch - HTTP-PATCH compliant set of properties to patch
+//          * @return {Promise} resolving Item object or an error
+//          */
+//         patch (id, patch) {
+//             let $http = this.resolveHttp();
+//             let opts = {
+//                 method: "PATCH",
+//                 url: this.baseUrl + '/' + id,
+//                 data: patch
+//             };
+//             return $http(opts);
+//         }
+//
+//         search (arg) {
+//
+//             let params = arg;
+//
+//             if(arg && typeof(arg.getQuery) !== 'undefined') {
+//                 //if passed a GeoPlatform.Query object,
+//                 // convert to parameters object
+//                 params = arg.getQuery();
+//             }
+//
+//             let opts = {
+//                 method: "GET",
+//                 url: this.baseUrl,
+//                 data: params||{}
+//             };
+//             return $http(opts);
+//         }
+//
+//     }
+//
+//
+// }) (jQuery, Q, L/*eaflet*/, GeoPlatform);
+
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["GeoPlatform"], function (GeoPlatform) {
+            return root.Query = factory(GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.Query = factory(require('GeoPlatform'));
+    } else {
+        GeoPlatform.Query = factory(GeoPlatform);
+    }
+})(undefined || window, function (GeoPlatform) {
+
+    //( function(GeoPlatform) {
+
+
     var Query = function () {
         function Query() {
             _classCallCheck(this, Query);
@@ -899,18 +1413,41 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return Query;
     }();
 
-    GeoPlatform.Query = Query;
+    // GeoPlatform.Query = Query;
 
     GeoPlatform.QueryFactory = function () {
-        return new GeoPlatform.Query();
+        return new Query();
     };
-})(GeoPlatform);
+
+    // }) (GeoPlatform);
+
+    return Query;
+});
 
 /**
  *
  */
 
-(function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.FeatureStyleResolver = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.FeatureStyleResolver = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.FeatureStyleResolver = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+
+    //(function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -939,9 +1476,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         });
         return deferred.promise;
     };
-})(jQuery, Q, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+    // })(jQuery, Q, L/*eaflet*/, GeoPlatform);
+
+    return L.GeoPlatform.FeatureStyleResolver;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform", "ItemService"], function (jQuery, Q, L, GeoPlatform, ItemService) {
+            return root.ESRITileLayer = factory(jQuery, Q, L, GeoPlatform, ItemService);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.ESRITileLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.ESRITileLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform, GeoPlatform.ItemService);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform, ItemService) {
+
+    // ( function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
     'use strict';
 
@@ -953,8 +1513,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * @see GeoPlatform.ItemService
      */
 
-    var ServiceService = function (_GeoPlatform$ItemServ) {
-        _inherits(ServiceService, _GeoPlatform$ItemServ);
+    var ServiceService = function (_ItemService) {
+        _inherits(ServiceService, _ItemService);
 
         function ServiceService() {
             _classCallCheck(this, ServiceService);
@@ -1006,20 +1566,45 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }]);
 
         return ServiceService;
-    }(GeoPlatform.ItemService);
+    }(ItemService);
 
-    GeoPlatform.ServiceService = ServiceService;
+    // GeoPlatform.ServiceService = ServiceService;
+
+
     GeoPlatform.serviceService = function () {
-        return new GeoPlatform.ServiceService();
+        return new ServiceService();
     };
-})(jQuery, Q, L /*eaflet*/, GeoPlatform);
+
+    // }) (jQuery, Q, L/*eaflet*/, GeoPlatform);
+
+    return ServiceService;
+});
 
 /*
  * Fetches the set of supported Service types from UAL and
  * makes them available via GeoPlatform.ServiceTypes
  */
 
-(function (jQuery, Q, GeoPlatform) {
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "GeoPlatform"], function (jQuery, Q, GeoPlatform) {
+            return root.ServiceTypes = factory(jQuery, Q, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.ServiceTypes = factory(require("jquery"), require('q'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, GeoPlatform) {
+
+    //( function(jQuery, Q, GeoPlatform) {
 
     var ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
     var esriExpr = /Esri REST ([A-Za-z]+) Service/;
@@ -1064,59 +1649,38 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         console.log("Error loading supported service types: " + error.message);
     });
 
-    // const url = GeoPlatform.ualUrl + '/api/items?' +
-    //     'type:dct:Standard&resourceType=ServiceType&' +
-    //     'size=50&sort=label,asc';
+    // GeoPlatform.ServiceTypes = types;
 
+    // }) (jQuery, Q, GeoPlatform);
 
-    // jQuery.ajax({ url: url, dataType: 'json',
-    //     success: function(data) {
-    //
-    //         data.results.each( (type) => {
-    //
-    //             let key = null;
-    //             let label = type.label;
-    //
-    //             if(~label.indexOf("WMS-T")) {
-    //                 key = 'WMST';
-    //                 type.supported = true;
-    //
-    //             } else if(~label.indexOf('OGC')) {
-    //                 key = keyFn(ogcExpr, label);
-    //                 type.supported = 'WMS' === key || 'WMTS' === key;
-    //
-    //             } else if(~label.indexOf('Esri')) {
-    //                 key = keyFn(esriExpr, label);
-    //                 type.supported = true;
-    //                 key = 'ESRI_' + key.toUpperCase() + '_SERVER';
-    //
-    //             } else if(~label.indexOf("Feed")) {
-    //                 key = "FEED";
-    //                 type.supported = true;
-    //
-    //             } else {
-    //                 key = label;
-    //
-    //             }
-    //
-    //             types[key] = type;
-    //         });
-    //         // console.log(types);
-    //     },
-    //     error: function(xhr, status, message) {
-    //         console.log("Error loading supported service types: " + message);
-    //     }
-    // });
-
-    GeoPlatform.ServiceTypes = types;
-})(jQuery, Q, GeoPlatform);
+    return types;
+});
 
 /*
  * L.Control.Loading is a control that shows a loading indicator when tiles are
  * loading or when map-related AJAX requests are taking place.
  */
 
-(function (L /*eaflet*/) {
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["L" /*eaflet*/], function (L) {
+            return root.LoadingControl = factory(L);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.LoadingControl = factory(require('L'));
+    } else {
+        GeoPlatform.LoadingControl = factory(L /*eaflet*/);
+    }
+})(undefined || window, function (L /*eaflet*/) {
+
+    //(function (L/*eaflet*/) {
 
     function defineLeafletLoading(L) {
         L.Control.Loading = L.Control.extend({
@@ -1363,9 +1927,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // Else use the global L
         defineLeafletLoading(L);
     }
-})(L /*eaflet*/);
 
-(function (L /*eaflet*/) {
+    // }) (L/*eaflet*/);
+
+    return L.Control.Loading;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["L" /*eaflet*/], function (L) {
+            return root.MeasureControl = factory(L);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.MeasureControl = factory(require('L'));
+    } else {
+        GeoPlatform.MeasureControl = factory(L /*eaflet*/);
+    }
+})(undefined || window, function (L /*eaflet*/) {
+
+    //(function (L/*eaflet*/) {
 
     L.Control.Measure = L.Control.extend({
         options: {
@@ -1605,9 +2192,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     L.control.measure = function (options) {
         return new L.Control.Measure(options);
     };
-})(L /*eaflet*/);
 
-(function (L /*eaflet*/) {
+    // }) (L/*eaflet*/);
+
+    return L.Control.Measure;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["L" /*eaflet*/], function (L) {
+            return root.MousePositionControl = factory(L);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.MousePositionControl = factory(require('L'));
+    } else {
+        GeoPlatform.MousePositionControl = factory(L /*eaflet*/);
+    }
+})(undefined || window, function (L /*eaflet*/) {
+
+    //(function (L/*eaflet*/) {
 
     L.Control.MousePosition = L.Control.extend({
         options: {
@@ -1657,9 +2267,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     L.control.mousePosition = function (options) {
         return new L.Control.MousePosition(options);
     };
-})(L /*eaflet*/);
 
-(function (jQuery, L /*eaflet*/, GeoPlatform) {
+    // }) (L/*eaflet*/);
+
+    return L.Control.MousePosition;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.WMSLayer = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.WMSLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.WMSLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+
+    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
+
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -1776,9 +2410,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         return new L.GeoPlatform.WMS(url, opts);
     };
-})(jQuery, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, L /*eaflet*/, GeoPlatform) {
+    // })(jQuery, L/*eaflet*/,GeoPlatform);
+
+    return L.GeoPlatform.WMS;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.WMTSLayer = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.WMTSLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.WMTSLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+
+    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
+
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -1932,9 +2590,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         return new L.GeoPlatform.WMTS(url, options);
     };
-})(jQuery, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, L /*eaflet*/, GeoPlatform) {
+    // })(jQuery, L/*eaflet*/,GeoPlatform);
+
+    return L.GeoPlatform.WMTS;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.WMSTLayer = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.WMSTLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.WMSTLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+
+    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
+
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -2020,9 +2702,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             proxy: proxyUrl
         });
     };
-})(jQuery, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, L /*eaflet*/, GeoPlatform) {
+    // })(jQuery, L/*eaflet*/,GeoPlatform);
+
+    return L.GeoPlatform.WMST;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.ESRITileLayer = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.ESRITileLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.ESRITileLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+
+    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
+
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -2124,9 +2830,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     L.tileLayer.esri = function (url, options) {
         return new L.TileLayer.ESRI(url, options);
     };
-})(jQuery, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, L /*eaflet*/, GeoPlatform) {
+    // })(jQuery, L/*eaflet*/,GeoPlatform);
+
+    return L.TileLayer.ESRI;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.FeatureLayer = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.FeatureLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.FeatureLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+
+    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
+
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -2330,7 +3060,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
     });
-})(jQuery, L /*eaflet*/, GeoPlatform);
+
+    // })(jQuery, L/*eaflet*/,GeoPlatform);
+
+    return L.GeoPlatform.FeatureLayer;
+});
 
 /* jshint ignore:start */
 
@@ -2339,7 +3073,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * Apache-2.0 */
 (function (global, factory) {
     (typeof exports === "undefined" ? "undefined" : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? factory(exports, require('leaflet'), require('esri-leaflet')) : typeof define === 'function' && define.amd ? define(['exports', 'leaflet', 'esri-leaflet'], factory) : factory((global.L = global.L || {}, global.L.esri = global.L.esri || {}, global.L.esri.Cluster = global.L.esri.Cluster || {}), global.L, global.L.esri);
-})(window, function (exports, L, esriLeaflet) {
+})(undefined || window, function (exports, L, esriLeaflet) {
     'use strict';
 
     L = 'default' in L ? L['default'] : L;
@@ -2521,7 +3255,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     exports.VERSION = version;
 });
 
-(function (jQuery, L /*eaflet*/, GeoPlatform) {
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.ClusteredFeatureLayer = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.ClusteredFeatureLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.ClusteredFeatureLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+
+    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
+
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -2860,9 +3614,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             pane: GeoPlatform.leafletPane
         });
     };
-})(jQuery, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+    // })(jQuery, L/*eaflet*/,GeoPlatform);
+
+    return L.GeoPlatform.ClusteredFeatureLayer;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.LayerFactory = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.LayerFactory = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.LayerFactory = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+
+    // (function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+
+    /**
+     * @param {Object} layer - GeoPlatform Layer object
+     * @return {boolean} true if is an OSM layer
+     */
+    GeoPlatform.isOSM = function (layer) {
+        return layer && layer.resourceTypes && layer.resourceTypes.length && ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
+    };
 
     /**
      * @return {Promise} resolving OpenStreet Map GeoPlatform Layer
@@ -2877,11 +3662,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     };
 
     /**
-     * @param {Object} layer - GeoPlatform Layer object
-     * @return {boolean} true if is an OSM layer
+     * If a default base layer is defined using the 'defaultBaseLayer'
+     * environment value, fetch it. Otherwise, fetch the OpenStreet Map layer.
+     * @return {Promise} resolving GeoPlatform Layer object
      */
-    L.GeoPlatform.isOSM = function (layer) {
-        return layer && layer.resourceTypes && layer.resourceTypes.length && ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
+    GeoPlatform.defaultBaseLayer = function () {
+        if (GeoPlatform.defaultBaseLayer) {
+            return GeoPlatform.layerService().get(GeoPlatform.defaultBaseLayer).catch(function (e) {
+                return Q.resolve(GeoPlatform.osm());
+            });
+        } else {
+            return GeoPlatform.osm();
+        }
     };
 
     /**
@@ -2906,7 +3698,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         //OSM layers have no "services" so we have to treat them differently
-        if (L.GeoPlatform.isOSM(layer)) {
+        if (GeoPlatform.isOSM(layer)) {
             return L.GeoPlatform.osm(layer);
         }
 
@@ -2963,9 +3755,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return null;
         }
     };
-})(jQuery, Q, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+    // })(jQuery, Q, L/*eaflet*/, GeoPlatform);
+
+    return L.GeoPlatform.LayerFactory;
+});
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform", "ItemService"], function (jQuery, Q, L, GeoPlatform, ItemService) {
+            return root.LayerService = factory(jQuery, Q, L, GeoPlatform, ItemService);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.LayerService = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'), require('ItemService'));
+    } else {
+        GeoPlatform.LayerService = factory(jQuery, Q, L /*eaflet*/, GeoPlatform, GeoPlatform.ItemService);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform, ItemService) {
+
+    // ( function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
     'use strict';
 
@@ -2977,8 +3792,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * @see GeoPlatform.ItemService
      */
 
-    var LayerService = function (_GeoPlatform$ItemServ2) {
-        _inherits(LayerService, _GeoPlatform$ItemServ2);
+    var LayerService = function (_ItemService2) {
+        _inherits(LayerService, _ItemService2);
 
         function LayerService() {
             _classCallCheck(this, LayerService);
@@ -3070,15 +3885,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }]);
 
         return LayerService;
-    }(GeoPlatform.ItemService);
+    }(ItemService);
 
-    GeoPlatform.LayerService = LayerService;
+    // GeoPlatform.LayerService = LayerService;
+
+
     GeoPlatform.layerService = function () {
-        return new GeoPlatform.LayerService();
+        return new LayerService();
     };
-})(jQuery, Q, L /*eaflet*/, GeoPlatform);
 
-(function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+    // }) (jQuery, Q, L/*eaflet*/, GeoPlatform);
+
+    return LayerService;
+});
+
+// ( function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform", "ItemService"], function (jQuery, Q, L, GeoPlatform, ItemService) {
+            return root.MapService = factory(jQuery, Q, L, GeoPlatform, ItemService);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.MapService = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'), require('ItemService'));
+    } else {
+        GeoPlatform.MapService = factory(jQuery, Q, L /*eaflet*/, GeoPlatform, GeoPlatform.ItemService);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform, ItemService) {
 
     'use strict';
 
@@ -3090,8 +3930,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * @see GeoPlatform.ItemService
      */
 
-    var MapService = function (_GeoPlatform$ItemServ3) {
-        _inherits(MapService, _GeoPlatform$ItemServ3);
+    var MapService = function (_ItemService3) {
+        _inherits(MapService, _ItemService3);
 
         function MapService() {
             _classCallCheck(this, MapService);
@@ -3103,18 +3943,43 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         return MapService;
-    }(GeoPlatform.ItemService);
+    }(ItemService);
 
-    GeoPlatform.MapService = MapService;
+    // GeoPlatform.MapService = MapService;
+
+
     GeoPlatform.mapService = function () {
-        return new GeoPlatform.MapService();
+        return new MapService();
     };
-})(jQuery, Q, L /*eaflet*/, GeoPlatform);
 
-/**
- *
- */
-(function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
+    // }) (jQuery, Q, L/*eaflet*/, GeoPlatform);
+
+    return MapService;
+});
+
+// /**
+//  *
+//  */
+// (function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
+            return root.MapInstance = factory(jQuery, Q, L, GeoPlatform);
+        });
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+    } else {
+        GeoPlatform.MapInstance = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
+    }
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
 
     "use strict";
 
@@ -4374,4 +5239,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         this.keys[instance._key] = instance;
         return instance;
     };
-})(jQuery, Q, L /*eaflet*/, GeoPlatform);
+
+    return MapInstance;
+}); //(jQuery, Q, L/*eaflet*/, GeoPlatform);

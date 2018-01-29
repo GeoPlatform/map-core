@@ -4,7 +4,33 @@
  * makes them available via GeoPlatform.ServiceTypes
  */
 
-( function(jQuery, Q, GeoPlatform) {
+ (function (root, factory) {
+     if(typeof define === "function" && define.amd) {
+         // Now we're wrapping the factory and assigning the return
+         // value to the root (window) and returning it as well to
+         // the AMD loader.
+         define(["jquery", "q", "GeoPlatform"],
+             function(jQuery, Q, GeoPlatform) {
+                 return (root.ServiceTypes = factory(jQuery, Q, GeoPlatform));
+             });
+     } else if(typeof module === "object" && module.exports) {
+         // I've not encountered a need for this yet, since I haven't
+         // run into a scenario where plain modules depend on CommonJS
+         // *and* I happen to be loading in a CJS browser environment
+         // but I'm including it for the sake of being thorough
+         module.exports = (
+             root.ServiceTypes = factory(
+                 require("jquery"),
+                 require('q'),
+                 require('GeoPlatform')
+             )
+         );
+     } else {
+         GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform);
+     }
+ }(this||window, function(jQuery, Q, GeoPlatform) {
+
+ //( function(jQuery, Q, GeoPlatform) {
 
     const ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
     const esriExpr = /Esri REST ([A-Za-z]+) Service/;
@@ -59,50 +85,10 @@
         console.log("Error loading supported service types: " + error.message);
     });
 
-    // const url = GeoPlatform.ualUrl + '/api/items?' +
-    //     'type:dct:Standard&resourceType=ServiceType&' +
-    //     'size=50&sort=label,asc';
+    // GeoPlatform.ServiceTypes = types;
 
+// }) (jQuery, Q, GeoPlatform);
 
-    // jQuery.ajax({ url: url, dataType: 'json',
-    //     success: function(data) {
-    //
-    //         data.results.each( (type) => {
-    //
-    //             let key = null;
-    //             let label = type.label;
-    //
-    //             if(~label.indexOf("WMS-T")) {
-    //                 key = 'WMST';
-    //                 type.supported = true;
-    //
-    //             } else if(~label.indexOf('OGC')) {
-    //                 key = keyFn(ogcExpr, label);
-    //                 type.supported = 'WMS' === key || 'WMTS' === key;
-    //
-    //             } else if(~label.indexOf('Esri')) {
-    //                 key = keyFn(esriExpr, label);
-    //                 type.supported = true;
-    //                 key = 'ESRI_' + key.toUpperCase() + '_SERVER';
-    //
-    //             } else if(~label.indexOf("Feed")) {
-    //                 key = "FEED";
-    //                 type.supported = true;
-    //
-    //             } else {
-    //                 key = label;
-    //
-    //             }
-    //
-    //             types[key] = type;
-    //         });
-    //         // console.log(types);
-    //     },
-    //     error: function(xhr, status, message) {
-    //         console.log("Error loading supported service types: " + message);
-    //     }
-    // });
+    return types;
 
-    GeoPlatform.ServiceTypes = types;
-
-}) (jQuery, Q, GeoPlatform);
+}));

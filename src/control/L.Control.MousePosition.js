@@ -1,6 +1,28 @@
 
 
-(function (L/*eaflet*/) {
+(function (root, factory) {
+    if(typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["L"/*eaflet*/],
+            function(L) {
+                return (root.MousePositionControl = factory(L));
+            });
+    } else if(typeof module === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = (
+            root.MousePositionControl = factory(require('L'))
+        );
+    } else {
+        GeoPlatform.MousePositionControl = factory(L/*eaflet*/);
+    }
+}(this||window, function(L/*eaflet*/) {
+
+//(function (L/*eaflet*/) {
 
     L.Control.MousePosition = L.Control.extend({
       options: {
@@ -51,4 +73,8 @@
         return new L.Control.MousePosition(options);
     };
 
-}) (L/*eaflet*/);
+// }) (L/*eaflet*/);
+
+    return L.Control.MousePosition;
+
+}));

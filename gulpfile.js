@@ -49,10 +49,10 @@ gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
         .pipe(concat(pkg.name + '.js'))
         .pipe(babel({presets: ["es2015"]}))
         .pipe(gulp.dest('dist/js'))
-        // .pipe(uglify()).on('error', notify.onError("Error: <%= error.message %>"))
-        // .pipe(rename({extname: ".min.js"}))
+        .pipe(uglify()).on('error', notify.onError("Error: <%= error.message %>"))
+        .pipe(rename({extname: ".min.js"}))
         // .pipe(srcmaps.write('./'))
-        // .pipe(gulp.dest('dist/js'))
+        .pipe(gulp.dest('dist/js'))
         .pipe(notify('Uglified JavaScript'));
 });
 

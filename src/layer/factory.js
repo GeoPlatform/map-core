@@ -1,8 +1,45 @@
 
 
 
-(function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+(function (root, factory) {
+    if(typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform"],
+            function(jQuery, Q, L, GeoPlatform) {
+                return (root.LayerFactory = factory(jQuery, Q, L, GeoPlatform));
+            });
+    } else if(typeof module === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = (
+            root.LayerFactory = factory(
+                require("jquery"),
+                require('q'),
+                require('L'),
+                require('GeoPlatform')
+            )
+        );
+    } else {
+        GeoPlatform.LayerFactory = factory(jQuery, Q, L/*eaflet*/, GeoPlatform);
+    }
+}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
+// (function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+
+    /**
+     * @param {Object} layer - GeoPlatform Layer object
+     * @return {boolean} true if is an OSM layer
+     */
+    GeoPlatform.isOSM = function(layer) {
+        return  layer &&
+                layer.resourceTypes &&
+                layer.resourceTypes.length &&
+                ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
+    };
 
     /**
      * @return {Promise} resolving OpenStreet Map GeoPlatform Layer
@@ -17,15 +54,22 @@
     };
 
     /**
-     * @param {Object} layer - GeoPlatform Layer object
-     * @return {boolean} true if is an OSM layer
+     * If a default base layer is defined using the 'defaultBaseLayer'
+     * environment value, fetch it. Otherwise, fetch the OpenStreet Map layer.
+     * @return {Promise} resolving GeoPlatform Layer object
      */
-    L.GeoPlatform.isOSM = function(layer) {
-        return  layer &&
-                layer.resourceTypes &&
-                layer.resourceTypes.length &&
-                ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
+    GeoPlatform.defaultBaseLayer = function() {
+        if(GeoPlatform.defaultBaseLayer) {
+            return GeoPlatform.layerService().get(GeoPlatform.defaultBaseLayer)
+            .catch(e => Q.resolve(GeoPlatform.osm()));
+        } else {
+            return GeoPlatform.osm();
+        }
     };
+
+
+
+
 
     /**
      * @param {Object} layer - GeoPlatform Layer
@@ -37,6 +81,7 @@
             attribution: 'Map data (c) <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
         });
     };
+
 
     /**
      * @param {Object} layer - GeoPlatform Layer object
@@ -52,7 +97,7 @@
         }
 
         //OSM layers have no "services" so we have to treat them differently
-        if(L.GeoPlatform.isOSM(layer)) {
+        if(GeoPlatform.isOSM(layer)) {
             return L.GeoPlatform.osm(layer);
         }
 
@@ -115,4 +160,8 @@
         }
     };
 
-})(jQuery, Q, L/*eaflet*/, GeoPlatform);
+// })(jQuery, Q, L/*eaflet*/, GeoPlatform);
+
+    return L.GeoPlatform.LayerFactory;
+
+}));

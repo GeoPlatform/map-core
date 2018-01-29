@@ -1,7 +1,34 @@
 
 
 
-( function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+(function (root, factory) {
+    if(typeof define === "function" && define.amd) {
+        // Now we're wrapping the factory and assigning the return
+        // value to the root (window) and returning it as well to
+        // the AMD loader.
+        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "ItemService"],
+            function(jQuery, Q, L, GeoPlatform, ItemService) {
+                return (root.ESRITileLayer = factory(jQuery, Q, L, GeoPlatform, ItemService));
+            });
+    } else if(typeof module === "object" && module.exports) {
+        // I've not encountered a need for this yet, since I haven't
+        // run into a scenario where plain modules depend on CommonJS
+        // *and* I happen to be loading in a CJS browser environment
+        // but I'm including it for the sake of being thorough
+        module.exports = (
+            root.ESRITileLayer = factory(
+                require("jquery"),
+                require('q'),
+                require('L'),
+                require('GeoPlatform')
+            )
+        );
+    } else {
+        GeoPlatform.ESRITileLayer = factory(jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.ItemService);
+    }
+}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, ItemService) {
+
+// ( function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
     'use strict';
 
@@ -13,7 +40,7 @@
      * @see GeoPlatform.ItemService
      */
 
-    class ServiceService extends GeoPlatform.ItemService {
+    class ServiceService extends ItemService {
 
         constructor() {
             super();
@@ -57,9 +84,13 @@
 
     }
 
-    GeoPlatform.ServiceService = ServiceService;
+    // GeoPlatform.ServiceService = ServiceService;
     GeoPlatform.serviceService = function() {
-        return new GeoPlatform.ServiceService();
+        return new ServiceService();
     };
 
-}) (jQuery, Q, L/*eaflet*/, GeoPlatform);
+// }) (jQuery, Q, L/*eaflet*/, GeoPlatform);
+
+    return ServiceService;
+
+}));
