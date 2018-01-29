@@ -1,17 +1,14 @@
 
 
-//@deprecated
-// Use JQueryLayerService or NGLayerService instead
-
 
 (function (root, factory) {
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform" ,"ItemService"],
-            function(jQuery, Q, L, GeoPlatform, ItemService) {
-                return (root.LayerService = factory(jQuery, Q, L, GeoPlatform, ItemService));
+        define(["jquery", "q", "GeoPlatform", "JQueryItemService"],
+            function(jQuery, Q, GeoPlatform, JQueryItemService) {
+                return (root.JQueryLayerService = factory(jQuery, Q, GeoPlatform, JQueryItemService));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -19,35 +16,35 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.LayerService = factory(
+            root.JQueryLayerService = factory(
                 require("jquery"),
                 require('q'),
-                require('L'),
                 require('GeoPlatform'),
-                require('ItemService')
+                require('JQueryItemService')
             )
         );
     } else {
-        GeoPlatform.LayerService = factory(jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.ItemService);
+        GeoPlatform.JQueryLayerService = factory(jQuery, Q, GeoPlatform, GeoPlatform.JQueryItemService);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, ItemService) {
+}(this||window, function(jQuery, Q, GeoPlatform, JQueryItemService) {
+
 
     'use strict';
 
     /**
-     * Layer Service
+     * GeoPlatform Map service
      * service for working with the GeoPlatform API to
-     * retrieve and manipulate layer objects.
+     * retrieve and manipulate map objects.
      *
-     * @see GeoPlatform.ItemService
+     * @see GeoPlatform.JQueryItemService
      */
-    class LayerService extends ItemService {
+
+    class JQueryLayerService extends JQueryItemService {
 
         constructor() {
             super();
             this.baseUrl = GeoPlatform.ualUrl + '/api/layers';
         }
-
 
         /**
          * @return {Promise} resolving style JSON object
@@ -60,7 +57,7 @@
                 dataType: 'json',
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ItemService.style() - Error fetching item style: ${message}`;
+                    let m = `GeoPlatform.LayerService.style() - Error fetching item style: ${message}`;
                     let err = new Error(m);
                     d.reject(err);
                 }
@@ -106,7 +103,7 @@
                 data: params,
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ItemService.describe() -
+                    let m = `GeoPlatform.LayerService.describe() -
                         Error describing layer feature: ${message}`;
                     let err = new Error(m);
                     d.reject(err);
@@ -118,6 +115,6 @@
 
     }
 
-    
-    return LayerService;
+    return JQueryLayerService;
+
 }));

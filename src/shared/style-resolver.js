@@ -8,9 +8,9 @@
          // Now we're wrapping the factory and assigning the return
          // value to the root (window) and returning it as well to
          // the AMD loader.
-         define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform"],
-             function(jQuery, Q, L, GeoPlatform) {
-                 return (root.FeatureStyleResolver = factory(jQuery, Q, L, GeoPlatform));
+         define(["q", "L"/*eaflet*/, "GeoPlatform"],
+             function(Q, L, GeoPlatform) {
+                 return (root.FeatureStyleResolver = factory(Q, L, GeoPlatform));
              });
      } else if(typeof module === "object" && module.exports) {
          // I've not encountered a need for this yet, since I haven't
@@ -19,18 +19,15 @@
          // but I'm including it for the sake of being thorough
          module.exports = (
              root.FeatureStyleResolver = factory(
-                 require("jquery"),
                  require('q'),
                  require('L'),
                  require('GeoPlatform')
              )
          );
      } else {
-         GeoPlatform.FeatureStyleResolver = factory(jQuery, Q, L/*eaflet*/, GeoPlatform);
+         GeoPlatform.FeatureStyleResolver = factory(Q, L/*eaflet*/, GeoPlatform);
      }
- }(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
-
-//(function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+ }(this||window, function(Q, L/*eaflet*/, GeoPlatform) {
 
     if(!L) {
         throw new Error("Missing Leaflet");
@@ -46,22 +43,20 @@
     L.GeoPlatform.FeatureStyleResolver = function(id) {
         let deferred = Q.defer();
         jQuery.ajax({
-            url: GeoPlatform.ualUrl + '/api/layers/' + id + '/style',
-            dataType: 'json',
-            success: function(data) {
-                deferred.resolve(data);
-            },
-            error: function(xhr, status, message) {
-                let em = `L.GeoPlatform.FeatureStyleResolver() -
-                    Error loading style information for layer ${id} : ${message}`;
-                let error = new Error(em);
-                deferred.reject(error);
-            }
+           url: GeoPlatform.ualUrl + '/api/layers/' + id + '/style',
+           dataType: 'json',
+           success: function(data) {
+               deferred.resolve(data);
+           },
+           error: function(xhr, status, message) {
+               let em = `L.GeoPlatform.FeatureStyleResolver() -
+                   Error loading style information for layer ${id} : ${message}`;
+               let error = new Error(em);
+               deferred.reject(error);
+           }
         });
         return deferred.promise;
     };
-
-// })(jQuery, Q, L/*eaflet*/, GeoPlatform);
 
     return L.GeoPlatform.FeatureStyleResolver;
 

@@ -1,17 +1,14 @@
 
 
-//@deprecated
-// Use JQueryServiceService or NGServiceService instead
-
 
 (function (root, factory) {
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "ItemService"],
-            function(jQuery, Q, L, GeoPlatform, ItemService) {
-                return (root.ServiceService = factory(jQuery, Q, L, GeoPlatform, ItemService));
+        define(["jquery", "q", "GeoPlatform", "JQueryItemService"],
+            function(jQuery, Q, GeoPlatform, JQueryItemService) {
+                return (root.JQueryServiceService = factory(jQuery, Q, GeoPlatform, JQueryItemService));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -19,17 +16,17 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.ServiceService = factory(
+            root.JQueryServiceService = factory(
                 require("jquery"),
                 require('q'),
-                require('L'),
-                require('GeoPlatform')
+                require('GeoPlatform'),
+                require('JQueryItemService')
             )
         );
     } else {
-        GeoPlatform.ServiceService = factory(jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.ItemService);
+        GeoPlatform.JQueryServiceService = factory(jQuery, Q, GeoPlatform, GeoPlatform.JQueryItemService);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, ItemService) {
+}(this||window, function(jQuery, Q, GeoPlatform, JQueryItemService) {
 
 // ( function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
@@ -40,10 +37,10 @@
      * service for working with the GeoPlatform API to
      * retrieve and manipulate service objects.
      *
-     * @see GeoPlatform.ItemService
+     * @see GeoPlatform.JQueryItemService
      */
 
-    class ServiceService extends ItemService {
+    class JQueryServiceService extends JQueryItemService {
 
         constructor() {
             super();
@@ -87,13 +84,6 @@
 
     }
 
-    // GeoPlatform.ServiceService = ServiceService;
-    GeoPlatform.serviceService = function() {
-        return new ServiceService();
-    };
-
-// }) (jQuery, Q, L/*eaflet*/, GeoPlatform);
-
-    return ServiceService;
+    return JQueryServiceService;
 
 }));

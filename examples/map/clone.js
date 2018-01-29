@@ -18,7 +18,8 @@ mapInstance.setMap(leafletMap);
 mapInstance.load(L.GeoPlatform.osm());
 
 //just for example purposes, find the first map available
-GeoPlatform.mapService.search().then( response => {
+let mapService = GeoPlatform.JQueryMapService();
+mapService.search().then( response => {
     if(response.results.length) {
 
         //Note: search results do not contain resolved

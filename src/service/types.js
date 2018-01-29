@@ -9,9 +9,9 @@
          // Now we're wrapping the factory and assigning the return
          // value to the root (window) and returning it as well to
          // the AMD loader.
-         define(["jquery", "q", "GeoPlatform"],
-             function(jQuery, Q, GeoPlatform) {
-                 return (root.ServiceTypes = factory(jQuery, Q, GeoPlatform));
+         define(["jquery", "q", "GeoPlatform", "JQueryItemService"],
+             function(jQuery, Q, GeoPlatform, JQueryItemService) {
+                 return (root.ServiceTypes = factory(jQuery, Q, GeoPlatform, JQueryItemService));
              });
      } else if(typeof module === "object" && module.exports) {
          // I've not encountered a need for this yet, since I haven't
@@ -22,15 +22,15 @@
              root.ServiceTypes = factory(
                  require("jquery"),
                  require('q'),
-                 require('GeoPlatform')
+                 require('GeoPlatform'),
+                 require('JQueryItemService')
              )
          );
      } else {
-         GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform);
+         GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform, GeoPlatform.JQueryItemService);
      }
- }(this||window, function(jQuery, Q, GeoPlatform) {
+ }(this||window, function(jQuery, Q, GeoPlatform, JQueryItemService) {
 
- //( function(jQuery, Q, GeoPlatform) {
 
     const ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
     const esriExpr = /Esri REST ([A-Za-z]+) Service/;
@@ -46,7 +46,7 @@
         .resourceTypes('ServiceType')
         .pageSize(50)
 
-    GeoPlatform.itemService().search(query)
+    new JQueryItemService().search(query)
     .then( data => {
 
         for(let i=0; i<data.results.length; ++i) {

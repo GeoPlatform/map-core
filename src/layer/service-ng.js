@@ -1,17 +1,14 @@
 
 
-//@deprecated
-// Use JQueryLayerService or NGLayerService instead
-
 
 (function (root, factory) {
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform" ,"ItemService"],
-            function(jQuery, Q, L, GeoPlatform, ItemService) {
-                return (root.LayerService = factory(jQuery, Q, L, GeoPlatform, ItemService));
+        define(["q", "angular", "GeoPlatform", "NGItemService"],
+            function(Q, angular, GeoPlatform, NGItemService) {
+                return (root.NGLayerService = factory(Q, angular, GeoPlatform, NGItemService));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -19,54 +16,48 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.LayerService = factory(
-                require("jquery"),
+            root.NGLayerService = factory(
                 require('q'),
-                require('L'),
+                require("angular"),
                 require('GeoPlatform'),
-                require('ItemService')
+                require('NGItemService')
             )
         );
     } else {
-        GeoPlatform.LayerService = factory(jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.ItemService);
+        GeoPlatform.NGLayerService = factory(Q, angular, GeoPlatform, GeoPlatform.NGItemService);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, ItemService) {
+}(this||window, function(Q, angular, GeoPlatform, NGItemService) {
 
     'use strict';
 
     /**
-     * Layer Service
+     * GeoPlatform Map service
      * service for working with the GeoPlatform API to
-     * retrieve and manipulate layer objects.
+     * retrieve and manipulate map objects.
      *
-     * @see GeoPlatform.ItemService
+     * @see GeoPlatform.NGItemService
      */
-    class LayerService extends ItemService {
+
+    class NGLayerService extends NGItemService {
 
         constructor() {
             super();
             this.baseUrl = GeoPlatform.ualUrl + '/api/layers';
         }
 
-
         /**
          * @return {Promise} resolving style JSON object
          */
         style () {
-            let d = Q.defer();
-            let opts = {
-                method: "GET",
-                url: this.baseUrl + '/' + id + '/style',
-                dataType: 'json',
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ItemService.style() - Error fetching item style: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
-                }
-            };
-            jQuery.ajax(opts);
-            return d.promise;
+            let url = this.baseUrl + '/' + id + '/style';
+            let $http = angular.injector().get('$http');
+            if(typeof($http) === 'undefined')
+                throw new Error("Angular $http not resolved");
+            return $http.get(url).catch( e => {
+                let m = `GeoPlatform.NGLayerService.style() - Error getting layer style: ${e.message}`;
+                let err = new Error(m);
+                return Q.reject(err);
+            });
         }
 
         /**
@@ -98,26 +89,24 @@
                 j           : options.y  //WMS 1.3.0
             };
 
-            let d = Q.defer();
+
             let opts = {
                 method: "GET",
                 url: this.baseUrl + '/' + id + '/describe',
-                dataType: 'json',
-                data: params,
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ItemService.describe() -
-                        Error describing layer feature: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
-                }
+                data: params
             };
-            jQuery.ajax(opts);
-            return d.promise;
+            let $http = angular.injector().get('$http');
+            if(typeof($http) === 'undefined')
+                throw new Error("Angular $http not resolved");
+            return $http(opts).catch( e => {
+                let m = `GeoPlatform.NGLayerService.get() - Error describing layer feature: ${e.message}`;
+                let err = new Error(m);
+                return Q.reject(err);
+            });
         }
 
     }
 
-    
-    return LayerService;
+    return NGLayerService;
+
 }));

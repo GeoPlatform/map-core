@@ -9,9 +9,10 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform"], function(jQuery, Q, L, GeoPlatform){
-            return (root.MapInstance = factory(jQuery, Q, L, GeoPlatform));
-        });
+        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "JQueryMapService"],
+            function(jQuery, Q, L, GeoPlatform, JQueryMapService){
+                return (root.MapInstance = factory(jQuery, Q, L, GeoPlatform, JQueryMapService));
+            });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
@@ -22,13 +23,14 @@
                 require("jquery"),
                 require('q'),
                 require('L'),
-                require('GeoPlatform')
+                require('GeoPlatform'),
+                require('JQueryMapService')
             )
         );
     } else {
-        GeoPlatform.MapInstance = factory(jQuery, Q, L/*eaflet*/, GeoPlatform);
+        GeoPlatform.MapInstance = factory(jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.JQueryMapService);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, JQueryMapService) {
 
     "use strict";
 
@@ -71,6 +73,8 @@
 
         constructor() {
             super();
+
+            this.service = new JQueryMapService();
 
             //generate random key (see factory below)
             this._key = Math.ceil(Math.random()*9999);
@@ -154,6 +158,14 @@
 
         getKey () {
             return this._key;
+        }
+
+        /**
+         * Override default (JQuery-based) map service used by this instance
+         * @param {ItemService} mapService - service to use to CRUD map objects
+         */
+        setService(mapService) {
+            this.service = mapService;
         }
 
 
@@ -920,7 +932,7 @@
             }
 
             // console.log("Updating: " + JSON.stringify(map));
-            GeoPlatform.mapService().save(content)
+            this.service.save(content)
             .then( result => {
 
                 //track new map's info so we can update it with next save
@@ -945,7 +957,7 @@
         fetchMap (mapId) {
             //Having to send cache busting parameter to avoid CORS header cache
             // not sending correct Origin value
-            return GeoPlatform.mapService().get(mapId);
+            return this.service.get(mapId);
         }
 
         /**
@@ -976,7 +988,7 @@
                         //update view count
                         let views = map.statistics ? (map.statistics.numViews||0) : 0;
                         let patch = [ { op: 'replace', path: '/statistics/numViews', value: views+1 } ];
-                        GeoPlatform.mapService().patch(map.id, patch)
+                        this.service.patch(map.id, patch)
                         .then( updated => { map.statistics = updated.statistics; })
                         .catch( e => { console.log("Error updating view count for map: " + e); });
                     }, 1000, map);

@@ -1,17 +1,14 @@
 
 
-//@deprecated
-// Use JQueryServiceService or NGServiceService instead
-
 
 (function (root, factory) {
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "ItemService"],
-            function(jQuery, Q, L, GeoPlatform, ItemService) {
-                return (root.ServiceService = factory(jQuery, Q, L, GeoPlatform, ItemService));
+        define(["q", "angular", "GeoPlatform", "NGItemService"],
+            function(Q, angular, GeoPlatform, NGItemService) {
+                return (root.NGServiceService = factory(Q, angular, GeoPlatform, NGItemService));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -19,19 +16,17 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.ServiceService = factory(
-                require("jquery"),
+            root.NGServiceService = factory(
                 require('q'),
-                require('L'),
-                require('GeoPlatform')
+                require("angular"),
+                require('GeoPlatform'),
+                require('NGItemService')
             )
         );
     } else {
-        GeoPlatform.ServiceService = factory(jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.ItemService);
+        GeoPlatform.NGServiceService = factory(Q, angular, GeoPlatform, GeoPlatform.NGItemService);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, ItemService) {
-
-// ( function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+}(this||window, function(Q, angular, GeoPlatform, NGItemService) {
 
     'use strict';
 
@@ -40,10 +35,10 @@
      * service for working with the GeoPlatform API to
      * retrieve and manipulate service objects.
      *
-     * @see GeoPlatform.ItemService
+     * @see GeoPlatform.NGItemService
      */
 
-    class ServiceService extends ItemService {
+    class NGServiceService extends NGItemService {
 
         constructor() {
             super();
@@ -65,35 +60,24 @@
                 return Q.reject(err);
             }
 
-            let d = Q.defer();
             let opts = {
                 method: "POST",
                 url: this.baseUrl + '/about',
-                dataType: 'json',
-                data: service,
-                processData: false,
-                contentType: 'application/json',
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ServiceService.about() -
-                        Error describing service: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
-                }
+                data: service
             };
-            jQuery.ajax(opts);
-            return d.promise;
+
+            let $http = angular.injector().get('$http');
+            if(typeof($http) === 'undefined')
+                throw new Error("Angular $http not resolved");
+            return $http(opts).catch( e => {
+                let m = `GeoPlatform.NGServiceService.get() - Error describing service: ${e.message}`;
+                let err = new Error(m);
+                return Q.reject(err);
+            });
         }
 
     }
 
-    // GeoPlatform.ServiceService = ServiceService;
-    GeoPlatform.serviceService = function() {
-        return new ServiceService();
-    };
-
-// }) (jQuery, Q, L/*eaflet*/, GeoPlatform);
-
-    return ServiceService;
+    return NGServiceService;
 
 }));

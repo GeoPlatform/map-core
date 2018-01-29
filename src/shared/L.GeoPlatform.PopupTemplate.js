@@ -25,8 +25,6 @@
     }
 }(this||window, function(jQuery, L/*eaflet*/, GeoPlatform) {
 
-//(function(jQuery, L/*eaflet*/, GeoPlatform) {
-
 
     if(!L) {
         throw new Error("Missing Leaflet");
@@ -113,8 +111,6 @@
         result += '</div>';
         return result;
     };
-
-// })(jQuery, L/*eaflet*/,GeoPlatform);
 
     return L.GeoPlatform.featurePopupTemplate;
 

@@ -49,7 +49,7 @@ query.setSort('modified,desc');
 query.setSort('modified', 'desc');  //same as previous line
 
 
-let service = new GeoPlatform.ItemService();
+let service = new GeoPlatform.JQueryItemService();
 service.search(query)
        .then( response => {
            //do something with results

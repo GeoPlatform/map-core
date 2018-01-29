@@ -30,8 +30,14 @@ gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
     //include module first, then other src files which depend on module
     gulp.src([
         'src/index.js',
+        'src/shared/item-service.js',
+        'src/shared/item-service-jquery.js',
+        'src/shared/item-service-ng.js',
         'src/shared/**/*.js',
+
+        '!src/service/service.js',
         'src/service/**/*.js',
+
         'src/control/**/*.js',
         'src/layer/L.GeoPlatform.WMS.js',
         'src/layer/L.GeoPlatform.WMTS.js',
@@ -40,9 +46,15 @@ gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
         'src/layer/L.GeoPlatform.FeatureLayer.js',
         'src/layer/L.esri.Cluster.FeatureLayer.js',
         'src/layer/L.GeoPlatform.ClusteredFeatureLayer.js',
+        'src/layer/service-*.js',
         'src/layer/factory.js',
+
+        '!src/layer/service.js',
         'src/layer/service.js',
-        'src/map/service.js',
+
+        '!src/map/service.js',
+        'src/map/service-jquery.js',
+        'src/map/service-ng.js',
         'src/map/instance.js'
         ])
         // .pipe(srcmaps.init())

@@ -1,18 +1,14 @@
 
 
 
-//@deprecated
-// Use JQueryMapService or NGMapService instead
-
-
 (function (root, factory) {
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "ItemService"],
-            function(jQuery, Q, L, GeoPlatform, ItemService){
-                return (root.MapService = factory(jQuery, Q, L, GeoPlatform, ItemService));
+        define(["jquery", "q", "GeoPlatform", "JQueryItemService"],
+            function(jQuery, Q, GeoPlatform, JQueryItemService) {
+                return (root.JQueryMapService = factory(jQuery, Q, GeoPlatform, JQueryItemService));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -20,30 +16,30 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.MapService = factory(
+            root.JQueryMapService = factory(
                 require("jquery"),
                 require('q'),
-                require('L'),
                 require('GeoPlatform'),
-                require('ItemService')
+                require('JQueryItemService')
             )
         );
     } else {
-        GeoPlatform.MapService = factory(jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.ItemService);
+        GeoPlatform.JQueryMapService = factory(jQuery, Q, GeoPlatform, GeoPlatform.JQueryItemService);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, ItemService) {
+}(this||window, function(jQuery, Q, GeoPlatform, JQueryItemService) {
+
 
     'use strict';
 
     /**
-     * Map Service
+     * GeoPlatform Map service
      * service for working with the GeoPlatform API to
      * retrieve and manipulate map objects.
      *
-     * @see GeoPlatform.ItemService
+     * @see GeoPlatform.JQueryItemService
      */
 
-    class MapService extends ItemService {
+    class JQueryMapService extends JQueryItemService {
 
         constructor() {
             super();
@@ -52,6 +48,6 @@
 
     }
 
-    return MapService;
+    return JQueryMapService;
 
 }));

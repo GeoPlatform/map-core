@@ -6,9 +6,9 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform"],
-            function(jQuery, Q, L, GeoPlatform) {
-                return (root.LayerFactory = factory(jQuery, Q, L, GeoPlatform));
+        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "JQueryLayerService"],
+            function(jQuery, Q, L, GeoPlatform, JQueryLayerService) {
+                return (root.LayerFactory = factory(jQuery, Q, L, GeoPlatform, JQueryLayerService));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -20,13 +20,15 @@
                 require("jquery"),
                 require('q'),
                 require('L'),
-                require('GeoPlatform')
+                require('GeoPlatform'),
+                require('JQueryLayerService')
             )
         );
     } else {
-        GeoPlatform.LayerFactory = factory(jQuery, Q, L/*eaflet*/, GeoPlatform);
+        GeoPlatform.LayerFactory = factory(
+            jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.JQueryLayerService);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
+}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, JQueryLayerService) {
 
 // (function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
@@ -48,7 +50,7 @@
         let query = GeoPlatform.QueryFactory()
             .fields('*')
             .resourceTypes("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
-        return GeoPlatform.layerService().search(query)
+        return new JQueryLayerService().search(query)
         .then( response => response.results.length ? response.results[0] : null)
         .catch( e => Q.reject(e));
     };
@@ -60,7 +62,7 @@
      */
     GeoPlatform.defaultBaseLayer = function() {
         if(GeoPlatform.defaultBaseLayer) {
-            return GeoPlatform.layerService().get(GeoPlatform.defaultBaseLayer)
+            return new JQueryLayerService().get(GeoPlatform.defaultBaseLayer)
             .catch(e => Q.resolve(GeoPlatform.osm()));
         } else {
             return GeoPlatform.osm();

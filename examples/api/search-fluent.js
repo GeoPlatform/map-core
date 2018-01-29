@@ -16,7 +16,7 @@ let query = GeoPlatform.QueryFactory()
      .size(50)
      .sort('modified', 'desc');
 
-let service = new GeoPlatform.ItemService();
+let service = new GeoPlatform.JQueryItemService();
 service.search(query)
        .then( response => {
            //display results
