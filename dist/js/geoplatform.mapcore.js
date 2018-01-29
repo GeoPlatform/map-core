@@ -3571,7 +3571,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function setBaseLayer(layer) {
                 var _this9 = this;
 
-                var promise = layer !== null && typeof layer !== 'undefined' ? Q.resolve(layer) : BaseLayerFactory.get();
+                var promise = null;
+                if (!layer) {
+                    promise = GeoPlatform.osm();
+                } else promise = Q.resolve(layer);
 
                 promise.then(function (layer) {
 

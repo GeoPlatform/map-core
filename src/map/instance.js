@@ -388,8 +388,11 @@
          */
         setBaseLayer (layer) {
 
-            let promise = (layer !== null && typeof(layer) !== 'undefined') ?
-                Q.resolve(layer) : BaseLayerFactory.get();
+            let promise = null;
+            if(!layer) {
+                promise = GeoPlatform.osm();
+            } else
+                promise = Q.resolve(layer);
 
             promise.then( layer => {
 
