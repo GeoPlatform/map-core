@@ -6,10 +6,6 @@
 
 ( function(jQuery, Q, GeoPlatform) {
 
-    const url = GeoPlatform.ualUrl + '/api/items?' +
-        'type:dct:Standard&resourceType=ServiceType&' +
-        'size=50&sort=label,asc';
-
     const ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
     const esriExpr = /Esri REST ([A-Za-z]+) Service/;
     const keyFn = (expr, str) => {
@@ -19,44 +15,93 @@
 
     var types = {};
 
-    jQuery.ajax({ url: url, dataType: 'json',
-        success: function(data) {
+    let query = GeoPlatform.QueryFactory()
+        .types('dct:Standard')
+        .resourceTypes('ServiceType')
+        .pageSize(50)
 
-            data.results.each( (type) => {
+    GeoPlatform.itemService().search(query)
+    .then( data => {
 
-                let key = null;
-                let label = type.label;
+        for(let i=0; i<data.results.length; ++i) {
 
-                if(~label.indexOf("WMS-T")) {
-                    key = 'WMST';
-                    type.supported = true;
+            let type = data.results[i],
+                key = null,
+                label = type.label;
 
-                } else if(~label.indexOf('OGC')) {
-                    key = keyFn(ogcExpr, label);
-                    type.supported = 'WMS' === key || 'WMTS' === key;
+            if(~label.indexOf("WMS-T")) {
+                key = 'WMST';
+                type.supported = true;
 
-                } else if(~label.indexOf('Esri')) {
-                    key = keyFn(esriExpr, label);
-                    type.supported = true;
-                    key = 'ESRI_' + key.toUpperCase() + '_SERVER';
+            } else if(~label.indexOf('OGC')) {
+                key = keyFn(ogcExpr, label);
+                type.supported = 'WMS' === key || 'WMTS' === key;
 
-                } else if(~label.indexOf("Feed")) {
-                    key = "FEED";
-                    type.supported = true;
+            } else if(~label.indexOf('Esri')) {
+                key = keyFn(esriExpr, label);
+                type.supported = true;
+                key = 'ESRI_' + key.toUpperCase() + '_SERVER';
 
-                } else {
-                    key = label;
+            } else if(~label.indexOf("Feed")) {
+                key = "FEED";
+                type.supported = true;
 
-                }
+            } else {
+                key = label;
 
-                types[key] = type;
-            });
-            // console.log(types);
-        },
-        error: function(xhr, status, message) {
-            console.log("Error loading supported service types: " + message);
+            }
+
+            types[key] = type;
         }
+        // console.log(types);
+    })
+    .catch( error => {
+        console.log("Error loading supported service types: " + error.message);
     });
+
+    // const url = GeoPlatform.ualUrl + '/api/items?' +
+    //     'type:dct:Standard&resourceType=ServiceType&' +
+    //     'size=50&sort=label,asc';
+
+
+    // jQuery.ajax({ url: url, dataType: 'json',
+    //     success: function(data) {
+    //
+    //         data.results.each( (type) => {
+    //
+    //             let key = null;
+    //             let label = type.label;
+    //
+    //             if(~label.indexOf("WMS-T")) {
+    //                 key = 'WMST';
+    //                 type.supported = true;
+    //
+    //             } else if(~label.indexOf('OGC')) {
+    //                 key = keyFn(ogcExpr, label);
+    //                 type.supported = 'WMS' === key || 'WMTS' === key;
+    //
+    //             } else if(~label.indexOf('Esri')) {
+    //                 key = keyFn(esriExpr, label);
+    //                 type.supported = true;
+    //                 key = 'ESRI_' + key.toUpperCase() + '_SERVER';
+    //
+    //             } else if(~label.indexOf("Feed")) {
+    //                 key = "FEED";
+    //                 type.supported = true;
+    //
+    //             } else {
+    //                 key = label;
+    //
+    //             }
+    //
+    //             types[key] = type;
+    //         });
+    //         // console.log(types);
+    //     },
+    //     error: function(xhr, status, message) {
+    //         console.log("Error loading supported service types: " + message);
+    //     }
+    // });
 
     GeoPlatform.ServiceTypes = types;
 

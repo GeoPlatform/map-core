@@ -41,6 +41,7 @@ gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
         'src/layer/L.esri.Cluster.FeatureLayer.js',
         'src/layer/L.GeoPlatform.ClusteredFeatureLayer.js',
         'src/layer/factory.js',
+        'src/layer/service.js',
         'src/map/service.js',
         'src/map/instance.js'
         ])

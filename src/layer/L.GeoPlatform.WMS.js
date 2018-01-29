@@ -117,13 +117,16 @@
         let url = service.href;
         let format  = layer.supportedFormats ? layer.supportedFormats[0] : "image/png";
 
-        return new L.GeoPlatform.WMS(url, {
+        let opts = {
             layers: layer.layerName,
             transparent: true,
             format: format,
-            wmvId: layer.id,
-            pane: GeoPlatform.leafletPane
-        });
+            wmvId: layer.id
+        };
+        if(GeoPlatform.leafletPane)
+            opts.pane = GeoPlatform.leafletPane;
+
+        return new L.GeoPlatform.WMS(url, opts);
 
     };
 

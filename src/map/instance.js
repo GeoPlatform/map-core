@@ -859,9 +859,25 @@
            ============================================== */
 
         /**
-         * @param metadata object containing metadata properties for map
+         * @param {Object} metadata
+         * @return {Promise} resolving persisted map
          */
-        saveMap (metadata) {
+        save (metadata) {
+            return this.saveMap(metadata);
+        }
+
+        /**
+         * @param md object containing metadata properties for map
+         */
+        saveMap (md) {
+
+            let metadata = md || {};
+            metadata.resourceTypes = metadata.resourceTypes || [];
+
+            //add GeoPlatformMap resource type if not already present
+            const gpMapType = 'http://www.geoplatform.gov/ont/openmap/GeoplatformMap';
+            if(metadata.resourceTypes.indexOf(gpMapType) < 0)
+                metadata.resourceTypes.push(gpMapType);
 
             var content = this.getMapResourceContent(metadata);
 
@@ -870,10 +886,12 @@
             //ensure the two name properties line up
             if(content.title && content.title !== content.label) {
                 content.label = content.title;
+            } else if(content.label && !content.title) {
+                content.title = content.label;
             }
 
             // console.log("Updating: " + JSON.stringify(map));
-            GeoPlatform.MapService.save(content)
+            GeoPlatform.mapService().save(content)
             .then( result => {
 
                 //track new map's info so we can update it with next save
@@ -898,7 +916,7 @@
         fetchMap (mapId) {
             //Having to send cache busting parameter to avoid CORS header cache
             // not sending correct Origin value
-            return GeoPlatform.MapService.get(mapId);
+            return GeoPlatform.mapService().get(mapId);
         }
 
         /**
@@ -929,7 +947,7 @@
                         //update view count
                         let views = map.statistics ? (map.statistics.numViews||0) : 0;
                         let patch = [ { op: 'replace', path: '/statistics/numViews', value: views+1 } ];
-                        GeoPlatform.MapService.patch(map.id, patch)
+                        GeoPlatform.mapService().patch(map.id, patch)
                         .then( updated => { map.statistics = updated.statistics; })
                         .catch( e => { console.log("Error updating view count for map: " + e); });
                     }, 1000, map);
@@ -1025,7 +1043,7 @@
         /**
          * Used to take an existing map that is already persisted on the
          * server and unlink it here in the client so that it will be saved
-         * as a completely new map when MapService.saveMap(...) is next called
+         * as a completely new map when mapService.saveMap(...) is next called
          */
         setAsNewMap (mapToUse) {
             this._mapId = null;

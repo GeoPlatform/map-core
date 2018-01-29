@@ -17,4 +17,18 @@
         L.GeoPlatform = {};
 
 
+
+
+    if(typeof(Array.prototype.each) === 'undefined') {
+        Array.prototype.each = function(fn) {
+            let arr = this, len = arr.length;
+            for(let i=0; i<len; ++i) {
+                try {
+                    fn(arr[i]);
+                } catch(e) { }
+            }
+        }
+    }
+
+
 })(jQuery, L/*eaflet*/, GeoPlatform);

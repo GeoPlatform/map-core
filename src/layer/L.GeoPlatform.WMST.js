@@ -65,13 +65,16 @@
         let service = gpLayer.services[0];
         let url = service.href;
 
-        let leafletLayer = new L.TileLayer.CustomWMS( url, {
+        let opts = {
             layers: gpLayer.layerName,
             transparent: true,
             format: "image/png",
-            wmvId: gpLayer.layerId,
-            pane: GeoPlatform.leafletPane
-        });
+            wmvId: gpLayer.layerId
+        };
+        if(GeoPlatform.leafletPane)
+            opts.pane = GeoPlatform.leafletPane;
+
+        let leafletLayer = new L.TileLayer.CustomWMS( url, opts );
 
         let proxyUrl = GeoPlatform.ualUrl + '/api/services/' +
             service.id + '/proxy/capabilities';

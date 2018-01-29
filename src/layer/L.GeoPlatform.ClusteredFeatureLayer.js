@@ -91,7 +91,9 @@
 
             options = options || {};
 
-            options.pane = GeoPlatform.leafletPane;
+            if(GeoPlatform.leafletPane)
+                options.pane = GeoPlatform.leafletPane;
+
             options.pointToLayer = L.bind(this.pointToLayerFn, this);
             options.onEachFeature = L.bind(this.eachFeatureFn, this);
             // options.fields = ['FID', 'type', 'title', 'geometry'];
@@ -109,7 +111,10 @@
 
             //in order to put features-based layers into same pane as tile layers,
             // must specify renderer and set desired pane on that
-            var renderer = (L.SVG && L.svg({pane: 'gpmvPane'})) || (L.Canvas && L.canvas());
+            let svgOpts = {};
+            if(GeoPlatform.leafletPane)
+                svgOpts.pane = GeoPlatform.leafletPane;
+            var renderer = (L.SVG && L.svg(svgOpts)) || (L.Canvas && L.canvas());
             options.renderer = renderer;
 
             L.esri.Cluster.FeatureLayer.prototype.initialize.call(this, options);

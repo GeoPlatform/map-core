@@ -91,14 +91,19 @@
 
             var self = this;
             options = options || {};
-            options.pane = GeoPlatform.leafletPane;
+
+            if(GeoPlatform.leafletPane)
+                options.pane = GeoPlatform.leafletPane;
 
             let getGPStyle = () => { return this._gpStyle; };
             options.style = options.style || getGPStyle();
 
             //in order to put features-based layers into same pane as tile layers,
             // must specify renderer and set desired pane on that
-            var renderer = (L.SVG && L.svg({pane: 'gpmvPane'})) || (L.Canvas && L.canvas());
+            let svgOpts = {};
+            if(GeoPlatform.leafletPane)
+                svgOpts.pane = GeoPlatform.leafletPane;
+            var renderer = (L.SVG && L.svg(svgOpts)) || (L.Canvas && L.canvas());
             options.renderer = renderer;
 
             options.pointToLayer = L.bind(this.pointToLayerFn, this);

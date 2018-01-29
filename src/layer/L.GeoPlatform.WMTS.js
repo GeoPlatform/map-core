@@ -140,6 +140,8 @@
             tileMatrixSet: "default",
             format: "image/png"
         };
+        if(GeoPlatform.leafletPane)
+            options.pane = GeoPlatform.leafletPane;
 
         let distro = (layer.distributions || []).find( dist => {
             return dist.href && ( dist.mediaType==='image/png' || dist.mediaType==='image/jpeg' );
