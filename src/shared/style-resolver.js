@@ -40,7 +40,7 @@
      * Fetches style information from GeoPlatform UAL
      * @param {string} id - identifier of layer to resolve style for
      */
-    L.GeoPlatform.FeatureStyleResolver = function(id) {
+    L.GeoPlatform.featureStyleResolver = function(id) {
         let deferred = Q.defer();
         jQuery.ajax({
            url: GeoPlatform.ualUrl + '/api/layers/' + id + '/style',

@@ -26,8 +26,6 @@
     }
 }(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
-// (function(jQuery, L/*eaflet*/, GeoPlatform) {
-
 
     if(!L) {
         throw new Error("Missing Leaflet");

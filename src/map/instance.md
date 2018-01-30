@@ -54,6 +54,17 @@ When no longer needed, you should dispose of the map instance.
 mapInstance.destroyMap();
 ```
 
+## Cached Map Instances
+MapFactory caches instances created through it using keys which are available via `instance.getKey()`. You can later retrieve the same instance using its key:
+```javascript
+let mapKey = "MY_MAP";
+let instance = GeoPlatform.MapFactory.get(mapKey);
+```
+
+To dispose of a cached map or clear all cached instances, call `GeoPlatform.MapFactory.dispose()` passing either a map's key to dispose of only that map instance or no arguments to clear the cache.
+
+__Note:__ Disposing of a single map will call `destroyMap()` on that instance.
+
 
 ## Map Layers
 
@@ -101,6 +112,31 @@ mapInstance.updateLayerOpacity(gpLayerId, 1.0);
 //get leaflet layer for existing gp layer object already on map
 let leafletLayer = mapInstance.getLeafletLayerFor(gpLayerObj);
 ```
+
+
+Convenience methods exist for using OpenStreetMap layers, which are used as
+default base layers unless otherwise specified.
+
+```javascript
+//fetch OSM layer definition using GeoPlatform API
+GeoPlatform.OSM.get().then( osmLayer => {
+    mapInstance.setBaseLayer(osmLayer);
+});
+
+//test whether a GeoPlatform Layer is OSM or not
+let layer = { "type": "Layer", ... };
+if( GeoPlatform.OSM.test(layer) ) {
+    console.log("Layer is OSM!");
+}
+
+//create a quick, unpersisted OSM Leaflet layer instance
+// it's recommended to fetch OSM and add to map that way,
+// but this is handy for preview maps, mini maps, and
+// similar uses of a map that don't need persistence
+let leafletLayer = L.GeoPlatform.osm();
+leafletMap.addLayer(leafletLayer);
+```
+
 
 
 ## Map Features
@@ -184,6 +220,6 @@ mapInstance.saveMap(metadata)
 
 ## Map Controls
 Included in Map Core are three Leaflet map controls for use with maps:
-- L.Control.Loading
-- L.Control.MeasureControl
-- L.Control.MousePosition
+- [L.Control.Loading](../control/L.Control.Loading.js)
+- [L.Control.MeasureControl](../control/L.Control.MeasureControl.js)
+- [L.Control.MousePosition](../control/L.Control.MousePosition.js)
