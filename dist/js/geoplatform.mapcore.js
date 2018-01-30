@@ -1023,16 +1023,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // value to the root (window) and returning it as well to
         // the AMD loader.
         define(["jquery", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, L, GeoPlatform) {
-            return root.FeaturePopupTemplate = factory(jQuery, L, GeoPlatform);
+            return root.featurePopupTemplate = factory(jQuery, L, GeoPlatform);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.FeaturePopupTemplate = factory(require("jquery"), require('L'), require('GeoPlatform'));
+        module.exports = root.featurePopupTemplate = factory(require("jquery"), require('L'), require('GeoPlatform'));
     } else {
-        GeoPlatform.FeaturePopupTemplate = factory(jQuery, L /*eaflet*/, GeoPlatform);
+        GeoPlatform.featurePopupTemplate = factory(jQuery, L /*eaflet*/, GeoPlatform);
     }
 })(undefined || window, function (jQuery, L /*eaflet*/, GeoPlatform) {
 
@@ -1137,7 +1137,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * Fetches style information from GeoPlatform UAL
      * @param {string} id - identifier of layer to resolve style for
      */
-    L.GeoPlatform.FeatureStyleResolver = function (id) {
+    L.GeoPlatform.featureStyleResolver = function (id) {
         var deferred = Q.defer();
         jQuery.ajax({
             url: GeoPlatform.ualUrl + '/api/layers/' + id + '/style',
@@ -2933,9 +2933,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         GeoPlatform.ClusteredFeatureLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
     }
 })(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
-
-    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
-
 
     if (!L) {
         throw new Error("Missing Leaflet");
