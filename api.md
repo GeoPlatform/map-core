@@ -1,54 +1,122 @@
 # GeoPlatform APIs
 
-## Maps
-To search, retrieve, update, and delete GeoPlatform Map objects using
-the GeoPlatform API, use an instance of GeoPlatform.MapService. One exists
-by default using the lowercase convention:
+## ItemService
+[GeoPlatform.ItemService](src/shared/item-service.js) is a base class from which implementations exist that
+allow interacting with GeoPlatform model objects such as Maps, Layers, Services, etc.  
+Included with the Map Core's main build file are implementations of ItemService
+which use jQuery to perform AJAX requests against the GeoPlatform API.
+
+- [JQueryItemService](src/shared/item-service-jquery.js) - extension of ItemService, base class using jQuery
+- [JQueryMapService](src/map/service-jquery.js) - extension of JQueryItemService which works with GP Map objects
+- [JQueryLayerService](src/layer/service-jquery.js) - extension of JQueryItemService which works with GP Layer objects
+- [JQueryServiceService](src/service/service-jquery.js) - extension of JQueryItemService which works with GP Service objects
+
+
+Included with the "ng" build file for Angular 1.x applications are
+implementations of ItemService which use Angular's $http service.
+
+- [NGItemService](src/shared/item-service-ng.js) - extension of ItemService, base class using $http  
+- [NGMapService](src/map/service-ng.js) - extension of NGItemService which works with GP Map objects
+- [NGLayerService](src/layer/service-ng.js) - extension of NGItemService which works with GP Layer objects
+- [NGServiceService](src/service/service-ng.js) - extension of NGItemService which works with GP Service objects
+
+
+_Note:_ Using Angular's $http service allows you to define global behaviors in your application's
+config file using $httpProvider. This can include forwarding authentication credentials automatically
+or appending parameters and headers to each request.
+
 
 ```javascript
-GeoPlatform.mapService().get(mapId).then( map => {...}).catch(e=>{...});
+let query = GeoPlatform.QueryFactory()
+    .types('Map','Layer');
+let svc = new GeoPlatform.JQueryItemService();
+svc.search(query)
+.then( response => {
+    if(!response.results.length) {
+        console.log("No results");
+        return;
+    }
+    console.log(response.results.length + " of " +
+    response.totalResults + " matches");
+})
+.catch(e=>{...});
 ```
 
-You can also create an instance and override behavior.
 ```javascript
-let service = new GeoPlatform.MapService();
-service.get = function(id) {
-     return GeoPlatform.MapService.prototype.get.call(this, id);
+let newItem = {
+    type: "Map",
+    title: "My New Map",
+    label: "My New Map",
+    description: "This map needs a description",
+    createdBy: null,
+    baseLayer: null,
+    layers: [],
+    keywords: [],
+    themes: [],
+    resourceTypes: ['http://www.geoplatform.gov/ont/openmap/GeoplatformMap']
 };
+svc.save(newItem)   //create new map
+.then( saved => {
+
+    let patch = [{
+        op: 'replace',
+        path: '/label',
+        value: "Updated label"
+    }];
+    svc.patch(saved.id, patch)  //patch map
+    .then( updated => {
+
+        svc.remove(updated.id)  //remove map
+        .then( () => {
+            //204 empty response
+        })
+        .catch( e => { ... });
+    })
+    .catch( e => {...});
+})
+.catch(e => { ... });
 ```
 
 
-## Layers
-To search, retrieve, update, and delete GeoPlatform Layer objects using
-the GeoPlatform API, use an instance of GeoPlatform.LayerService. One exists
-by default using the lowercase convention:
+
+
+### Maps
 
 ```javascript
-GeoPlatform.layerService().get(layerId).then( layer => {...}).catch(e=>{...});
+new GeoPlatform.JQueryMapService().get(mapId).then( map => {...}).catch(e=>{...});
 ```
 
-You can also create an instance and override behavior.
+### Layers
+
 ```javascript
-let service = new GeoPlatform.LayerService();
-service.get = function(id) {
-     return GeoPlatform.LayerService.prototype.get.call(this, id);
-};
+let svc = new GeoPlatform.JQueryLayerService();
+svc.get(layerId)
+.then( layer => {
+
+    if('FeatureLayer' === layer.layerType) {
+        //fetch layer style info (feature layers only)
+        svc.style(layerId).then( styleJson => {
+            //do something
+        });
+    }
+
+})
+.catch(e=>{...});
 ```
 
 
-## Services
-To search, retrieve, update, and delete GeoPlatform Service objects using
-the GeoPlatform API, use an instance of GeoPlatform.ServiceService. One exists
-by default using the lowercase convention:
+### Services
 
 ```javascript
-GeoPlatform.serviceService().get(serviceId).then( service => {...}).catch(e=>{...});
-```
+let svc = new GeoPlatform.JQueryServiceService();
+svc.get(serviceId)
+.then( service => {
 
-You can also create an instance and override behavior.
-```javascript
-let service = new GeoPlatform.ServiceService();
-service.get = function(id) {
-     return GeoPlatform.ServiceService.prototype.get.call(this, id);
-};
+    //get service information using Service Harvester
+    svc.about(service).then( md => {
+        //do something
+    });
+
+})
+.catch(e=>{...});
 ```
