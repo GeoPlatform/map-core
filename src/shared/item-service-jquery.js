@@ -32,21 +32,21 @@
      *
      * Ex Searching Items
      *      let params = { q: 'test' };
-     *      GeoPlatform.ItemService.search(params).then(response=>{
+     *      itemService.search(params).then(response=>{
      *          console.log(response.results.length + " of " + response.totalResults);
      *      }).catch(e=>{...});
      *
      * Ex Fetch Item:
-     *      GeoPlatform.ItemService.get(itemId).then(item=>{...}).catch(e=>{...});
+     *      itemService.get(itemId).then(item=>{...}).catch(e=>{...});
      *
      * Ex Saving Item:
-     *      GeoPlatform.ItemService.save(item).then(item=>{...}).catch(e=>{...});
+     *      itemService.save(item).then(item=>{...}).catch(e=>{...});
      *
      * Ex Deleting Item:
-     *      GeoPlatform.ItemService.remove(itemId).then(()=>{...}).catch(e=>{...});
+     *      itemService.remove(itemId).then(()=>{...}).catch(e=>{...});
      *
      * Ex Patching Item:
-     *      GeoPlatform.ItemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
+     *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
      */
     class JQueryItemService extends ItemService {
@@ -67,7 +67,7 @@
                 dataType: 'json',
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ItemService.save() - Error fetching item: ${message}`;
+                    let m = `ItemService.save() - Error fetching item: ${message}`;
                     let err = new Error(m);
                     d.reject(err);
                 }
@@ -91,7 +91,7 @@
                 contentType: 'application/json',
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ItemService.save() - Error saving item: ${message}`;
+                    let m = `ItemService.save() - Error saving item: ${message}`;
                     let err = new Error(m);
                     d.reject(err);
                 }
@@ -115,7 +115,7 @@
                 url: this.baseUrl + '/' + id,
                 success: function(data) { d.resolve(true); },
                 error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ItemService.save() - Error deleting item: ${message}`;
+                    let m = `ItemService.save() - Error deleting item: ${message}`;
                     let err = new Error(m);
                     d.reject(err);
                 }
@@ -140,7 +140,7 @@
                 contentType: 'application/json',
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ItemService.save() - Error patching item: ${message}`;
+                    let m = `ItemService.save() - Error patching item: ${message}`;
                     let err = new Error(m);
                     d.reject(err);
                 }
@@ -167,7 +167,7 @@
                 data: params||{},
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ItemService.search() - Error searching items: ${message}`;
+                    let m = `ItemService.search() - Error searching items: ${message}`;
                     let err = new Error(m);
                     d.reject(err);
                 }

@@ -10,28 +10,21 @@
          // Now we're wrapping the factory and assigning the return
          // value to the root (window) and returning it as well to
          // the AMD loader.
-         define(["jQuery", "L"/*eaflet*/, "GeoPlatform"],
-             function(jQuery, L, GeoPlatform) {
-                 return (root.MousePositionControl = factory(jQuery, L, GeoPlatform));
-             });
+         define(["L"/*eaflet*/], function(L) {
+             return (root.L_GeoPlatform = factory(L));
+         });
      } else if(typeof module === "object" && module.exports) {
          // I've not encountered a need for this yet, since I haven't
          // run into a scenario where plain modules depend on CommonJS
          // *and* I happen to be loading in a CJS browser environment
          // but I'm including it for the sake of being thorough
          module.exports = (
-             root.MousePositionControl = factory(
-                 require("jquery"),
-                 require('L'),
-                 require('GeoPlatform')
-             )
+             root.L_GeoPlatform = factory(require('L'))
          );
      } else {
-         GeoPlatform.MousePositionControl = factory(jQuery, L/*eaflet*/, GeoPlatform);
+         GeoPlatform.L_GeoPlatform = factory(L/*eaflet*/);
      }
- }(this||window, function(jQuery, L/*eaflet*/, GeoPlatform) {
-
- //(function(jQuery, L/*eaflet*/, GeoPlatform) {
+ }(this||window, function(L/*eaflet*/) {
 
     if(!L)
         throw new Error("Missing Leaflet");
@@ -41,8 +34,6 @@
     // create the container
     if(!L.GeoPlatform)
         L.GeoPlatform = {};
-
-
 
 
     if(typeof(Array.prototype.each) === 'undefined') {
@@ -55,9 +46,6 @@
             }
         }
     }
-
-
-// })(jQuery, L/*eaflet*/, GeoPlatform);
 
     return L.GeoPlatform;
 

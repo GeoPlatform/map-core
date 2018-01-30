@@ -70,7 +70,7 @@
             if(typeof($http) === 'undefined')
                 throw new Error("Angular $http not resolved");
             return $http(opts).catch( e => {
-                let m = `GeoPlatform.NGServiceService.get() - Error describing service: ${e.message}`;
+                let m = `NGServiceService.get() - Error describing service: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
             });

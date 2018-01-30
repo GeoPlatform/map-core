@@ -29,6 +29,29 @@ configuration variables. It expects `window.GeoPlatform` to exist at runtime.
 <script src="geoplatform.mapcore.js"></script>
 ```
 
+If you are using Angular 1.x, import the mapcore.ng.js file to get access to
+"NG" services which leverage Angular's $http service when fetching data.
+
+```html
+<script src="geoplatform.mapcore.ng.js"></script>
+```
+
+__Note:__ the default services used will still be jQuery-based, but can be overridden
+by passing the desired service implementation.
+
+```javascript
+//use angular $http to fetch OSM base layer definition
+let ngLayerSvc = new GeoPlatform.NGLayerService();
+GeoPlatform.OSM.get(ngLayerSvc).then( layer => {...}).catch( e => {...});
+```
+
+```javascript 
+//use angular $http to load and save maps inside MapInstance
+let ngMapSvc = new GeoPlatform.NGMapService();
+let mapInstance = GeoPlatform.MapFactory.get();
+mapInstance.setService(ngMapSvc);
+```
+
 ## Using Map Core
 Using map core functionality in an application is described in the following sections.
 

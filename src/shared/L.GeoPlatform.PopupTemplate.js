@@ -6,7 +6,7 @@
         // the AMD loader.
         define(["jquery", "L"/*eaflet*/, "GeoPlatform"],
             function(jQuery, L, GeoPlatform) {
-                return (root.ESRITileLayer = factory(jQuery, L, GeoPlatform));
+                return (root.FeaturePopupTemplate = factory(jQuery, L, GeoPlatform));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -14,14 +14,14 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.ESRITileLayer = factory(
+            root.FeaturePopupTemplate = factory(
                 require("jquery"),
                 require('L'),
                 require('GeoPlatform')
             )
         );
     } else {
-        GeoPlatform.ESRITileLayer = factory(jQuery, L/*eaflet*/, GeoPlatform);
+        GeoPlatform.FeaturePopupTemplate = factory(jQuery, L/*eaflet*/, GeoPlatform);
     }
 }(this||window, function(jQuery, L/*eaflet*/, GeoPlatform) {
 

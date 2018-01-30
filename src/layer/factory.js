@@ -6,9 +6,10 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "JQueryLayerService"],
-            function(jQuery, Q, L, GeoPlatform, JQueryLayerService) {
-                return (root.LayerFactory = factory(jQuery, Q, L, GeoPlatform, JQueryLayerService));
+        define(["q", "L"/*eaflet*/, "GeoPlatform", "ServiceTypes", "OSM", "JQueryLayerService"],
+            function(Q, L, GeoPlatform, ServiceTypes, OSM, JQueryLayerService) {
+                return (root.LayerFactory = factory(
+                    Q, L, GeoPlatform, ServiceTypes, OSM, JQueryLayerService));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -17,60 +18,23 @@
         // but I'm including it for the sake of being thorough
         module.exports = (
             root.LayerFactory = factory(
-                require("jquery"),
                 require('q'),
                 require('L'),
                 require('GeoPlatform'),
+                require('ServiceTypes'),
+                require('OSM'),
                 require('JQueryLayerService')
             )
         );
     } else {
         GeoPlatform.LayerFactory = factory(
-            jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.JQueryLayerService);
+            Q, L/*eaflet*/, GeoPlatform,
+            GeoPlatform.ServiceTypes,
+            GeoPlatform.OSM,
+            GeoPlatform.JQueryLayerService);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, JQueryLayerService) {
-
-// (function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
-
-    /**
-     * @param {Object} layer - GeoPlatform Layer object
-     * @return {boolean} true if is an OSM layer
-     */
-    GeoPlatform.isOSM = function(layer) {
-        return  layer &&
-                layer.resourceTypes &&
-                layer.resourceTypes.length &&
-                ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
-    };
-
-    /**
-     * @return {Promise} resolving OpenStreet Map GeoPlatform Layer
-     */
-    GeoPlatform.osm = function() {
-        let query = GeoPlatform.QueryFactory()
-            .fields('*')
-            .resourceTypes("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
-        return new JQueryLayerService().search(query)
-        .then( response => response.results.length ? response.results[0] : null)
-        .catch( e => Q.reject(e));
-    };
-
-    /**
-     * If a default base layer is defined using the 'defaultBaseLayer'
-     * environment value, fetch it. Otherwise, fetch the OpenStreet Map layer.
-     * @return {Promise} resolving GeoPlatform Layer object
-     */
-    GeoPlatform.defaultBaseLayer = function() {
-        if(GeoPlatform.defaultBaseLayer) {
-            return new JQueryLayerService().get(GeoPlatform.defaultBaseLayer)
-            .catch(e => Q.resolve(GeoPlatform.osm()));
-        } else {
-            return GeoPlatform.osm();
-        }
-    };
-
-
-
+}(this||window, function(Q, L/*eaflet*/,
+    GeoPlatform, ServiceTypes, OSM, JQueryLayerService) {
 
 
     /**
@@ -99,7 +63,7 @@
         }
 
         //OSM layers have no "services" so we have to treat them differently
-        if(GeoPlatform.isOSM(layer)) {
+        if(OSM.test(layer)) {
             return L.GeoPlatform.osm(layer);
         }
 
@@ -120,7 +84,7 @@
 
         switch(typeUri) {
 
-            case GeoPlatform.ServiceTypes.ESRI_MAP_SERVER.uri:
+            case ServiceTypes.ESRI_MAP_SERVER.uri:
                 opts = {
                     layers: layer.layerName,
                     transparent: true,
@@ -131,38 +95,36 @@
                     opts.pane = GeoPlatform.leafletPane;
                 return L.tileLayer.esri(url, opts);
 
-            case GeoPlatform.ServiceTypes.ESRI_FEATURE_SERVER.uri:
+            case ServiceTypes.ESRI_FEATURE_SERVER.uri:
                 return L.GeoPlatform.clusteredFeatures(layer);
 
-            case GeoPlatform.ServiceTypes.ESRI_TILE_SERVER.uri:
+            case ServiceTypes.ESRI_TILE_SERVER.uri:
                 opts = { url: url, useCors: true };
                 if(GeoPlatform.leafletPane)
                     opts.pane = GeoPlatform.leafletPane;
                 return L.esri.tiledMapLayer(opts);
 
-            case GeoPlatform.ServiceTypes.FEED.uri:
+            case ServiceTypes.FEED.uri:
                 return L.GeoPlatform.geoJsonFeed(layer);
 
-            case GeoPlatform.ServiceTypes.WMS.uri:
+            case ServiceTypes.WMS.uri:
                 return L.GeoPlatform.wms(layer);
 
-            case GeoPlatform.ServiceTypes.WMST.uri:
+            case ServiceTypes.WMST.uri:
                 return L.GeoPlatform.wmst(layer);
 
-            case GeoPlatform.ServiceTypes.WMTS.uri:
+            case ServiceTypes.WMTS.uri:
                 return L.GeoPlatform.wmts(layer);
 
-            case GeoPlatform.ServiceTypes.WFS.uri:
+            case ServiceTypes.WFS.uri:
 
-            case GeoPlatform.ServiceTypes.WCS.uri:
+            case ServiceTypes.WCS.uri:
 
                 return null;
 
             default: return null;
         }
     };
-
-// })(jQuery, Q, L/*eaflet*/, GeoPlatform);
 
     return L.GeoPlatform.LayerFactory;
 

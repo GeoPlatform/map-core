@@ -9,9 +9,10 @@
          // Now we're wrapping the factory and assigning the return
          // value to the root (window) and returning it as well to
          // the AMD loader.
-         define(["jquery", "q", "GeoPlatform", "JQueryItemService"],
-             function(jQuery, Q, GeoPlatform, JQueryItemService) {
-                 return (root.ServiceTypes = factory(jQuery, Q, GeoPlatform, JQueryItemService));
+         define(["jquery", "q", "GeoPlatform", "JQueryItemService", "QueryFactory"],
+             function(jQuery, Q, GeoPlatform, JQueryItemService, QueryFactory) {
+                 return (root.ServiceTypes = factory(
+                     jQuery, Q, GeoPlatform, JQueryItemService, QueryFactory));
              });
      } else if(typeof module === "object" && module.exports) {
          // I've not encountered a need for this yet, since I haven't
@@ -23,13 +24,15 @@
                  require("jquery"),
                  require('q'),
                  require('GeoPlatform'),
-                 require('JQueryItemService')
+                 require('JQueryItemService'),
+                 require('QueryFactory')
              )
          );
      } else {
-         GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform, GeoPlatform.JQueryItemService);
+         GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform,
+             GeoPlatform.JQueryItemService, GeoPlatform.QueryFactory);
      }
- }(this||window, function(jQuery, Q, GeoPlatform, JQueryItemService) {
+ }(this||window, function(jQuery, Q, GeoPlatform, JQueryItemService, QueryFactory) {
 
 
     const ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
@@ -41,7 +44,7 @@
 
     var types = {};
 
-    let query = GeoPlatform.QueryFactory()
+    let query = QueryFactory()
         .types('dct:Standard')
         .resourceTypes('ServiceType')
         .pageSize(50)
@@ -84,10 +87,6 @@
     .catch( error => {
         console.log("Error loading supported service types: " + error.message);
     });
-
-    // GeoPlatform.ServiceTypes = types;
-
-// }) (jQuery, Q, GeoPlatform);
 
     return types;
 

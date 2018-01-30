@@ -32,21 +32,21 @@
      *
      * Ex Searching Items
      *      let params = { q: 'test' };
-     *      GeoPlatform.ItemService.search(params).then(response=>{
+     *      itemService.search(params).then(response=>{
      *          console.log(response.results.length + " of " + response.totalResults);
      *      }).catch(e=>{...});
      *
      * Ex Fetch Item:
-     *      GeoPlatform.ItemService.get(itemId).then(item=>{...}).catch(e=>{...});
+     *      itemService.get(itemId).then(item=>{...}).catch(e=>{...});
      *
      * Ex Saving Item:
-     *      GeoPlatform.ItemService.save(item).then(item=>{...}).catch(e=>{...});
+     *      itemService.save(item).then(item=>{...}).catch(e=>{...});
      *
      * Ex Deleting Item:
-     *      GeoPlatform.ItemService.remove(itemId).then(()=>{...}).catch(e=>{...});
+     *      itemService.remove(itemId).then(()=>{...}).catch(e=>{...});
      *
      * Ex Patching Item:
-     *      GeoPlatform.ItemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
+     *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
      */
     class NGItemService {
@@ -68,7 +68,7 @@
             return $http.get(this.baseUrl + '/' + id)
             .then(response=>response.data)
             .catch( e => {
-                let m = `GeoPlatform.NGItemService.get() - Error fetching item: ${e.message}`;
+                let m = `NGItemService.get() - Error fetching item: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
             });
@@ -94,7 +94,7 @@
             return $http(opts)
             .then(response=>response.data)
             .catch( e => {
-                let m = `GeoPlatform.NGItemService.save() - Error saving item: ${e.message}`;
+                let m = `NGItemService.save() - Error saving item: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
             });
@@ -113,7 +113,7 @@
             if(typeof($http) === 'undefined')
                 throw new Error("Angular $http not resolved");
             return $http(opts).catch( e => {
-                let m = `GeoPlatform.NGItemService.remove() - Error deleting item: ${e.message}`;
+                let m = `NGItemService.remove() - Error deleting item: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
             });
@@ -136,7 +136,7 @@
             return $http(opts)
             .then(response=>response.data)
             .catch( e => {
-                let m = `GeoPlatform.NGItemService.patch() - Error patching item: ${e.message}`;
+                let m = `NGItemService.patch() - Error patching item: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
             });
@@ -147,7 +147,7 @@
             let params = arg;
 
             if(arg && typeof(arg.getQuery) !== 'undefined') {
-                //if passed a GeoPlatform.Query object,
+                //if passed a Query object,
                 // convert to parameters object
                 params = arg.getQuery();
             }
@@ -163,7 +163,7 @@
             return $http(opts)
             .then(response=>response.data)
             .catch( e => {
-                let m = `GeoPlatform.NGItemService.search() - Error searching items: ${e.message}`;
+                let m = `NGItemService.search() - Error searching items: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
             });

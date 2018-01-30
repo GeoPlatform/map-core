@@ -21,9 +21,10 @@ if(typeof(L.Control.MiniMap) !== 'undefined') {
 L.control.mousePosition({ separator: ' , ', numDigits: 3 }).addTo(leafletMap);
 L.control.scale().addTo(leafletMap);
 
-let mapInstance = L.GeoPlatform.MapFactory();
+let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
-GeoPlatform.osm().then(osm => {
+//load OpenStreet Map layer using API and set as base layer
+GeoPlatform.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
 }).catch(e => { console.log("Unable to get OSM base layer"); });

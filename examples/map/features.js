@@ -14,60 +14,50 @@ let mapOptions = {
 };
 
 var leafletMap = L.map(elem, mapOptions);
-var mapInstance = L.GeoPlatform.MapFactory();
+var mapInstance = L.GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
-
-GeoPlatform.osm().then(osm => {
-
-    mapInstance.setBaseLayer(osm);
-
-    initFeatures();
-
-}).catch(e => { console.log("Unable to get OSM base layer"); });
+mapInstance.setBaseLayer(L.GeoPlatform.osm());
 
 
-function initFeatures() {
-
-    //add a feature manually
-    let geoJson = {
-        "type": "Feature",
-        "geometry": {
-            "type": "Point",
-            "coordinates": [-90, 40]
-        },
-        "properties": {
-            "id": Math.ceil(Math.random()*9999),
-            "name": "Point"
-        }
-    };
-    mapInstance.addFeature(geoJson);
+//add a feature manually
+let geoJson = {
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [-90, 40]
+    },
+    "properties": {
+        "id": Math.ceil(Math.random()*9999),
+        "name": "Point"
+    }
+};
+mapInstance.addFeature(geoJson);
 
 
-    //enable Leaflet.Draw for drawing features
+//enable Leaflet.Draw for drawing features
 
-    let shapeOpts = {
-        repeatMode: true,
-        shapeOptions: {
-            stroke: true, color: '#999', weight: 2,
-            opacity: 1, fill: true, fillColor: null,
-            fillOpacity: 0.2, clickable: false
-        }
-    };
-    let drawOpts = {
-        draw: {
-            marker: { repeatMode: true },
-            polyline : shapeOpts,
-            polygon : shapeOpts,
-            circle : false,
-            rectangle : false
-        }
-    };
+let shapeOpts = {
+    repeatMode: true,
+    shapeOptions: {
+        stroke: true, color: '#999', weight: 2,
+        opacity: 1, fill: true, fillColor: null,
+        fillOpacity: 0.2, clickable: false
+    }
+};
+let drawOpts = {
+    draw: {
+        marker: { repeatMode: true },
+        polyline : shapeOpts,
+        polygon : shapeOpts,
+        circle : false,
+        rectangle : false
+    }
+};
 
-    let draw = new L.Control.Draw(drawOpts);
-    leafletMap.on('draw:created', (evt) => {
-        var layer = evt.layer;
-        mapInstance.addFeature(layer.toGeoJSON());
-    });
-    leafletMap.addControl(draw);
-}
+let draw = new L.Control.Draw(drawOpts);
+leafletMap.on('draw:created', (evt) => {
+    var layer = evt.layer;
+    mapInstance.addFeature(layer.toGeoJSON());
+});
+leafletMap.addControl(draw);

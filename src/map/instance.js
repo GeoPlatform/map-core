@@ -9,9 +9,9 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "JQueryMapService"],
-            function(jQuery, Q, L, GeoPlatform, JQueryMapService){
-                return (root.MapInstance = factory(jQuery, Q, L, GeoPlatform, JQueryMapService));
+        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "OSM", "JQueryMapService"],
+            function(jQuery, Q, L, GeoPlatform, OSM, JQueryMapService){
+                return (root.MapInstance = factory(jQuery, Q, L, GeoPlatform, OSM, JQueryMapService));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -24,13 +24,16 @@
                 require('q'),
                 require('L'),
                 require('GeoPlatform'),
+                require('OSM'),
                 require('JQueryMapService')
             )
         );
     } else {
-        GeoPlatform.MapInstance = factory(jQuery, Q, L/*eaflet*/, GeoPlatform, GeoPlatform.JQueryMapService);
+        GeoPlatform.MapInstance = factory(
+            jQuery, Q, L, GeoPlatform,
+            GeoPlatform.OSM, GeoPlatform.JQueryMapService);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, JQueryMapService) {
+}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, OSM, JQueryMapService) {
 
     "use strict";
 
@@ -71,13 +74,13 @@
 
     class MapInstance extends Listener {
 
-        constructor() {
+        constructor(key) {
             super();
 
             this.service = new JQueryMapService();
 
             //generate random key (see factory below)
-            this._key = Math.ceil(Math.random()*9999);
+            this._key = key || Math.ceil(Math.random()*9999);
 
             //registry id of current map if available
             this._mapId = null,
@@ -428,7 +431,7 @@
 
             let promise = null;
             if(!layer) {
-                promise = GeoPlatform.osm();
+                promise = OSM.get();
             } else
                 promise = Q.resolve(layer);
 
@@ -1138,15 +1141,6 @@
         /* ---------------------------- */
     }
 
-    L.GeoPlatform.MapFactory = function(key) {
-        this.keys = this.keys || {};
-        if(key && this.keys[key]) return this.keys[key];
-        let instance = new MapInstance();
-        this.keys[instance._key] = instance;
-        return instance;
-    };
-
-
     return MapInstance;
 
-})); //(jQuery, Q, L/*eaflet*/, GeoPlatform);
+}));

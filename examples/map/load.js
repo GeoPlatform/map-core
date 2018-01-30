@@ -13,7 +13,7 @@ let mapOptions = {
 };
 
 let leafletMap = L.map(elem, mapOptions);
-let mapInstance = L.GeoPlatform.MapFactory();
+let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 
@@ -39,10 +39,10 @@ service.search(query)
         mapInstance.loadMap(map.id);
 
         //or this
-        service.get(map.id)
-        .then( fullMap => {
-            mapInstance.loadMapFromObj(fullMap);
-        }).catch(e => { console.log(e.message); });
+        // service.get(map.id)
+        // .then( fullMap => {
+        //     mapInstance.loadMapFromObj(fullMap);
+        // }).catch(e => { console.log(e.message); });
 
     }
 })

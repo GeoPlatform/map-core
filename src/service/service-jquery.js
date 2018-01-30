@@ -72,7 +72,7 @@
                 contentType: 'application/json',
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
-                    let m = `GeoPlatform.ServiceService.about() -
+                    let m = `JQueryServiceService.about() -
                         Error describing service: ${message}`;
                     let err = new Error(m);
                     d.reject(err);

@@ -12,10 +12,10 @@ let mapOptions = {
 };
 
 let leafletMap = L.map(elem, mapOptions);
-let mapInstance = L.GeoPlatform.MapFactory();
+let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
-GeoPlatform.osm().then(osm => {
+GeoPlatform.OSM.get().then(osm => {
 
     mapInstance.setBaseLayer(osm);
 
@@ -30,5 +30,5 @@ GeoPlatform.osm().then(osm => {
         console.log("Saved Map!");
     })
     .catch(e => { console.log(e.message); });
-    
+
 }).catch(e => { console.log("Unable to get OSM base layer"); });

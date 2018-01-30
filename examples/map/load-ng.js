@@ -1,4 +1,10 @@
 
+//define the application's angular module and make sure to include the $httpProvider
+// in the config function
+angular.module('loadNG', []).config(function myAppConfig ($httpProvider) {
+    $httpProvider.defaults.withCredentials = true;
+});
+
 
 let elem = document.getElementById('map');
 let mapOptions = {
@@ -15,11 +21,16 @@ let mapOptions = {
 let leafletMap = L.map(elem, mapOptions);
 let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
-mapInstance.setBaseLayer(L.GeoPlatform.osm());
+
+//use Angular-based MapService instead of default (JQuery)
+let service = new GeoPlatform.NGMapService();
+mapInstance.setService(service);
 
 //just for example purposes, find the first map available
-let mapService = new GeoPlatform.JQueryMapService();
-mapService.search().then( response => {
+let query = GeoPlatform.QueryFactory().keywords('WMV');
+
+service.search(query)
+.then( response => {
     if(response.results.length) {
 
         //Note: search results do not contain resolved
@@ -32,25 +43,13 @@ mapService.search().then( response => {
         let map = response.results[0];
 
         //either this...
-        mapInstance.loadMap(map.id)
-        .then( () => {
+        mapInstance.loadMap(map.id);
 
-            //Must override certain properties like
-            // id, uri, createdBy, and modified
-            // should also update label
-            let md = {
-                id: null,       //will get assigned by API
-                uri: null,      //will get assigned by API
-                modified: null, //will get assigned by API
-                createdBy: 'test_user',
-                label: 'Copy of ' + map.label
-            };
-            let mapDef = mapInstance.getMapResourceContent(md);
-            this.mapSvc.setAsNewMap(mapDef);
-            mapInstance.save();
-
-        })
-        .catch( e => console.log(e.message) );
+        //or this
+        // service.get(map.id)
+        // .then( fullMap => {
+        //     mapInstance.loadMapFromObj(fullMap);
+        // }).catch(e => { console.log(e.message); });
 
     }
 })

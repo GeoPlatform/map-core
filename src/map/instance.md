@@ -8,7 +8,7 @@
 let leafletMap = L.Map('#map', { ... });
 
 //create a map instance
-let mapInstance = L.GeoPlatform.MapFactory();
+let mapInstance = GeoPlatform.MapFactory.get();
 
 //bind leaflet map to the map instance so the leaflet
 // map can be modified through the map instance api

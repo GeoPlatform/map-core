@@ -603,14 +603,6 @@
         }
     }
 
-
-    // GeoPlatform.Query = Query;
-
-    GeoPlatform.QueryFactory = function() {
-        return new Query();
-    };
-
-
     return Query;
 
 }));

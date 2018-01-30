@@ -30,21 +30,21 @@
      *
      * Ex Searching Items
      *      let params = { q: 'test' };
-     *      GeoPlatform.ItemService.search(params).then(response=>{
+     *      itemService.search(params).then(response=>{
      *          console.log(response.results.length + " of " + response.totalResults);
      *      }).catch(e=>{...});
      *
      * Ex Fetch Item:
-     *      GeoPlatform.ItemService.get(itemId).then(item=>{...}).catch(e=>{...});
+     *      itemService.get(itemId).then(item=>{...}).catch(e=>{...});
      *
      * Ex Saving Item:
-     *      GeoPlatform.ItemService.save(item).then(item=>{...}).catch(e=>{...});
+     *      itemService.save(item).then(item=>{...}).catch(e=>{...});
      *
      * Ex Deleting Item:
-     *      GeoPlatform.ItemService.remove(itemId).then(()=>{...}).catch(e=>{...});
+     *      itemService.remove(itemId).then(()=>{...}).catch(e=>{...});
      *
      * Ex Patching Item:
-     *      GeoPlatform.ItemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
+     *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
      */
     class ItemService {
