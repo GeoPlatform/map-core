@@ -49,12 +49,12 @@
      *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
      */
-    class NGItemService {
+    class NGItemService extends ItemService {
 
         constructor() {
+            super();
             if(typeof(angular) === 'undefined')
                 throw new Error("Angular not defined");
-            this.baseUrl = GeoPlatform.ualUrl + '/api/items';
         }
 
         /**
@@ -82,7 +82,8 @@
             let opts = {
                 method: "POST",
                 url: this.baseUrl,
-                data: itemObj
+                data: itemObj,
+                timeout: this.timeout
             };
             if(itemObj.id) {
                 opts.method = "PUT";
@@ -107,7 +108,8 @@
         remove (id) {
             let opts = {
                 method: "DELETE",
-                url: this.baseUrl + '/' + id
+                url: this.baseUrl + '/' + id,
+                timeout: this.timeout
             };
             let $http = angular.injector(['ng']).get('$http');
             if(typeof($http) === 'undefined')
@@ -128,7 +130,8 @@
             let opts = {
                 method: "PATCH",
                 url: this.baseUrl + '/' + id,
-                data: patch
+                data: patch,
+                timeout: this.timeout
             };
             let $http = angular.injector(['ng']).get('$http');
             if(typeof($http) === 'undefined')
@@ -155,7 +158,8 @@
             let opts = {
                 method: "GET",
                 url: this.baseUrl,
-                data: params||{}
+                data: params||{},
+                timeout: this.timeout
             };
             let $http = angular.injector(['ng']).get('$http');
             if(typeof($http) === 'undefined')

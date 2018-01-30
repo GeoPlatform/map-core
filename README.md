@@ -42,6 +42,38 @@ If you are using Angular 1.x, import the mapcore.ng.js file to get access to
 <script src="geoplatform.mapcore.ng.js"></script>
 ```
 
+## Environment Variables
+An example of the `GeoPlatform` object and environment variables contained
+within is shown below.
+
+```javascript
+GeoPlatform = {
+
+    //environment the application is deployed within
+    "env" : "development",
+
+    //URLs to GeoPlatform identity management services
+    "idmUrl" : "https://sitidp.geoplatform.us",
+    "idspUrl" : "https://sitsp.geoplatform.us",
+
+    //URL to GeoPlatform UAL for API usage
+    "ualUrl" : "https://sit-ual.geoplatform.us",
+
+    //timeout max for requests
+    "timeout" : "5000",
+
+    //name of custom Leaflet pane to append layers to
+    "leafletPane" : "gpmvPane",
+
+    //identifier of GP Layer to use as default base layer
+    "defaultBaseLayerId" : "336e91f5f5680e37031b80c9e7a49a4c",
+
+    //{env}-{id} of application deployed
+    "appId" : "development-mv"
+
+};
+```
+
 
 ## Using Map Core
 Using map core functionality in an application is described in the following sections.

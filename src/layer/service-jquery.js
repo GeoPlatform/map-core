@@ -55,6 +55,7 @@
                 method: "GET",
                 url: this.baseUrl + '/' + id + '/style',
                 dataType: 'json',
+                timeout: this.timeout,
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
                     let m = `GeoPlatform.LayerService.style() - Error fetching item style: ${message}`;
@@ -101,6 +102,7 @@
                 url: this.baseUrl + '/' + id + '/describe',
                 dataType: 'json',
                 data: params,
+                timeout: this.timeout,
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
                     let m = `GeoPlatform.LayerService.describe() -

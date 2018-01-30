@@ -8,7 +8,7 @@
         // the AMD loader.
         define(["q", "GeoPlatform", "OSM", "JQueryLayerService"],
             function(Q, GeoPlatform, OSM, JQueryLayerService) {
-                return (root.getDefaultBaseLayer = factory(Q, GeoPlatform, OSM, JQueryLayerService));
+                return (root.defaultBaseLayer = factory(Q, GeoPlatform, OSM, JQueryLayerService));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -16,7 +16,7 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.getDefaultBaseLayer = factory(
+            root.defaultBaseLayer = factory(
                 require('q'),
                 require('GeoPlatform'),
                 require('OSM'),
@@ -24,7 +24,7 @@
             )
         );
     } else {
-        GeoPlatform.getDefaultBaseLayer = factory(
+        GeoPlatform.defaultBaseLayer = factory(
             Q, GeoPlatform, GeoPlatform.OSM,
             GeoPlatform.JQueryLayerService);
     }
@@ -37,11 +37,11 @@
      * @return {Promise} resolving GeoPlatform Layer object
      */
     return function(layerService) {
-        if(!GeoPlatform.defaultBaseLayer)
+        if(!GeoPlatform.defaultBaseLayerId)
             return OSM.get();
 
         let svc = layerService || new JQueryLayerService();
-        return svc.get(GeoPlatform.defaultBaseLayer)
+        return svc.get(GeoPlatform.defaultBaseLayerId)
         .catch(e => Q.resolve( OSM.get() ));
     };
 

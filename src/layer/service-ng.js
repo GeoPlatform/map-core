@@ -93,7 +93,8 @@
             let opts = {
                 method: "GET",
                 url: this.baseUrl + '/' + id + '/describe',
-                data: params
+                data: params,
+                timeout: this.timeout
             };
             let $http = angular.injector().get('$http');
             if(typeof($http) === 'undefined')

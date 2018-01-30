@@ -65,6 +65,7 @@
                 method: "GET",
                 url: this.baseUrl + '/' + id,
                 dataType: 'json',
+                timeout: this.timeout,
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
                     let m = `ItemService.save() - Error fetching item: ${message}`;
@@ -89,6 +90,7 @@
                 data: itemObj,
                 processData: false,
                 contentType: 'application/json',
+                timeout: this.timeout,
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
                     let m = `ItemService.save() - Error saving item: ${message}`;
@@ -113,6 +115,7 @@
             let opts = {
                 method: "DELETE",
                 url: this.baseUrl + '/' + id,
+                timeout: this.timeout,
                 success: function(data) { d.resolve(true); },
                 error: function(xhr, status, message) {
                     let m = `ItemService.save() - Error deleting item: ${message}`;
@@ -138,6 +141,7 @@
                 data: patch,
                 processData: false,
                 contentType: 'application/json',
+                timeout: this.timeout,
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
                     let m = `ItemService.save() - Error patching item: ${message}`;
@@ -165,6 +169,7 @@
                 url: this.baseUrl,
                 dataType: 'json',
                 data: params||{},
+                timeout: this.timeout,
                 success: function(data) { d.resolve(data); },
                 error: function(xhr, status, message) {
                     let m = `ItemService.search() - Error searching items: ${message}`;

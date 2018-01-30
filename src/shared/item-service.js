@@ -51,6 +51,14 @@
 
         constructor() {
             this.baseUrl = GeoPlatform.ualUrl + '/api/items';
+            this.timeout = GeoPlatform.timeout || 10000;
+        }
+
+        /**
+         * @param {number} milliseconds - override environment variable timeout
+         */
+        timeout(milliseconds) {
+            this.timeout = milliseconds;
         }
 
         /**

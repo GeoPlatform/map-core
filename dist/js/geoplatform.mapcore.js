@@ -104,15 +104,26 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             _classCallCheck(this, ItemService);
 
             this.baseUrl = GeoPlatform.ualUrl + '/api/items';
+            this.timeout = GeoPlatform.timeout || 10000;
         }
 
         /**
-         * @param {string} id - identifier of item to fetch
-         * @return {Promise} resolving Item object or an error
+         * @param {number} milliseconds - override environment variable timeout
          */
 
 
         _createClass(ItemService, [{
+            key: "timeout",
+            value: function timeout(milliseconds) {
+                this.timeout = milliseconds;
+            }
+
+            /**
+             * @param {string} id - identifier of item to fetch
+             * @return {Promise} resolving Item object or an error
+             */
+
+        }, {
             key: "get",
             value: function get(id) {
                 return Q.reject(new Error("Must use a subclass of ItemService"));
@@ -231,6 +242,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     method: "GET",
                     url: this.baseUrl + '/' + id,
                     dataType: 'json',
+                    timeout: this.timeout,
                     success: function success(data) {
                         d.resolve(data);
                     },
@@ -260,6 +272,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     data: itemObj,
                     processData: false,
                     contentType: 'application/json',
+                    timeout: this.timeout,
                     success: function success(data) {
                         d.resolve(data);
                     },
@@ -289,6 +302,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var opts = {
                     method: "DELETE",
                     url: this.baseUrl + '/' + id,
+                    timeout: this.timeout,
                     success: function success(data) {
                         d.resolve(true);
                     },
@@ -319,6 +333,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     data: _patch2,
                     processData: false,
                     contentType: 'application/json',
+                    timeout: this.timeout,
                     success: function success(data) {
                         d.resolve(data);
                     },
@@ -349,6 +364,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     url: this.baseUrl,
                     dataType: 'json',
                     data: params || {},
+                    timeout: this.timeout,
                     success: function success(data) {
                         d.resolve(data);
                     },
@@ -3331,6 +3347,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     method: "GET",
                     url: this.baseUrl + '/' + id + '/style',
                     dataType: 'json',
+                    timeout: this.timeout,
                     success: function success(data) {
                         d.resolve(data);
                     },
@@ -3384,6 +3401,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     url: this.baseUrl + '/' + id + '/describe',
                     dataType: 'json',
                     data: params,
+                    timeout: this.timeout,
                     success: function success(data) {
                         d.resolve(data);
                     },
@@ -3456,16 +3474,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // value to the root (window) and returning it as well to
         // the AMD loader.
         define(["q", "GeoPlatform", "OSM", "JQueryLayerService"], function (Q, GeoPlatform, OSM, JQueryLayerService) {
-            return root.getDefaultBaseLayer = factory(Q, GeoPlatform, OSM, JQueryLayerService);
+            return root.defaultBaseLayer = factory(Q, GeoPlatform, OSM, JQueryLayerService);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.getDefaultBaseLayer = factory(require('q'), require('GeoPlatform'), require('OSM'), require('JQueryLayerService'));
+        module.exports = root.defaultBaseLayer = factory(require('q'), require('GeoPlatform'), require('OSM'), require('JQueryLayerService'));
     } else {
-        GeoPlatform.getDefaultBaseLayer = factory(Q, GeoPlatform, GeoPlatform.OSM, GeoPlatform.JQueryLayerService);
+        GeoPlatform.defaultBaseLayer = factory(Q, GeoPlatform, GeoPlatform.OSM, GeoPlatform.JQueryLayerService);
     }
 })(undefined || window, function (Q, GeoPlatform, OSM, JQueryLayerService) {
 
@@ -3476,10 +3494,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * @return {Promise} resolving GeoPlatform Layer object
      */
     return function (layerService) {
-        if (!GeoPlatform.defaultBaseLayer) return OSM.get();
+        if (!GeoPlatform.defaultBaseLayerId) return OSM.get();
 
         var svc = layerService || new JQueryLayerService();
-        return svc.get(GeoPlatform.defaultBaseLayer).catch(function (e) {
+        return svc.get(GeoPlatform.defaultBaseLayerId).catch(function (e) {
             return Q.resolve(OSM.get());
         });
     };

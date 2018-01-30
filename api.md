@@ -23,7 +23,18 @@ implementations of ItemService which use Angular's $http service.
 
 _Note:_ Using Angular's $http service allows you to define global behaviors in your application's
 config file using $httpProvider. This can include forwarding authentication credentials automatically
-or appending parameters and headers to each request.
+or appending parameters and headers to each request.  For example, setting a default timeout for all $http
+service requests:
+
+```javascript
+
+angular.module('myApp', [])
+
+.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.timeout = GeoPlatform.timeout || 10000;
+}]);
+
+```
 
 
 ```javascript
@@ -43,36 +54,43 @@ svc.search(query)
 ```
 
 ```javascript
-let newItem = {
-    type: "Map",
-    title: "My New Map",
-    label: "My New Map",
-    description: "This map needs a description",
-    createdBy: null,
-    baseLayer: null,
-    layers: [],
-    keywords: [],
-    themes: [],
-    resourceTypes: ['http://www.geoplatform.gov/ont/openmap/GeoplatformMap']
-};
-svc.save(newItem)   //create new map
+//first, fetch OSM base layer to use
+GeoPlatform.OSM.get()
+//once we have it, define a map to create
+.then( osm => {
+
+    return {
+        type: "Map",
+        title: "My New Map",
+        label: "My New Map",
+        description: "This map needs a description",
+        createdBy: 'testUser',
+        baseLayer: osm,
+        layers: [],
+        keywords: [],
+        themes: [],
+        resourceTypes: ['http://www.geoplatform.gov/ont/openmap/GeoplatformMap']
+    };
+})
+//save new map
+.then( item => svc.save(item) )
+//then work against persisted copy
 .then( saved => {
 
+    //patch the map by changing its label
     let patch = [{
         op: 'replace',
         path: '/label',
         value: "Updated label"
     }];
-    svc.patch(saved.id, patch)  //patch map
-    .then( updated => {
+    return svc.patch(saved.id, patch);
 
-        svc.remove(updated.id)  //remove map
-        .then( () => {
-            //204 empty response
-        })
-        .catch( e => { ... });
-    })
-    .catch( e => {...});
+})
+//lastly, remove the map
+.then( updated => svc.remove(updated.id) )
+// map has been removed
+.then( () => {
+    //204 empty response
 })
 .catch(e => { ... });
 ```
@@ -91,15 +109,15 @@ new GeoPlatform.JQueryMapService().get(mapId).then( map => {...}).catch(e=>{...}
 ```javascript
 let svc = new GeoPlatform.JQueryLayerService();
 svc.get(layerId)
+//fetch layer style info (feature layers only)
 .then( layer => {
-
-    if('FeatureLayer' === layer.layerType) {
-        //fetch layer style info (feature layers only)
-        svc.style(layerId).then( styleJson => {
-            //do something
-        });
+    if('FeatureLayer' !== layer.layerType) return null;
+    return svc.style(layer.id);
+})
+.then( styleJson => {
+    if(styleJson !== null) {
+        //do something
     }
-
 })
 .catch(e=>{...});
 ```
@@ -110,13 +128,9 @@ svc.get(layerId)
 ```javascript
 let svc = new GeoPlatform.JQueryServiceService();
 svc.get(serviceId)
-.then( service => {
-
-    //get service information using Service Harvester
-    svc.about(service).then( md => {
-        //do something
-    });
-
-})
+//get service information using Service Harvester
+.then( service => svc.about(service) )
+//do something with extracted service metadata
+.then( md => {...});
 .catch(e=>{...});
 ```

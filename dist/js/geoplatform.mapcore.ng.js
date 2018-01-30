@@ -4,11 +4,11 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 (function (root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -53,12 +53,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
      */
-    var NGItemService = function () {
+    var NGItemService = function (_ItemService) {
+        _inherits(NGItemService, _ItemService);
+
         function NGItemService() {
             _classCallCheck(this, NGItemService);
 
+            var _this = _possibleConstructorReturn(this, (NGItemService.__proto__ || Object.getPrototypeOf(NGItemService)).call(this));
+
             if (typeof angular === 'undefined') throw new Error("Angular not defined");
-            this.baseUrl = GeoPlatform.ualUrl + '/api/items';
+            return _this;
         }
 
         /**
@@ -92,7 +96,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var opts = {
                     method: "POST",
                     url: this.baseUrl,
-                    data: itemObj
+                    data: itemObj,
+                    timeout: this.timeout
                 };
                 if (itemObj.id) {
                     opts.method = "PUT";
@@ -119,7 +124,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function remove(id) {
                 var opts = {
                     method: "DELETE",
-                    url: this.baseUrl + '/' + id
+                    url: this.baseUrl + '/' + id,
+                    timeout: this.timeout
                 };
                 var $http = angular.injector(['ng']).get('$http');
                 if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
@@ -142,7 +148,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var opts = {
                     method: "PATCH",
                     url: this.baseUrl + '/' + id,
-                    data: _patch
+                    data: _patch,
+                    timeout: this.timeout
                 };
                 var $http = angular.injector(['ng']).get('$http');
                 if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
@@ -169,7 +176,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var opts = {
                     method: "GET",
                     url: this.baseUrl,
-                    data: params || {}
+                    data: params || {},
+                    timeout: this.timeout
                 };
                 var $http = angular.injector(['ng']).get('$http');
                 if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
@@ -184,7 +192,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }]);
 
         return NGItemService;
-    }();
+    }(ItemService);
 
     return NGItemService;
 });
@@ -224,10 +232,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function NGServiceService() {
             _classCallCheck(this, NGServiceService);
 
-            var _this = _possibleConstructorReturn(this, (NGServiceService.__proto__ || Object.getPrototypeOf(NGServiceService)).call(this));
+            var _this2 = _possibleConstructorReturn(this, (NGServiceService.__proto__ || Object.getPrototypeOf(NGServiceService)).call(this));
 
-            _this.baseUrl = GeoPlatform.ualUrl + '/api/services';
-            return _this;
+            _this2.baseUrl = GeoPlatform.ualUrl + '/api/services';
+            return _this2;
         }
 
         /**
@@ -305,10 +313,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function NGLayerService() {
             _classCallCheck(this, NGLayerService);
 
-            var _this2 = _possibleConstructorReturn(this, (NGLayerService.__proto__ || Object.getPrototypeOf(NGLayerService)).call(this));
+            var _this3 = _possibleConstructorReturn(this, (NGLayerService.__proto__ || Object.getPrototypeOf(NGLayerService)).call(this));
 
-            _this2.baseUrl = GeoPlatform.ualUrl + '/api/layers';
-            return _this2;
+            _this3.baseUrl = GeoPlatform.ualUrl + '/api/layers';
+            return _this3;
         }
 
         /**
@@ -366,7 +374,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var opts = {
                     method: "GET",
                     url: this.baseUrl + '/' + id + '/describe',
-                    data: params
+                    data: params,
+                    timeout: this.timeout
                 };
                 var $http = angular.injector().get('$http');
                 if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
@@ -419,10 +428,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function NGMapService() {
             _classCallCheck(this, NGMapService);
 
-            var _this3 = _possibleConstructorReturn(this, (NGMapService.__proto__ || Object.getPrototypeOf(NGMapService)).call(this));
+            var _this4 = _possibleConstructorReturn(this, (NGMapService.__proto__ || Object.getPrototypeOf(NGMapService)).call(this));
 
-            _this3.baseUrl = GeoPlatform.ualUrl + '/api/maps';
-            return _this3;
+            _this4.baseUrl = GeoPlatform.ualUrl + '/api/maps';
+            return _this4;
         }
 
         return NGMapService;
