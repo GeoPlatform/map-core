@@ -1,5 +1,7 @@
 
 # Using Map Instances
+The following information details how to use a MapInstance to manipulate and
+manage a Leaflet map instance.
 
 ## Creating a new map instance
 
@@ -17,12 +19,15 @@ mapInstance.setMap(leafletMap);
 
 ## Listening for events
 
+
 ```javascript
 
 //listen for layer modification events
-mapInstance.on('layers:changed', () => {
-    let layers = mapInstance.getLayers();
-});
+let listener = () => { let layers = mapInstance.getLayers() };
+mapInstance.on('layers:changed', listener);
+
+//and later, unregister listener
+mapInstance.off('layers:changed', listener);
 ```
 
 ## Modifying map state
@@ -64,6 +69,29 @@ let instance = GeoPlatform.MapFactory.get(mapKey);
 To dispose of a cached map or clear all cached instances, call `GeoPlatform.MapFactory.dispose()` passing either a map's key to dispose of only that map instance or no arguments to clear the cache.
 
 __Note:__ Disposing of a single map will call `destroyMap()` on that instance.
+
+
+## Avoid using the Leaflet API directly
+It is important to know that changes to the underlying Leaflet map made
+without using the GeoPlatform MapInstance will not be reflected in the state
+managed by the MapInstance object.
+
+For example, adding and removing layers directly will prevent being able to
+determine accurate map state later:
+
+```javascript
+let leafletMap = L.Map('#map', { ... });
+let mapInstance = GeoPlatform.MapFactory.get();
+mapInstance.setMap(leafletMap);
+
+leafletMap.addLayer(leafletLayerObj);
+let layerStates = mapInstance.getLayers(); //<-- will be empty
+
+mapInstance.addLayer(gpLayerObj);
+layerStates = mapInstance.getLayers(); //<-- will have one item
+```
+
+
 
 
 ## Map Layers

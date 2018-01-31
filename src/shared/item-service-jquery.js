@@ -25,6 +25,9 @@
     }
 }(this||window, function(jQuery, Q, GeoPlatform, ItemService) {
 
+
+    const METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"];
+
     /**
      * JQuery ItemService
      * service for working with the GeoPlatform API to
@@ -48,6 +51,15 @@
      * Ex Patching Item:
      *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
+     *
+     * Example of adding custom request options:
+     *
+     *      let options = {
+     *          headers: { 'X-My-Header': 'myHeaderValue' },
+     *          xhrFields: { withCredentials: true }
+     *      };
+     *      itemService.get(itemId, options).then(item=> {...}).catch(e=>{...});
+     *
      */
     class JQueryItemService extends ItemService {
 
@@ -57,129 +69,179 @@
 
         /**
          * @param {string} id - identifier of item to fetch
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving Item object or an error
          */
-        get (id) {
-            let d = Q.defer();
-            let opts = {
-                method: "GET",
-                url: this.baseUrl + '/' + id,
-                dataType: 'json',
-                timeout: this.timeout,
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
-                    let m = `ItemService.save() - Error fetching item: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
-                }
-            };
-            jQuery.ajax(opts);
-            return d.promise;
+        get (id, options) {
+
+            return Q.resolve( true )
+            .then( () => {
+                let opts = this.buildRequest("GET", this.baseUrl + '/' + id, null, options);
+                let d = Q.defer();
+                opts.success = function(data) { d.resolve(data); };
+                opts.error = function(xhr, status, message) { d.reject(new Error(message)); };
+                jQuery.ajax(opts);
+                return d.promise;
+            })
+            .catch(e => {
+                let err = new Error(`ItemService.save() - Error fetching item: ${e.message}`);
+                return Q.reject(err);
+            });
         }
 
         /**
          * @param {Object} itemObj - item to create or update
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving Item object or an error
          */
-        save (itemObj) {
-            let d = Q.defer();
-            let opts = {
-                method: "POST",
-                url: this.baseUrl,
-                dataType: 'json',
-                data: itemObj,
-                processData: false,
-                contentType: 'application/json',
-                timeout: this.timeout,
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
-                    let m = `ItemService.save() - Error saving item: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
+        save (itemObj, options) {
+
+            return Q.resolve( true )
+            .then( () => {
+
+                let method = 'POST',
+                    url = this.baseUrl;
+                if(itemObj.id) {
+                    method = "PUT";
+                    url += '/' + itemObj.id;
                 }
-            };
-            if(itemObj.id) {
-                opts.method = "PUT";
-                opts.url += '/' + itemObj.id;
-            }
-            jQuery.ajax(opts);
-            return d.promise;
+
+                let opts = this.buildRequest(method, url, itemObj, options);
+
+                let d = Q.defer();
+                opts.success = function(data) { d.resolve(data); };
+                opts.error = function(xhr, status, message) { d.reject(new Error(message)); };
+                jQuery.ajax(opts);
+                return d.promise;
+
+            })
+            .catch(e => {
+                let err = new Error(`ItemService.save() - Error saving item: ${e.message}`);
+                return Q.reject(err);
+            });
         }
 
         /**
          * @param {string} id - identifier of item to delete
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving true if successful or an error
          */
-        remove (id) {
-            let d = Q.defer();
-            let opts = {
-                method: "DELETE",
-                url: this.baseUrl + '/' + id,
-                timeout: this.timeout,
-                success: function(data) { d.resolve(true); },
-                error: function(xhr, status, message) {
-                    let m = `ItemService.save() - Error deleting item: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
-                }
-            };
-            jQuery.ajax(opts);
-            return d.promise;
+        remove (id, options) {
+
+            return Q.resolve( true )
+            .then( () => {
+
+                let opts = this.buildRequest("DELETE", this.baseUrl + '/' + id, null, options);
+                let d = Q.defer();
+                opts.success = function(data) { d.resolve(true); };
+                opts.error = function(xhr, status, message) { d.reject(new Error(message)); };
+                jQuery.ajax(opts);
+                return d.promise;
+            })
+            .catch(e => {
+                let err = new Error(`ItemService.save() - Error deleting item: ${e.message}`);
+                return Q.reject(err);
+            });
         }
 
         /**
          * @param {string} id - identifier of item to patch
          * @param {Object} patch - HTTP-PATCH compliant set of properties to patch
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving Item object or an error
          */
-        patch (id, patch) {
-            let d = Q.defer();
-            let opts = {
-                method: "PATCH",
-                url: this.baseUrl + '/' + id,
-                dataType: 'json',
-                data: patch,
-                processData: false,
-                contentType: 'application/json',
-                timeout: this.timeout,
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
-                    let m = `ItemService.save() - Error patching item: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
-                }
-            };
-            jQuery.ajax(opts);
-            return d.promise;
+        patch (id, patch, options) {
+            return Q.resolve( true )
+            .then( () => {
+
+                let opts = this.buildRequest("PATCH", this.baseUrl + '/' + id, patch, options);
+                let d = Q.defer();
+                opts.success = function(data) { d.resolve(data); };
+                opts.error == function(xhr, status, message) { d.reject(new Error(message)); };
+                jQuery.ajax(opts);
+                return d.promise;
+            })
+            .catch(e => {
+                let err = new Error(`ItemService.save() - Error patching item: ${e.message}`);
+                return Q.reject(err);
+            });
         }
 
-        search (arg) {
+        /**
+         * @param {Object} arg - either JS object of query parameters or GeoPlatform.Query instance
+         * @param {Object} options - optional set of request options to apply to xhr request
+         * @return {Promise} resolving search results
+         */
+        search (arg, options) {
 
-            let params = arg;
+            return Q.resolve( true )
+            .then( () => {
 
-            if(arg && typeof(arg.getQuery) !== 'undefined') {
-                //if passed a GeoPlatform.Query object,
-                // convert to parameters object
-                params = arg.getQuery();
+                let params = arg;
+
+                if(arg && typeof(arg.getQuery) !== 'undefined') {
+                    //if passed a GeoPlatform.Query object,
+                    // convert to parameters object
+                    params = arg.getQuery();
+                }
+
+                let opts = this.buildRequest("GET", this.baseUrl, params, options);
+                let d = Q.defer();
+                opts.success = function(data) { d.resolve(data); };
+                opts.error = function(xhr, status, message) { d.reject(new Error(message)); };
+                jQuery.ajax(opts);
+                return d.promise;
+            })
+            .catch(e => {
+                let err = new Error(`ItemService.search() - Error searching items: ${e.message}`);
+                return Q.reject(err);
+            });
+        }
+
+
+
+        /**
+         * @param {string} method - one of "GET", "POST", "PUT", "DELETE", "PATCH"
+         * @param {string} url - destination of xhr request
+         * @param {Object} data - object to be sent with request
+         * @param {Object} options - optional object defining request options
+         * @return {Object} request options for xhr
+         */
+        buildRequest (method, url, data, options) {
+
+            if(METHODS.indexOf(method)<0)
+                throw new Error(`Unsupported HTTP method ${method}`);
+
+            if(!url)
+                throw new Error(`Must specify a URL for HTTP requests`);
+
+            //define default options
+            let opts = {
+                method: method,
+                url: url,
+                dataType: 'json',   //expected response type
+                timeout: this.timeout
+            };
+            if(data) {
+                opts.data = data;
+                if("POST" === method || "PUT" === method || "PATCH" === method) {
+                    opts.processData = false;
+                    opts.contentType = 'application/json';
+                }
             }
 
-            let d = Q.defer();
-            let opts = {
-                method: "GET",
-                url: this.baseUrl,
-                dataType: 'json',
-                data: params||{},
-                timeout: this.timeout,
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
-                    let m = `ItemService.search() - Error searching items: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
+            //copy over user-supplied options
+            if(options && typeof(options) === 'object') {
+                for(let o in options) {
+                    if(options.hasOwnProperty(o)) {
+                        opts[o] = options[o];
+                    }
                 }
-            };
-            jQuery.ajax(opts);
-            return d.promise;
+            }
+
+            return opts;
         }
+
 
     }
 

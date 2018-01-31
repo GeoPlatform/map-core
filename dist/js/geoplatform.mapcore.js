@@ -195,6 +195,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }
 })(undefined || window, function (jQuery, Q, GeoPlatform, ItemService) {
 
+    var METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"];
+
     /**
      * JQuery ItemService
      * service for working with the GeoPlatform API to
@@ -218,7 +220,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * Ex Patching Item:
      *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
+     *
+     * Example of adding custom request options:
+     *
+     *      let options = {
+     *          headers: { 'X-My-Header': 'myHeaderValue' },
+     *          xhrFields: { withCredentials: true }
+     *      };
+     *      itemService.get(itemId, options).then(item=> {...}).catch(e=>{...});
+     *
      */
+
     var JQueryItemService = function (_ItemService) {
         _inherits(JQueryItemService, _ItemService);
 
@@ -230,152 +242,207 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         /**
          * @param {string} id - identifier of item to fetch
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving Item object or an error
          */
 
 
         _createClass(JQueryItemService, [{
             key: "get",
-            value: function get(id) {
-                var d = Q.defer();
-                var opts = {
-                    method: "GET",
-                    url: this.baseUrl + '/' + id,
-                    dataType: 'json',
-                    timeout: this.timeout,
-                    success: function success(data) {
+            value: function get(id, options) {
+                var _this2 = this;
+
+                return Q.resolve(true).then(function () {
+                    var opts = _this2.buildRequest("GET", _this2.baseUrl + '/' + id, null, options);
+                    var d = Q.defer();
+                    opts.success = function (data) {
                         d.resolve(data);
-                    },
-                    error: function error(xhr, status, message) {
-                        var m = "ItemService.save() - Error fetching item: " + message;
-                        var err = new Error(m);
-                        d.reject(err);
-                    }
-                };
-                jQuery.ajax(opts);
-                return d.promise;
+                    };
+                    opts.error = function (xhr, status, message) {
+                        d.reject(new Error(message));
+                    };
+                    jQuery.ajax(opts);
+                    return d.promise;
+                }).catch(function (e) {
+                    var err = new Error("ItemService.save() - Error fetching item: " + e.message);
+                    return Q.reject(err);
+                });
             }
 
             /**
              * @param {Object} itemObj - item to create or update
+             * @param {Object} options - optional set of request options to apply to xhr request
              * @return {Promise} resolving Item object or an error
              */
 
         }, {
             key: "save",
-            value: function save(itemObj) {
-                var d = Q.defer();
-                var opts = {
-                    method: "POST",
-                    url: this.baseUrl,
-                    dataType: 'json',
-                    data: itemObj,
-                    processData: false,
-                    contentType: 'application/json',
-                    timeout: this.timeout,
-                    success: function success(data) {
-                        d.resolve(data);
-                    },
-                    error: function error(xhr, status, message) {
-                        var m = "ItemService.save() - Error saving item: " + message;
-                        var err = new Error(m);
-                        d.reject(err);
+            value: function save(itemObj, options) {
+                var _this3 = this;
+
+                return Q.resolve(true).then(function () {
+
+                    var method = 'POST',
+                        url = _this3.baseUrl;
+                    if (itemObj.id) {
+                        method = "PUT";
+                        url += '/' + itemObj.id;
                     }
-                };
-                if (itemObj.id) {
-                    opts.method = "PUT";
-                    opts.url += '/' + itemObj.id;
-                }
-                jQuery.ajax(opts);
-                return d.promise;
+
+                    var opts = _this3.buildRequest(method, url, itemObj, options);
+
+                    var d = Q.defer();
+                    opts.success = function (data) {
+                        d.resolve(data);
+                    };
+                    opts.error = function (xhr, status, message) {
+                        d.reject(new Error(message));
+                    };
+                    jQuery.ajax(opts);
+                    return d.promise;
+                }).catch(function (e) {
+                    var err = new Error("ItemService.save() - Error saving item: " + e.message);
+                    return Q.reject(err);
+                });
             }
 
             /**
              * @param {string} id - identifier of item to delete
+             * @param {Object} options - optional set of request options to apply to xhr request
              * @return {Promise} resolving true if successful or an error
              */
 
         }, {
             key: "remove",
-            value: function remove(id) {
-                var d = Q.defer();
-                var opts = {
-                    method: "DELETE",
-                    url: this.baseUrl + '/' + id,
-                    timeout: this.timeout,
-                    success: function success(data) {
+            value: function remove(id, options) {
+                var _this4 = this;
+
+                return Q.resolve(true).then(function () {
+
+                    var opts = _this4.buildRequest("DELETE", _this4.baseUrl + '/' + id, null, options);
+                    var d = Q.defer();
+                    opts.success = function (data) {
                         d.resolve(true);
-                    },
-                    error: function error(xhr, status, message) {
-                        var m = "ItemService.save() - Error deleting item: " + message;
-                        var err = new Error(m);
-                        d.reject(err);
-                    }
-                };
-                jQuery.ajax(opts);
-                return d.promise;
+                    };
+                    opts.error = function (xhr, status, message) {
+                        d.reject(new Error(message));
+                    };
+                    jQuery.ajax(opts);
+                    return d.promise;
+                }).catch(function (e) {
+                    var err = new Error("ItemService.save() - Error deleting item: " + e.message);
+                    return Q.reject(err);
+                });
             }
 
             /**
              * @param {string} id - identifier of item to patch
              * @param {Object} patch - HTTP-PATCH compliant set of properties to patch
+             * @param {Object} options - optional set of request options to apply to xhr request
              * @return {Promise} resolving Item object or an error
              */
 
         }, {
             key: "patch",
-            value: function patch(id, _patch2) {
-                var d = Q.defer();
-                var opts = {
-                    method: "PATCH",
-                    url: this.baseUrl + '/' + id,
-                    dataType: 'json',
-                    data: _patch2,
-                    processData: false,
-                    contentType: 'application/json',
-                    timeout: this.timeout,
-                    success: function success(data) {
+            value: function patch(id, _patch2, options) {
+                var _this5 = this;
+
+                return Q.resolve(true).then(function () {
+
+                    var opts = _this5.buildRequest("PATCH", _this5.baseUrl + '/' + id, _patch2, options);
+                    var d = Q.defer();
+                    opts.success = function (data) {
                         d.resolve(data);
-                    },
-                    error: function error(xhr, status, message) {
-                        var m = "ItemService.save() - Error patching item: " + message;
-                        var err = new Error(m);
-                        d.reject(err);
-                    }
-                };
-                jQuery.ajax(opts);
-                return d.promise;
+                    };
+                    opts.error == function (xhr, status, message) {
+                        d.reject(new Error(message));
+                    };
+                    jQuery.ajax(opts);
+                    return d.promise;
+                }).catch(function (e) {
+                    var err = new Error("ItemService.save() - Error patching item: " + e.message);
+                    return Q.reject(err);
+                });
             }
+
+            /**
+             * @param {Object} arg - either JS object of query parameters or GeoPlatform.Query instance
+             * @param {Object} options - optional set of request options to apply to xhr request
+             * @return {Promise} resolving search results
+             */
+
         }, {
             key: "search",
-            value: function search(arg) {
+            value: function search(arg, options) {
+                var _this6 = this;
 
-                var params = arg;
+                return Q.resolve(true).then(function () {
 
-                if (arg && typeof arg.getQuery !== 'undefined') {
-                    //if passed a GeoPlatform.Query object,
-                    // convert to parameters object
-                    params = arg.getQuery();
+                    var params = arg;
+
+                    if (arg && typeof arg.getQuery !== 'undefined') {
+                        //if passed a GeoPlatform.Query object,
+                        // convert to parameters object
+                        params = arg.getQuery();
+                    }
+
+                    var opts = _this6.buildRequest("GET", _this6.baseUrl, params, options);
+                    var d = Q.defer();
+                    opts.success = function (data) {
+                        d.resolve(data);
+                    };
+                    opts.error = function (xhr, status, message) {
+                        d.reject(new Error(message));
+                    };
+                    jQuery.ajax(opts);
+                    return d.promise;
+                }).catch(function (e) {
+                    var err = new Error("ItemService.search() - Error searching items: " + e.message);
+                    return Q.reject(err);
+                });
+            }
+
+            /**
+             * @param {string} method - one of "GET", "POST", "PUT", "DELETE", "PATCH"
+             * @param {string} url - destination of xhr request
+             * @param {Object} data - object to be sent with request
+             * @param {Object} options - optional object defining request options
+             * @return {Object} request options for xhr
+             */
+
+        }, {
+            key: "buildRequest",
+            value: function buildRequest(method, url, data, options) {
+
+                if (METHODS.indexOf(method) < 0) throw new Error("Unsupported HTTP method " + method);
+
+                if (!url) throw new Error("Must specify a URL for HTTP requests");
+
+                //define default options
+                var opts = {
+                    method: method,
+                    url: url,
+                    dataType: 'json', //expected response type
+                    timeout: this.timeout
+                };
+                if (data) {
+                    opts.data = data;
+                    if ("POST" === method || "PUT" === method || "PATCH" === method) {
+                        opts.processData = false;
+                        opts.contentType = 'application/json';
+                    }
                 }
 
-                var d = Q.defer();
-                var opts = {
-                    method: "GET",
-                    url: this.baseUrl,
-                    dataType: 'json',
-                    data: params || {},
-                    timeout: this.timeout,
-                    success: function success(data) {
-                        d.resolve(data);
-                    },
-                    error: function error(xhr, status, message) {
-                        var m = "ItemService.search() - Error searching items: " + message;
-                        var err = new Error(m);
-                        d.reject(err);
+                //copy over user-supplied options
+                if (options && (typeof options === "undefined" ? "undefined" : _typeof(options)) === 'object') {
+                    for (var o in options) {
+                        if (options.hasOwnProperty(o)) {
+                            opts[o] = options[o];
+                        }
                     }
-                };
-                jQuery.ajax(opts);
-                return d.promise;
+                }
+
+                return opts;
             }
         }]);
 
@@ -1210,10 +1277,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function JQueryServiceService() {
             _classCallCheck(this, JQueryServiceService);
 
-            var _this2 = _possibleConstructorReturn(this, (JQueryServiceService.__proto__ || Object.getPrototypeOf(JQueryServiceService)).call(this));
+            var _this7 = _possibleConstructorReturn(this, (JQueryServiceService.__proto__ || Object.getPrototypeOf(JQueryServiceService)).call(this));
 
-            _this2.baseUrl = GeoPlatform.ualUrl + '/api/services';
-            return _this2;
+            _this7.baseUrl = GeoPlatform.ualUrl + '/api/services';
+            return _this7;
         }
 
         /**
@@ -1221,38 +1288,36 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          * web-accessible implementation using either GetCapabilities
          * or ESRI documentInfo.
          * @param {Object} service - GeoPlatform Service object
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving service metadata
          */
 
 
         _createClass(JQueryServiceService, [{
             key: "about",
-            value: function about(service) {
+            value: function about(service, options) {
+                var _this8 = this;
 
-                if (!service) {
-                    var err = new Error("Must provide service to get metadata about");
-                    return Q.reject(err);
-                }
+                return Q.resolve(true).then(function () {
 
-                var d = Q.defer();
-                var opts = {
-                    method: "POST",
-                    url: this.baseUrl + '/about',
-                    dataType: 'json',
-                    data: service,
-                    processData: false,
-                    contentType: 'application/json',
-                    success: function success(data) {
-                        d.resolve(data);
-                    },
-                    error: function error(xhr, status, message) {
-                        var m = "JQueryServiceService.about() -\n                        Error describing service: " + message;
-                        var err = new Error(m);
-                        d.reject(err);
+                    if (!service) {
+                        throw new Error("Must provide service to get metadata about");
                     }
-                };
-                jQuery.ajax(opts);
-                return d.promise;
+
+                    var d = Q.defer();
+                    var opts = _this8.buildRequest('POST', _this8.baseUrl + '/about', service, options);
+                    opts.success = function (data) {
+                        d.resolve(data);
+                    };
+                    opts.error = function (xhr, status, message) {
+                        d.reject(new Error(message));
+                    };
+                    jQuery.ajax(opts);
+                    return d.promise;
+                }).catch(function (e) {
+                    var err = new Error("JQueryServiceService.about() -\n                    Error describing service: " + e.message);
+                    return Q.reject(err);
+                });
             }
         }]);
 
@@ -2615,7 +2680,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         },
 
         initialize: function initialize(options) {
-            var _this3 = this;
+            var _this9 = this;
 
             var self = this;
             options = options || {};
@@ -2623,7 +2688,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             if (GeoPlatform.leafletPane) options.pane = GeoPlatform.leafletPane;
 
             var getGPStyle = function getGPStyle() {
-                return _this3._gpStyle;
+                return _this9._gpStyle;
             };
             options.style = options.style || getGPStyle();
 
@@ -2668,7 +2733,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         },
 
         loadStyle: function loadStyle(gpLayerId) {
-            var _this4 = this;
+            var _this10 = this;
 
             var self = this;
 
@@ -2703,8 +2768,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             // console.log("Using style: " + JSON.stringify(style));
                             return style;
                         }, json);
-                        _this4.options.style = styleFn;
-                        _this4.setStyle(styleFn);
+                        _this10.options.style = styleFn;
+                        _this10.setStyle(styleFn);
                         return;
                     } else if (json && typeof json.push !== 'undefined') {
                         //multiple styles returned
@@ -2718,14 +2783,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     if (style.shape) {
                         var obj = jQuery.extend({}, style);
                         obj.style = style;
-                        _this4._gpStyle = style;
+                        _this10._gpStyle = style;
 
                         //setStyle on Cluster.FeatureLayer doesn't appear to work consistently for
                         // non-clustered features.
                         // this.setStyle(obj);
                         //So instead, we manually set it on all features of the layer (that aren't clustered)
-                        for (var _id in _this4._layers) {
-                            _this4._layers[_id].setStyle(obj);
+                        for (var _id in _this10._layers) {
+                            _this10._layers[_id].setStyle(obj);
                         }
                     }
                 }).catch(function (e) {
@@ -3030,7 +3095,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         },
 
         initialize: function initialize(options) {
-            var _this5 = this;
+            var _this11 = this;
 
             var self = this;
 
@@ -3048,7 +3113,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             options.spiderfyDistanceMultiplier = 2;
 
             var getGPStyle = function getGPStyle() {
-                return _this5._gpStyle;
+                return _this11._gpStyle;
             };
             options.style = options.style || getGPStyle;
             if (options.styleResolver) {
@@ -3157,7 +3222,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         },
 
         loadStyle: function loadStyle(gpLayerId) {
-            var _this6 = this;
+            var _this12 = this;
 
             if (this.options.styleLoader) {
                 this.options.styleLoader(gpLayerId).then(function (json) {
@@ -3192,10 +3257,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             // console.log("Using style: " + JSON.stringify(style));
                             return style;
                         }, json);
-                        _this6.options.style = styleFn;
+                        _this12.options.style = styleFn;
                         setTimeout(function (layer, style) {
                             layer.setStyle(style);
-                        }, 1000, _this6, styleFn);
+                        }, 1000, _this12, styleFn);
                         return;
                     } else if (json && typeof json.push !== 'undefined') {
                         //multiple styles returned
@@ -3209,14 +3274,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     if (style.shape) {
                         var obj = jQuery.extend({}, style);
                         obj.style = style;
-                        _this6._gpStyle = style;
+                        _this12._gpStyle = style;
 
                         //setStyle on Cluster.FeatureLayer doesn't appear to work consistently for
                         // non-clustered features.
                         // this.setStyle(obj);
                         //So instead, we manually set it on all features of the layer (that aren't clustered)
-                        for (var _id8 in _this6._layers) {
-                            _this6._layers[_id8].setStyle(obj);
+                        for (var _id8 in _this12._layers) {
+                            _this12._layers[_id8].setStyle(obj);
                         }
                     }
                 }).catch(function (e) {
@@ -3328,91 +3393,96 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function JQueryLayerService() {
             _classCallCheck(this, JQueryLayerService);
 
-            var _this7 = _possibleConstructorReturn(this, (JQueryLayerService.__proto__ || Object.getPrototypeOf(JQueryLayerService)).call(this));
+            var _this13 = _possibleConstructorReturn(this, (JQueryLayerService.__proto__ || Object.getPrototypeOf(JQueryLayerService)).call(this));
 
-            _this7.baseUrl = GeoPlatform.ualUrl + '/api/layers';
-            return _this7;
+            _this13.baseUrl = GeoPlatform.ualUrl + '/api/layers';
+            return _this13;
         }
 
         /**
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving style JSON object
          */
 
 
         _createClass(JQueryLayerService, [{
             key: "style",
-            value: function style() {
-                var d = Q.defer();
-                var opts = {
-                    method: "GET",
-                    url: this.baseUrl + '/' + id + '/style',
-                    dataType: 'json',
-                    timeout: this.timeout,
-                    success: function success(data) {
+            value: function style(options) {
+                var _this14 = this;
+
+                return Q.resolve(true).then(function () {
+
+                    var d = Q.defer();
+                    var url = _this14.baseUrl + '/' + id + '/style';
+                    var opts = _this14.buildRequest("GET", url, null, options);
+                    opts.success = function (data) {
                         d.resolve(data);
-                    },
-                    error: function error(xhr, status, message) {
+                    };
+                    opts.error = function (xhr, status, message) {
                         var m = "GeoPlatform.LayerService.style() - Error fetching item style: " + message;
                         var err = new Error(m);
                         d.reject(err);
-                    }
-                };
-                jQuery.ajax(opts);
-                return d.promise;
+                    };
+                    jQuery.ajax(opts);
+                    return d.promise;
+                }).catch(function (e) {
+                    var err = new Error("ItemService.save() - Error deleting item: " + e.message);
+                    return Q.reject(err);
+                });
             }
 
             /**
-             * @param {Object} options identifying extent, x, y
+             * @param {Object} req identifying extent, x, y
+             * @param {Object} options - optional set of request options to apply to xhr request
              * @return {Promise} resolving feature JSON object
              */
 
         }, {
             key: "describe",
-            value: function describe(options) {
+            value: function describe(req, options) {
+                var _this15 = this;
 
-                if (!options) {
-                    var err = new Error("Must provide describe options");
-                    return Q.reject(err);
-                }
+                return Q.resolve(true).then(function () {
 
-                var keys = ['bbox', 'height', 'width', 'x', 'y'];
-                var missing = keys.find(function (key) {
-                    return !options[key];
-                });
-                if (missing) {
-                    return Q.reject(new Error("Must specify " + missing + " in describe options"));
-                }
-
-                var params = {
-                    srs: 'EPSG:4326',
-                    bbox: options.bbox,
-                    height: options.height,
-                    width: options.width,
-                    info_format: 'text/xml',
-                    x: options.x,
-                    y: options.y,
-                    i: options.x, //WMS 1.3.0
-                    j: options.y //WMS 1.3.0
-                };
-
-                var d = Q.defer();
-                var opts = {
-                    method: "GET",
-                    url: this.baseUrl + '/' + id + '/describe',
-                    dataType: 'json',
-                    data: params,
-                    timeout: this.timeout,
-                    success: function success(data) {
-                        d.resolve(data);
-                    },
-                    error: function error(xhr, status, message) {
-                        var m = "GeoPlatform.LayerService.describe() -\n                        Error describing layer feature: " + message;
-                        var err = new Error(m);
-                        d.reject(err);
+                    if (!req) {
+                        throw new Error("Must provide describe req");
                     }
-                };
-                jQuery.ajax(opts);
-                return d.promise;
+
+                    var keys = ['bbox', 'height', 'width', 'x', 'y'];
+                    var missing = keys.find(function (key) {
+                        return !req[key];
+                    });
+                    if (missing) {
+                        throw new Error("Must specify " + missing + " in describe req");
+                    }
+
+                    var params = {
+                        srs: 'EPSG:4326',
+                        bbox: req.bbox,
+                        height: req.height,
+                        width: req.width,
+                        info_format: 'text/xml',
+                        x: req.x,
+                        y: req.y,
+                        i: req.x, //WMS 1.3.0
+                        j: req.y //WMS 1.3.0
+                    };
+
+                    var d = Q.defer();
+                    var url = _this15.baseUrl + '/' + id + '/describe';
+                    var opts = _this15.buildRequest("GET", url, params, options);
+                    opts.success = function (data) {
+                        d.resolve(data);
+                    };
+                    opts.error = function (xhr, status, message) {
+                        d.reject(new Error(message));
+                    };
+                    jQuery.ajax(opts);
+                    return d.promise;
+                }).catch(function (e) {
+                    var err = new Error("JQueryLayerService.describe() -\n                    Error describing layer feature: " + e.message);
+                    return Q.reject(err);
+                });
             }
         }]);
 
@@ -3641,10 +3711,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function JQueryMapService() {
             _classCallCheck(this, JQueryMapService);
 
-            var _this8 = _possibleConstructorReturn(this, (JQueryMapService.__proto__ || Object.getPrototypeOf(JQueryMapService)).call(this));
+            var _this16 = _possibleConstructorReturn(this, (JQueryMapService.__proto__ || Object.getPrototypeOf(JQueryMapService)).call(this));
 
-            _this8.baseUrl = GeoPlatform.ualUrl + '/api/maps';
-            return _this8;
+            _this16.baseUrl = GeoPlatform.ualUrl + '/api/maps';
+            return _this16;
         }
 
         return JQueryMapService;
@@ -3723,47 +3793,47 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function MapInstance(key) {
             _classCallCheck(this, MapInstance);
 
-            var _this9 = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
+            var _this17 = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
 
-            _this9.service = new JQueryMapService();
+            _this17.service = new JQueryMapService();
 
             //generate random key (see factory below)
-            _this9._key = key || Math.ceil(Math.random() * 9999);
+            _this17._key = key || Math.ceil(Math.random() * 9999);
 
             //registry id of current map if available
-            _this9._mapId = null,
+            _this17._mapId = null,
 
             //definition of map (ie, from server)
-            _this9._mapDef = _this9.initializeMapDefinition(),
+            _this17._mapDef = _this17.initializeMapDefinition(),
 
             //primary map instance (ie, leaflet)
-            _this9._mapInstance = null,
+            _this17._mapInstance = null,
 
             //default map extent (if map doesn't have one for being saved)
-            _this9._defaultExtent = null,
+            _this17._defaultExtent = null,
 
             //current base layer object and leaflet instance
-            _this9._baseLayerDef = null, _this9._baseLayer = null,
+            _this17._baseLayerDef = null, _this17._baseLayer = null,
 
             //set definitions of layer states (including layer info) on map
-            _this9._layerStates = [],
+            _this17._layerStates = [],
 
             //map layer def ids with leaflet instances
-            _this9._layerCache = {},
+            _this17._layerCache = {},
 
             //errors generated by layers loading
-            _this9._layerErrors = [],
+            _this17._layerErrors = [],
 
             //layer used to store features on map
-            _this9._featureLayer = null, _this9._featureLayerVisible = true,
+            _this17._featureLayer = null, _this17._featureLayerVisible = true,
 
             //set of registered map tools
-            _this9._tools = [],
+            _this17._tools = [],
 
             //state management
-            _this9.state = { dirty: false };
+            _this17.state = { dirty: false };
 
-            _this9._geoJsonLayerOpts = {
+            _this17._geoJsonLayerOpts = {
                 style: function style(feature) {
                     if (feature.properties.style) return feature.properties.style;
                 },
@@ -3800,7 +3870,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             };
 
-            return _this9;
+            return _this17;
         }
 
         _createClass(MapInstance, [{
@@ -4143,7 +4213,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "setBaseLayer",
             value: function setBaseLayer(layer) {
-                var _this10 = this;
+                var _this18 = this;
 
                 var promise = null;
                 if (!layer) {
@@ -4155,18 +4225,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     var leafletLayer = L.GeoPlatform.LayerFactory(layer);
                     if (!leafletLayer) return;
 
-                    _this10._mapInstance.addLayer(leafletLayer);
+                    _this18._mapInstance.addLayer(leafletLayer);
                     leafletLayer.setZIndex(0); //set at bottom
 
-                    var oldBaseLayer = _this10._baseLayer;
+                    var oldBaseLayer = _this18._baseLayer;
                     if (oldBaseLayer) {
-                        _this10._mapInstance.removeLayer(oldBaseLayer);
+                        _this18._mapInstance.removeLayer(oldBaseLayer);
                     }
 
                     //remember new base layer
-                    _this10._baseLayer = leafletLayer;
-                    _this10._baseLayerDef = layer;
-                    _this10.touch('baselayer:changed', layer);
+                    _this18._baseLayer = leafletLayer;
+                    _this18._baseLayerDef = layer;
+                    _this18.touch('baselayer:changed', layer);
                 }).catch(function (e) {
                     console.log("MapInstance.setBaseLayer() - Error getting base layer for map : " + e.message);
                 });
@@ -4230,7 +4300,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "addLayers",
             value: function addLayers(layers) {
-                var _this11 = this;
+                var _this19 = this;
 
                 layers.each(function (obj, index) {
 
@@ -4249,7 +4319,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     if (!layer) return; //layer info is missing, skip it
 
                     //DT-442 prevent adding layer that already exists on map
-                    if (_this11._layerCache[layer.id]) return;
+                    if (_this19._layerCache[layer.id]) return;
 
                     if (!state) state = { opacity: 1, visibility: true, layer: JSON.parse(JSON.stringify(layer)) };
 
@@ -4258,16 +4328,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                         //listen for layer errors so we can inform the user
                         // that a layer hasn't been loaded in a useful way
-                        leafletLayer.on('tileerror', _this11.handleLayerError);
+                        leafletLayer.on('tileerror', _this19.handleLayerError);
 
                         var z = layers.length - index;
                         state.zIndex = z;
                         // console.log("Setting z of " + z + " on " + layer.label);
 
-                        _this11._layerCache[layer.id] = leafletLayer;
-                        _this11._mapInstance.addLayer(leafletLayer);
+                        _this19._layerCache[layer.id] = leafletLayer;
+                        _this19._mapInstance.addLayer(leafletLayer);
                         if (leafletLayer.setZIndex) leafletLayer.setZIndex(z);
-                        _this11._layerStates.push(state); //put it in at top of list
+                        _this19._layerStates.push(state); //put it in at top of list
 
                         // if layer is initially "off" or...
                         // if layer is initially not 100% opaque
@@ -4275,8 +4345,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             // initialize layer visibility and opacity async, or else
                             // some of the layers won't get properly initialized
                             setTimeout(function (layer, state) {
-                                _this11.setLayerVisibility(layer, state.visibility);
-                                _this11.setLayerOpacity(layer, state.opacity);
+                                _this19.setLayerVisibility(layer, state.visibility);
+                                _this19.setLayerOpacity(layer, state.opacity);
                                 //TODO notify of change
                             }, 500, leafletLayer, state);
                         }
@@ -4519,7 +4589,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "addFeature",
             value: function addFeature(json, fireEvent) {
-                var _this12 = this;
+                var _this20 = this;
 
                 // var type = json.type;
                 // var coordinates = json.coordinates;
@@ -4533,7 +4603,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 // _featureLayer.addData(json);
                 var opts = jQuery.extend({}, this._geoJsonLayerOpts);
                 L.geoJson(json, opts).eachLayer(function (l) {
-                    return _this12.addFeatureLayer(l);
+                    return _this20.addFeatureLayer(l);
                 });
 
                 if (typeof fireEvent === 'undefined' || fireEvent === true) this.touch('features:changed');else this.touch();
@@ -4576,7 +4646,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "replaceFeature",
             value: function replaceFeature(featureJson) {
-                var _this13 = this;
+                var _this21 = this;
 
                 //find existing layer for this feature
                 var layer = this.getFeatureLayer(featureJson.properties.id);
@@ -4587,7 +4657,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                     //add replacement
                     L.geoJson(featureJson, this._geoJsonLayerOpts).eachLayer(function (l) {
-                        return _this13.addFeatureLayer(l);
+                        return _this21.addFeatureLayer(l);
                     });
 
                     this.touch("map:feature:changed");
@@ -4700,7 +4770,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "saveMap",
             value: function saveMap(md) {
-                var _this14 = this;
+                var _this22 = this;
 
                 var metadata = md || {};
                 metadata.resourceTypes = metadata.resourceTypes || [];
@@ -4724,11 +4794,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.service.save(content).then(function (result) {
 
                     //track new map's info so we can update it with next save
-                    if (!_this14._mapId) _this14._mapId = result.id;
+                    if (!_this22._mapId) _this22._mapId = result.id;
 
-                    _this14._mapDef = result;
-                    _this14._defaultExtent = result.extent;
-                    _this14.clean();
+                    _this22._mapDef = result;
+                    _this22._defaultExtent = result.extent;
+                    _this22.clean();
                     d.resolve(result);
                 }).catch(function (error) {
                     d.reject(error);
@@ -4761,7 +4831,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "loadMap",
             value: function loadMap(mapId) {
-                var _this15 = this;
+                var _this23 = this;
 
                 return this.fetchMap(mapId).then(function (map) {
 
@@ -4780,7 +4850,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             //update view count
                             var views = map.statistics ? map.statistics.numViews || 0 : 0;
                             var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
-                            _this15.service.patch(map.id, patch).then(function (updated) {
+                            _this23.service.patch(map.id, patch).then(function (updated) {
                                 map.statistics = updated.statistics;
                             }).catch(function (e) {
                                 console.log("Error updating view count for map: " + e);
@@ -4789,7 +4859,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }
 
                     //load the map into the viewer
-                    _this15.loadMapFromObj(map);
+                    _this23.loadMapFromObj(map);
 
                     return map;
                 }).catch(function (err) {
@@ -4807,7 +4877,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "loadMapFromObj",
             value: function loadMapFromObj(map) {
-                var _this16 = this;
+                var _this24 = this;
 
                 // console.log(map);
 
@@ -4835,7 +4905,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 //remove existing layers
                 this._mapInstance.eachLayer(function (l) {
-                    _this16._mapInstance.removeLayer(l);
+                    _this24._mapInstance.removeLayer(l);
                 });
                 this._layerCache = {};
                 this._layerStates = [];

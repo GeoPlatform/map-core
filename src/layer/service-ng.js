@@ -7,9 +7,9 @@
         // value to the root (window) and returning it as well to
         // the AMD loader.
         define(["q", "angular", "GeoPlatform", "NGItemService"],
-            function(Q, angular, GeoPlatform, NGItemService) {
-                return (root.NGLayerService = factory(Q, angular, GeoPlatform, NGItemService));
-            });
+        function(Q, angular, GeoPlatform, NGItemService) {
+            return (root.NGLayerService = factory(Q, angular, GeoPlatform, NGItemService));
+        });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
@@ -31,12 +31,12 @@
     'use strict';
 
     /**
-     * GeoPlatform Map service
-     * service for working with the GeoPlatform API to
-     * retrieve and manipulate map objects.
-     *
-     * @see GeoPlatform.NGItemService
-     */
+    * GeoPlatform Map service
+    * service for working with the GeoPlatform API to
+    * retrieve and manipulate map objects.
+    *
+    * @see GeoPlatform.NGItemService
+    */
 
     class NGLayerService extends NGItemService {
 
@@ -46,14 +46,21 @@
         }
 
         /**
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving style JSON object
          */
-        style () {
-            let url = this.baseUrl + '/' + id + '/style';
-            let $http = angular.injector().get('$http');
-            if(typeof($http) === 'undefined')
-                throw new Error("Angular $http not resolved");
-            return $http.get(url).catch( e => {
+        style (options) {
+
+            return Q.resolve( angular.injector(['ng']).get('$http') )
+            .then( $http => {
+                if(typeof($http) === 'undefined')
+                    throw new Error("Angular $http not resolved");
+
+                let url = this.baseUrl + '/' + id + '/style';
+                let opts = this.buildRequest('GET', url, null, options);
+                return $http(opts);
+
+            }).catch( e => {
                 let m = `GeoPlatform.NGLayerService.style() - Error getting layer style: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
@@ -61,45 +68,45 @@
         }
 
         /**
-         * @param {Object} options identifying extent, x, y
+         * @param {Object} req identifying extent, x, y
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving feature JSON object
          */
-        describe( options ) {
+        describe( req, options ) {
 
-            if(!options) {
-                let err = new Error("Must provide describe options");
-                return Q.reject(err);
-            }
+            return Q.resolve( angular.injector(['ng']).get('$http') )
+            .then( $http => {
 
-            let keys = ['bbox', 'height', 'width', 'x', 'y'];
-            let missing = keys.find(key => !options[key]);
-            if(missing) {
-                return Q.reject(new Error(`Must specify ${missing} in describe options`));
-            }
+                if(typeof($http) === 'undefined')
+                    throw new Error("Angular $http not resolved");
 
-            let params = {
-                srs         : 'EPSG:4326',
-                bbox        : options.bbox,
-                height      : options.height,
-                width       : options.width,
-                info_format : 'text/xml',
-                x           : options.x,
-                y           : options.y,
-                i           : options.x, //WMS 1.3.0
-                j           : options.y  //WMS 1.3.0
-            };
+                if(!req) {
+                    throw new Error("Must provide describe request parameters");
+                }
 
+                let keys = ['bbox', 'height', 'width', 'x', 'y'];
+                let missing = keys.find(key => !req[key]);
+                if(missing) {
+                    throw new Error(`Must specify ${missing} in describe parameters`);
+                }
 
-            let opts = {
-                method: "GET",
-                url: this.baseUrl + '/' + id + '/describe',
-                data: params,
-                timeout: this.timeout
-            };
-            let $http = angular.injector().get('$http');
-            if(typeof($http) === 'undefined')
-                throw new Error("Angular $http not resolved");
-            return $http(opts).catch( e => {
+                let params = {
+                    srs         : 'EPSG:4326',
+                    bbox        : req.bbox,
+                    height      : req.height,
+                    width       : req.width,
+                    info_format : 'text/xml',
+                    x           : req.x,
+                    y           : req.y,
+                    i           : req.x, //WMS 1.3.0
+                    j           : req.y  //WMS 1.3.0
+                };
+
+                let url = this.baseUrl + '/' + id + '/describe';
+                let opts = this.buildRequest("GET", url, params, options);
+                return $http(opts);
+
+            }).catch( e => {
                 let m = `GeoPlatform.NGLayerService.get() - Error describing layer feature: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);

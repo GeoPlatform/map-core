@@ -25,6 +25,10 @@
     }
 }(this||window, function(Q, angular, GeoPlatform, ItemService) {
 
+
+    const METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"];
+
+
     /**
      * NGItemService
      * service for working with the GeoPlatform API to
@@ -48,6 +52,16 @@
      * Ex Patching Item:
      *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
+     *
+     *
+     * Example of adding custom request options:
+     *
+     *      let options = {
+     *          headers: { 'X-My-Header': 'myHeaderValue' },
+     *          withCredentials: true
+     *      };
+     *      itemService.get(itemId, options).then(item=> {...}).catch(e=>{...});
+     *
      */
     class NGItemService extends ItemService {
 
@@ -59,14 +73,19 @@
 
         /**
          * @param {string} id - identifier of item to fetch
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving Item object or an error
          */
-        get (id) {
-            let $http = angular.injector(['ng']).get('$http');
-            if(typeof($http) === 'undefined')
-                throw new Error("Angular $http not resolved");
-            return $http.get(this.baseUrl + '/' + id)
-            .then(response=>response.data)
+        get (id, options) {
+
+            return Q.resolve( angular.injector(['ng']).get('$http') )
+            .then( $http => {
+                if(typeof($http) === 'undefined')
+                    throw new Error("Angular $http not resolved");
+
+                let opts = this.buildRequest('GET', this.baseUrl + '/' + id, null, options);
+                return $http(opts).then(response=>response.data);
+            })
             .catch( e => {
                 let m = `NGItemService.get() - Error fetching item: ${e.message}`;
                 let err = new Error(m);
@@ -76,24 +95,26 @@
 
         /**
          * @param {Object} itemObj - item to create or update
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving Item object or an error
          */
-        save (itemObj) {
-            let opts = {
-                method: "POST",
-                url: this.baseUrl,
-                data: itemObj,
-                timeout: this.timeout
-            };
-            if(itemObj.id) {
-                opts.method = "PUT";
-                opts.url += '/' + itemObj.id;
-            }
-            let $http = angular.injector(['ng']).get('$http');
-            if(typeof($http) === 'undefined')
-                throw new Error("Angular $http not resolved");
-            return $http(opts)
-            .then(response=>response.data)
+        save (itemObj, options) {
+
+            return Q.resolve( angular.injector(['ng']).get('$http') )
+            .then( $http => {
+                if(typeof($http) === 'undefined')
+                    throw new Error("Angular $http not resolved");
+
+                let method = "POST", url = this.baseUrl;
+                if(itemObj.id) {
+                    method = "PUT";
+                    url += '/' + itemObj.id;
+                }
+
+                let opts = this.buildRequest(method, url, itemObj, options);
+                return $http(opts).then(response=>response.data);
+
+            })
             .catch( e => {
                 let m = `NGItemService.save() - Error saving item: ${e.message}`;
                 let err = new Error(m);
@@ -103,18 +124,20 @@
 
         /**
          * @param {string} id - identifier of item to delete
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving true if successful or an error
          */
-        remove (id) {
-            let opts = {
-                method: "DELETE",
-                url: this.baseUrl + '/' + id,
-                timeout: this.timeout
-            };
-            let $http = angular.injector(['ng']).get('$http');
-            if(typeof($http) === 'undefined')
-                throw new Error("Angular $http not resolved");
-            return $http(opts).catch( e => {
+        remove (id, options) {
+
+            return Q.resolve( angular.injector(['ng']).get('$http') )
+            .then( $http => {
+                if(typeof($http) === 'undefined')
+                    throw new Error("Angular $http not resolved");
+
+                let opts = this.buildRequest('DELETE', this.baseUrl+'/'+id, null, options);
+                return $http(opts);
+
+            }).catch( e => {
                 let m = `NGItemService.remove() - Error deleting item: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
@@ -124,20 +147,20 @@
         /**
          * @param {string} id - identifier of item to patch
          * @param {Object} patch - HTTP-PATCH compliant set of properties to patch
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving Item object or an error
          */
-        patch (id, patch) {
-            let opts = {
-                method: "PATCH",
-                url: this.baseUrl + '/' + id,
-                data: patch,
-                timeout: this.timeout
-            };
-            let $http = angular.injector(['ng']).get('$http');
-            if(typeof($http) === 'undefined')
-                throw new Error("Angular $http not resolved");
-            return $http(opts)
-            .then(response=>response.data)
+        patch (id, patch, options) {
+
+            return Q.resolve( angular.injector(['ng']).get('$http') )
+            .then( $http => {
+                if(typeof($http) === 'undefined')
+                    throw new Error("Angular $http not resolved");
+
+                let opts = this.buildRequest('PATCH', this.baseUrl + '/' + id, patch, options);
+                return $http(opts).then(response=>response.data);
+
+            })
             .catch( e => {
                 let m = `NGItemService.patch() - Error patching item: ${e.message}`;
                 let err = new Error(m);
@@ -145,32 +168,78 @@
             });
         }
 
-        search (arg) {
+        /**
+         * @param {Object} arg - either JS object of query parameters or GeoPlatform.Query instance
+         * @param {Object} options - optional set of request options to apply to xhr request
+         * @return {Promise} resolving search results
+         */
+        search (arg, options) {
 
-            let params = arg;
+            return Q.resolve( angular.injector(['ng']).get('$http') )
+            .then( $http => {
+                if(typeof($http) === 'undefined')
+                    throw new Error("Angular $http not resolved");
 
-            if(arg && typeof(arg.getQuery) !== 'undefined') {
-                //if passed a Query object,
-                // convert to parameters object
-                params = arg.getQuery();
-            }
+                let params = arg;
+                if(arg && typeof(arg.getQuery) !== 'undefined') {
+                    //if passed a Query object,
+                    // convert to parameters object
+                    params = arg.getQuery();
+                }
 
-            let opts = {
-                method: "GET",
-                url: this.baseUrl,
-                data: params||{},
-                timeout: this.timeout
-            };
-            let $http = angular.injector(['ng']).get('$http');
-            if(typeof($http) === 'undefined')
-                throw new Error("Angular $http not resolved");
-            return $http(opts)
-            .then(response=>response.data)
+                let opts = this.buildRequest('GET', this.baseUrl, params, options);
+                return $http(opts).then(response=>response.data);
+
+            })
             .catch( e => {
                 let m = `NGItemService.search() - Error searching items: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
             });
+        }
+
+
+
+
+        /**
+         * @param {string} method - one of "GET", "POST", "PUT", "DELETE", "PATCH"
+         * @param {string} url - destination of xhr request
+         * @param {Object} data - object to be sent with request
+         * @param {Object} options - optional object defining request options
+         * @return {Object} request options for xhr
+         */
+        buildRequest (method, url, data, options) {
+
+            if(METHODS.indexOf(method)<0)
+                throw new Error(`Unsupported HTTP method ${method}`);
+
+            if(!url)
+                throw new Error(`Must specify a URL for HTTP requests`);
+
+            //define default options
+            let opts = {
+                method: method,
+                url: url,
+                timeout: this.timeout
+            };
+            if(data) {
+                opts.data = data;
+                if("POST" === method || "PUT" === method || "PATCH" === method) {
+                    opts.processData = false;
+                    opts.contentType = 'application/json';
+                }
+            }
+
+            //copy over user-supplied options
+            if(options && typeof(options) === 'object') {
+                for(let o in options) {
+                    if(options.hasOwnProperty(o)) {
+                        opts[o] = options[o];
+                    }
+                }
+            }
+
+            return opts;
         }
 
     }

@@ -53,33 +53,30 @@
          * web-accessible implementation using either GetCapabilities
          * or ESRI documentInfo.
          * @param {Object} service - GeoPlatform Service object
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving service metadata
          */
-        about( service ) {
+        about( service, options ) {
 
-            if(!service) {
-                let err = new Error("Must provide service to get metadata about");
-                return Q.reject(err);
-            }
+            return Q.resolve( true )
+            .then( () => {
 
-            let d = Q.defer();
-            let opts = {
-                method: "POST",
-                url: this.baseUrl + '/about',
-                dataType: 'json',
-                data: service,
-                processData: false,
-                contentType: 'application/json',
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
-                    let m = `JQueryServiceService.about() -
-                        Error describing service: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
+                if(!service) {
+                    throw new Error("Must provide service to get metadata about");
                 }
-            };
-            jQuery.ajax(opts);
-            return d.promise;
+
+                let d = Q.defer();
+                let opts = this.buildRequest('POST', this.baseUrl + '/about', service, options);
+                opts.success = function(data) { d.resolve(data); };
+                opts.error = function(xhr, status, message) { d.reject(new Error(message)); };
+                jQuery.ajax(opts);
+                return d.promise;
+            })
+            .catch(e => {
+                let err = new Error(`JQueryServiceService.about() -
+                    Error describing service: ${e.message}`);
+                return Q.reject(err);
+            });
         }
 
     }

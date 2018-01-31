@@ -25,10 +25,10 @@ GeoPlatform.OSM.get().then(osm => {
         keywords: ["Map", "GeoPlatform"],
         createdBy: "test_user"
     };
-    mapInstance.saveMap(metadata)
-    .then( persisted => {
-        console.log("Saved Map!");
-    })
-    .catch(e => { console.log(e.message); });
+    return mapInstance.saveMap(metadata);
 
-}).catch(e => { console.log("Unable to get OSM base layer"); });
+})
+.then( persisted => {
+    console.log("Saved Map!");
+})
+.catch(e => { console.log(e.message); });

@@ -29,6 +29,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     }
 })(undefined || window, function (Q, angular, GeoPlatform, ItemService) {
 
+    var METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"];
+
     /**
      * NGItemService
      * service for working with the GeoPlatform API to
@@ -52,7 +54,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
      * Ex Patching Item:
      *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
      *
+     *
+     *
+     * Example of adding custom request options:
+     *
+     *      let options = {
+     *          headers: { 'X-My-Header': 'myHeaderValue' },
+     *          withCredentials: true
+     *      };
+     *      itemService.get(itemId, options).then(item=> {...}).catch(e=>{...});
+     *
      */
+
     var NGItemService = function (_ItemService) {
         _inherits(NGItemService, _ItemService);
 
@@ -67,17 +80,23 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
         /**
          * @param {string} id - identifier of item to fetch
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving Item object or an error
          */
 
 
         _createClass(NGItemService, [{
             key: "get",
-            value: function get(id) {
-                var $http = angular.injector(['ng']).get('$http');
-                if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
-                return $http.get(this.baseUrl + '/' + id).then(function (response) {
-                    return response.data;
+            value: function get(id, options) {
+                var _this2 = this;
+
+                return Q.resolve(angular.injector(['ng']).get('$http')).then(function ($http) {
+                    if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
+
+                    var opts = _this2.buildRequest('GET', _this2.baseUrl + '/' + id, null, options);
+                    return $http(opts).then(function (response) {
+                        return response.data;
+                    });
                 }).catch(function (e) {
                     var m = "NGItemService.get() - Error fetching item: " + e.message;
                     var err = new Error(m);
@@ -87,26 +106,29 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
             /**
              * @param {Object} itemObj - item to create or update
+             * @param {Object} options - optional set of request options to apply to xhr request
              * @return {Promise} resolving Item object or an error
              */
 
         }, {
             key: "save",
-            value: function save(itemObj) {
-                var opts = {
-                    method: "POST",
-                    url: this.baseUrl,
-                    data: itemObj,
-                    timeout: this.timeout
-                };
-                if (itemObj.id) {
-                    opts.method = "PUT";
-                    opts.url += '/' + itemObj.id;
-                }
-                var $http = angular.injector(['ng']).get('$http');
-                if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
-                return $http(opts).then(function (response) {
-                    return response.data;
+            value: function save(itemObj, options) {
+                var _this3 = this;
+
+                return Q.resolve(angular.injector(['ng']).get('$http')).then(function ($http) {
+                    if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
+
+                    var method = "POST",
+                        url = _this3.baseUrl;
+                    if (itemObj.id) {
+                        method = "PUT";
+                        url += '/' + itemObj.id;
+                    }
+
+                    var opts = _this3.buildRequest(method, url, itemObj, options);
+                    return $http(opts).then(function (response) {
+                        return response.data;
+                    });
                 }).catch(function (e) {
                     var m = "NGItemService.save() - Error saving item: " + e.message;
                     var err = new Error(m);
@@ -116,20 +138,21 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
             /**
              * @param {string} id - identifier of item to delete
+             * @param {Object} options - optional set of request options to apply to xhr request
              * @return {Promise} resolving true if successful or an error
              */
 
         }, {
             key: "remove",
-            value: function remove(id) {
-                var opts = {
-                    method: "DELETE",
-                    url: this.baseUrl + '/' + id,
-                    timeout: this.timeout
-                };
-                var $http = angular.injector(['ng']).get('$http');
-                if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
-                return $http(opts).catch(function (e) {
+            value: function remove(id, options) {
+                var _this4 = this;
+
+                return Q.resolve(angular.injector(['ng']).get('$http')).then(function ($http) {
+                    if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
+
+                    var opts = _this4.buildRequest('DELETE', _this4.baseUrl + '/' + id, null, options);
+                    return $http(opts);
+                }).catch(function (e) {
                     var m = "NGItemService.remove() - Error deleting item: " + e.message;
                     var err = new Error(m);
                     return Q.reject(err);
@@ -139,55 +162,101 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
             /**
              * @param {string} id - identifier of item to patch
              * @param {Object} patch - HTTP-PATCH compliant set of properties to patch
+             * @param {Object} options - optional set of request options to apply to xhr request
              * @return {Promise} resolving Item object or an error
              */
 
         }, {
             key: "patch",
-            value: function patch(id, _patch) {
-                var opts = {
-                    method: "PATCH",
-                    url: this.baseUrl + '/' + id,
-                    data: _patch,
-                    timeout: this.timeout
-                };
-                var $http = angular.injector(['ng']).get('$http');
-                if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
-                return $http(opts).then(function (response) {
-                    return response.data;
+            value: function patch(id, _patch, options) {
+                var _this5 = this;
+
+                return Q.resolve(angular.injector(['ng']).get('$http')).then(function ($http) {
+                    if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
+
+                    var opts = _this5.buildRequest('PATCH', _this5.baseUrl + '/' + id, _patch, options);
+                    return $http(opts).then(function (response) {
+                        return response.data;
+                    });
                 }).catch(function (e) {
                     var m = "NGItemService.patch() - Error patching item: " + e.message;
                     var err = new Error(m);
                     return Q.reject(err);
                 });
             }
+
+            /**
+             * @param {Object} arg - either JS object of query parameters or GeoPlatform.Query instance
+             * @param {Object} options - optional set of request options to apply to xhr request
+             * @return {Promise} resolving search results
+             */
+
         }, {
             key: "search",
-            value: function search(arg) {
+            value: function search(arg, options) {
+                var _this6 = this;
 
-                var params = arg;
+                return Q.resolve(angular.injector(['ng']).get('$http')).then(function ($http) {
+                    if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
 
-                if (arg && typeof arg.getQuery !== 'undefined') {
-                    //if passed a Query object,
-                    // convert to parameters object
-                    params = arg.getQuery();
-                }
+                    var params = arg;
+                    if (arg && typeof arg.getQuery !== 'undefined') {
+                        //if passed a Query object,
+                        // convert to parameters object
+                        params = arg.getQuery();
+                    }
 
-                var opts = {
-                    method: "GET",
-                    url: this.baseUrl,
-                    data: params || {},
-                    timeout: this.timeout
-                };
-                var $http = angular.injector(['ng']).get('$http');
-                if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
-                return $http(opts).then(function (response) {
-                    return response.data;
+                    var opts = _this6.buildRequest('GET', _this6.baseUrl, params, options);
+                    return $http(opts).then(function (response) {
+                        return response.data;
+                    });
                 }).catch(function (e) {
                     var m = "NGItemService.search() - Error searching items: " + e.message;
                     var err = new Error(m);
                     return Q.reject(err);
                 });
+            }
+
+            /**
+             * @param {string} method - one of "GET", "POST", "PUT", "DELETE", "PATCH"
+             * @param {string} url - destination of xhr request
+             * @param {Object} data - object to be sent with request
+             * @param {Object} options - optional object defining request options
+             * @return {Object} request options for xhr
+             */
+
+        }, {
+            key: "buildRequest",
+            value: function buildRequest(method, url, data, options) {
+
+                if (METHODS.indexOf(method) < 0) throw new Error("Unsupported HTTP method " + method);
+
+                if (!url) throw new Error("Must specify a URL for HTTP requests");
+
+                //define default options
+                var opts = {
+                    method: method,
+                    url: url,
+                    timeout: this.timeout
+                };
+                if (data) {
+                    opts.data = data;
+                    if ("POST" === method || "PUT" === method || "PATCH" === method) {
+                        opts.processData = false;
+                        opts.contentType = 'application/json';
+                    }
+                }
+
+                //copy over user-supplied options
+                if (options && (typeof options === "undefined" ? "undefined" : _typeof(options)) === 'object') {
+                    for (var o in options) {
+                        if (options.hasOwnProperty(o)) {
+                            opts[o] = options[o];
+                        }
+                    }
+                }
+
+                return opts;
             }
         }]);
 
@@ -232,10 +301,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
         function NGServiceService() {
             _classCallCheck(this, NGServiceService);
 
-            var _this2 = _possibleConstructorReturn(this, (NGServiceService.__proto__ || Object.getPrototypeOf(NGServiceService)).call(this));
+            var _this7 = _possibleConstructorReturn(this, (NGServiceService.__proto__ || Object.getPrototypeOf(NGServiceService)).call(this));
 
-            _this2.baseUrl = GeoPlatform.ualUrl + '/api/services';
-            return _this2;
+            _this7.baseUrl = GeoPlatform.ualUrl + '/api/services';
+            return _this7;
         }
 
         /**
@@ -243,28 +312,27 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
          * web-accessible implementation using either GetCapabilities
          * or ESRI documentInfo.
          * @param {Object} service - GeoPlatform Service object
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving service metadata
          */
 
 
         _createClass(NGServiceService, [{
             key: "about",
-            value: function about(service) {
+            value: function about(service, options) {
+                var _this8 = this;
 
                 if (!service) {
                     var err = new Error("Must provide service to get metadata about");
                     return Q.reject(err);
                 }
 
-                var opts = {
-                    method: "POST",
-                    url: this.baseUrl + '/about',
-                    data: service
-                };
+                return Q.resolve(angular.injector(['ng']).get('$http')).then(function ($http) {
+                    if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
 
-                var $http = angular.injector().get('$http');
-                if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
-                return $http(opts).catch(function (e) {
+                    var opts = _this8.buildRequest('POST', _this8.baseUrl + '/about', service, options);
+                    return $http(opts);
+                }).catch(function (e) {
                     var m = "NGServiceService.get() - Error describing service: " + e.message;
                     var err = new Error(m);
                     return Q.reject(err);
@@ -300,12 +368,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     'use strict';
 
     /**
-     * GeoPlatform Map service
-     * service for working with the GeoPlatform API to
-     * retrieve and manipulate map objects.
-     *
-     * @see GeoPlatform.NGItemService
-     */
+    * GeoPlatform Map service
+    * service for working with the GeoPlatform API to
+    * retrieve and manipulate map objects.
+    *
+    * @see GeoPlatform.NGItemService
+    */
 
     var NGLayerService = function (_NGItemService2) {
         _inherits(NGLayerService, _NGItemService2);
@@ -313,24 +381,30 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
         function NGLayerService() {
             _classCallCheck(this, NGLayerService);
 
-            var _this3 = _possibleConstructorReturn(this, (NGLayerService.__proto__ || Object.getPrototypeOf(NGLayerService)).call(this));
+            var _this9 = _possibleConstructorReturn(this, (NGLayerService.__proto__ || Object.getPrototypeOf(NGLayerService)).call(this));
 
-            _this3.baseUrl = GeoPlatform.ualUrl + '/api/layers';
-            return _this3;
+            _this9.baseUrl = GeoPlatform.ualUrl + '/api/layers';
+            return _this9;
         }
 
         /**
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving style JSON object
          */
 
 
         _createClass(NGLayerService, [{
             key: "style",
-            value: function style() {
-                var url = this.baseUrl + '/' + id + '/style';
-                var $http = angular.injector().get('$http');
-                if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
-                return $http.get(url).catch(function (e) {
+            value: function style(options) {
+                var _this10 = this;
+
+                return Q.resolve(angular.injector(['ng']).get('$http')).then(function ($http) {
+                    if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
+
+                    var url = _this10.baseUrl + '/' + id + '/style';
+                    var opts = _this10.buildRequest('GET', url, null, options);
+                    return $http(opts);
+                }).catch(function (e) {
                     var m = "GeoPlatform.NGLayerService.style() - Error getting layer style: " + e.message;
                     var err = new Error(m);
                     return Q.reject(err);
@@ -338,48 +412,48 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
             }
 
             /**
-             * @param {Object} options identifying extent, x, y
+             * @param {Object} req identifying extent, x, y
+             * @param {Object} options - optional set of request options to apply to xhr request
              * @return {Promise} resolving feature JSON object
              */
 
         }, {
             key: "describe",
-            value: function describe(options) {
+            value: function describe(req, options) {
+                var _this11 = this;
 
-                if (!options) {
-                    var err = new Error("Must provide describe options");
-                    return Q.reject(err);
-                }
+                return Q.resolve(angular.injector(['ng']).get('$http')).then(function ($http) {
 
-                var keys = ['bbox', 'height', 'width', 'x', 'y'];
-                var missing = keys.find(function (key) {
-                    return !options[key];
-                });
-                if (missing) {
-                    return Q.reject(new Error("Must specify " + missing + " in describe options"));
-                }
+                    if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
 
-                var params = {
-                    srs: 'EPSG:4326',
-                    bbox: options.bbox,
-                    height: options.height,
-                    width: options.width,
-                    info_format: 'text/xml',
-                    x: options.x,
-                    y: options.y,
-                    i: options.x, //WMS 1.3.0
-                    j: options.y //WMS 1.3.0
-                };
+                    if (!req) {
+                        throw new Error("Must provide describe request parameters");
+                    }
 
-                var opts = {
-                    method: "GET",
-                    url: this.baseUrl + '/' + id + '/describe',
-                    data: params,
-                    timeout: this.timeout
-                };
-                var $http = angular.injector().get('$http');
-                if (typeof $http === 'undefined') throw new Error("Angular $http not resolved");
-                return $http(opts).catch(function (e) {
+                    var keys = ['bbox', 'height', 'width', 'x', 'y'];
+                    var missing = keys.find(function (key) {
+                        return !req[key];
+                    });
+                    if (missing) {
+                        throw new Error("Must specify " + missing + " in describe parameters");
+                    }
+
+                    var params = {
+                        srs: 'EPSG:4326',
+                        bbox: req.bbox,
+                        height: req.height,
+                        width: req.width,
+                        info_format: 'text/xml',
+                        x: req.x,
+                        y: req.y,
+                        i: req.x, //WMS 1.3.0
+                        j: req.y //WMS 1.3.0
+                    };
+
+                    var url = _this11.baseUrl + '/' + id + '/describe';
+                    var opts = _this11.buildRequest("GET", url, params, options);
+                    return $http(opts);
+                }).catch(function (e) {
                     var m = "GeoPlatform.NGLayerService.get() - Error describing layer feature: " + e.message;
                     var err = new Error(m);
                     return Q.reject(err);
@@ -428,10 +502,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
         function NGMapService() {
             _classCallCheck(this, NGMapService);
 
-            var _this4 = _possibleConstructorReturn(this, (NGMapService.__proto__ || Object.getPrototypeOf(NGMapService)).call(this));
+            var _this12 = _possibleConstructorReturn(this, (NGMapService.__proto__ || Object.getPrototypeOf(NGMapService)).call(this));
 
-            _this4.baseUrl = GeoPlatform.ualUrl + '/api/maps';
-            return _this4;
+            _this12.baseUrl = GeoPlatform.ualUrl + '/api/maps';
+            return _this12;
         }
 
         return NGMapService;

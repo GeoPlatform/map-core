@@ -36,12 +36,13 @@ service.search(query)
         let map = response.results[0];
 
         //either this...
-        mapInstance.loadMap(map.id);
+        return mapInstance.loadMap(map.id);
 
         //or this
-        // service.get(map.id)
+        // return service.get(map.id)
         // .then( fullMap => {
         //     mapInstance.loadMapFromObj(fullMap);
+        //     return fullMap;
         // }).catch(e => { console.log(e.message); });
 
     }

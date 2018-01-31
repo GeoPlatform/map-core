@@ -47,72 +47,76 @@
         }
 
         /**
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving style JSON object
          */
-        style () {
-            let d = Q.defer();
-            let opts = {
-                method: "GET",
-                url: this.baseUrl + '/' + id + '/style',
-                dataType: 'json',
-                timeout: this.timeout,
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
+        style (options) {
+            return Q.resolve( true )
+            .then( () => {
+
+                let d = Q.defer();
+                let url = this.baseUrl + '/' + id + '/style';
+                let opts = this.buildRequest("GET", url, null, options);
+                opts.success = function(data) { d.resolve(data); };
+                opts.error = function(xhr, status, message) {
                     let m = `GeoPlatform.LayerService.style() - Error fetching item style: ${message}`;
                     let err = new Error(m);
                     d.reject(err);
-                }
-            };
-            jQuery.ajax(opts);
-            return d.promise;
+                };
+                jQuery.ajax(opts);
+                return d.promise;
+            })
+            .catch(e => {
+                let err = new Error(`ItemService.save() - Error deleting item: ${e.message}`);
+                return Q.reject(err);
+            });
         }
 
         /**
-         * @param {Object} options identifying extent, x, y
+         * @param {Object} req identifying extent, x, y
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving feature JSON object
          */
-        describe( options ) {
+        describe( req, options ) {
 
-            if(!options) {
-                let err = new Error("Must provide describe options");
-                return Q.reject(err);
-            }
+            return Q.resolve( true )
+            .then( () => {
 
-            let keys = ['bbox', 'height', 'width', 'x', 'y'];
-            let missing = keys.find(key => !options[key]);
-            if(missing) {
-                return Q.reject(new Error(`Must specify ${missing} in describe options`));
-            }
-
-            let params = {
-                srs         : 'EPSG:4326',
-                bbox        : options.bbox,
-                height      : options.height,
-                width       : options.width,
-                info_format : 'text/xml',
-                x           : options.x,
-                y           : options.y,
-                i           : options.x, //WMS 1.3.0
-                j           : options.y  //WMS 1.3.0
-            };
-
-            let d = Q.defer();
-            let opts = {
-                method: "GET",
-                url: this.baseUrl + '/' + id + '/describe',
-                dataType: 'json',
-                data: params,
-                timeout: this.timeout,
-                success: function(data) { d.resolve(data); },
-                error: function(xhr, status, message) {
-                    let m = `GeoPlatform.LayerService.describe() -
-                        Error describing layer feature: ${message}`;
-                    let err = new Error(m);
-                    d.reject(err);
+                if(!req) {
+                    throw new Error("Must provide describe req");
                 }
-            };
-            jQuery.ajax(opts);
-            return d.promise;
+
+                let keys = ['bbox', 'height', 'width', 'x', 'y'];
+                let missing = keys.find(key => !req[key]);
+                if(missing) {
+                    throw new Error(`Must specify ${missing} in describe req`);
+                }
+
+                let params = {
+                    srs         : 'EPSG:4326',
+                    bbox        : req.bbox,
+                    height      : req.height,
+                    width       : req.width,
+                    info_format : 'text/xml',
+                    x           : req.x,
+                    y           : req.y,
+                    i           : req.x, //WMS 1.3.0
+                    j           : req.y  //WMS 1.3.0
+                };
+
+                let d = Q.defer();
+                let url = this.baseUrl + '/' + id + '/describe';
+                let opts = this.buildRequest("GET", url, params, options);
+                opts.success = function(data) { d.resolve(data); };
+                opts.error = function(xhr, status, message) { d.reject(new Error(message)); };
+                jQuery.ajax(opts);
+                return d.promise;
+            })
+            .catch(e => {
+                let err = new Error(`JQueryLayerService.describe() -
+                    Error describing layer feature: ${e.message}`);
+                return Q.reject(err);
+            });
         }
 
     }

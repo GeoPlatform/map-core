@@ -15,7 +15,6 @@ let mapOptions = {
 let leafletMap = L.map(elem, mapOptions);
 let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
-mapInstance.setBaseLayer(L.GeoPlatform.osm());
 
 //just for example purposes, find the first map available
 let mapService = new GeoPlatform.JQueryMapService();
@@ -32,7 +31,7 @@ mapService.search().then( response => {
         let map = response.results[0];
 
         //either this...
-        mapInstance.loadMap(map.id)
+        return mapInstance.loadMap(map.id)
         .then( () => {
 
             //Must override certain properties like
@@ -46,12 +45,11 @@ mapService.search().then( response => {
                 label: 'Copy of ' + map.label
             };
             let mapDef = mapInstance.getMapResourceContent(md);
-            this.mapSvc.setAsNewMap(mapDef);
-            mapInstance.save();
+            mapInstance.setAsNewMap(mapDef);
+            return mapInstance.saveMap();
 
-        })
-        .catch( e => console.log(e.message) );
-
+        });
     }
+    return true;
 })
 .catch(e => { console.log(e.message); });

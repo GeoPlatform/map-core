@@ -51,25 +51,25 @@
          * web-accessible implementation using either GetCapabilities
          * or ESRI documentInfo.
          * @param {Object} service - GeoPlatform Service object
+         * @param {Object} options - optional set of request options to apply to xhr request
          * @return {Promise} resolving service metadata
          */
-        about( service ) {
+        about( service, options ) {
 
             if(!service) {
                 let err = new Error("Must provide service to get metadata about");
                 return Q.reject(err);
             }
 
-            let opts = {
-                method: "POST",
-                url: this.baseUrl + '/about',
-                data: service
-            };
+            return Q.resolve( angular.injector(['ng']).get('$http') )
+            .then( $http => {
+                if(typeof($http) === 'undefined')
+                    throw new Error("Angular $http not resolved");
 
-            let $http = angular.injector().get('$http');
-            if(typeof($http) === 'undefined')
-                throw new Error("Angular $http not resolved");
-            return $http(opts).catch( e => {
+                let opts = this.buildRequest('POST', this.baseUrl + '/about', service, options);
+                return $http(opts);
+
+            }).catch( e => {
                 let m = `NGServiceService.get() - Error describing service: ${e.message}`;
                 let err = new Error(m);
                 return Q.reject(err);
