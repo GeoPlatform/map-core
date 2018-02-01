@@ -6,10 +6,10 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "L"/*eaflet*/, "GeoPlatform", "ServiceTypes", "OSM", "JQueryLayerService"],
-            function(Q, L, GeoPlatform, ServiceTypes, OSM, JQueryLayerService) {
+        define(["q", "L"/*eaflet*/, "GeoPlatform", "ServiceTypes", "OSM"],
+            function(Q, L, GeoPlatform, ServiceTypes, OSM) {
                 return (root.LayerFactory = factory(
-                    Q, L, GeoPlatform, ServiceTypes, OSM, JQueryLayerService));
+                    Q, L, GeoPlatform, ServiceTypes, OSM));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -22,19 +22,16 @@
                 require('L'),
                 require('GeoPlatform'),
                 require('ServiceTypes'),
-                require('OSM'),
-                require('JQueryLayerService')
+                require('OSM')
             )
         );
     } else {
         GeoPlatform.LayerFactory = factory(
             Q, L/*eaflet*/, GeoPlatform,
             GeoPlatform.ServiceTypes,
-            GeoPlatform.OSM,
-            GeoPlatform.JQueryLayerService);
+            GeoPlatform.OSM);
     }
-}(this||window, function(Q, L/*eaflet*/,
-    GeoPlatform, ServiceTypes, OSM, JQueryLayerService) {
+}(this||window, function(Q, L/*eaflet*/, GeoPlatform, ServiceTypes, OSM) {
 
 
     /**
@@ -78,7 +75,7 @@
         let service = layer.services[0],
             url     = service.href,
             typeUri = service.serviceType.uri,
-            srs  = layer.supportedCRS ? layer.supportedCRS[0] : null,
+            srs     = layer.supportedCRS ? layer.supportedCRS[0] : null,
             format  = layer.supportedFormats ? layer.supportedFormats[0] : null,
             opts = {};
 

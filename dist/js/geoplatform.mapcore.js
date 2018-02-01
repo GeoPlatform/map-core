@@ -3578,20 +3578,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "L" /*eaflet*/, "GeoPlatform", "ServiceTypes", "OSM", "JQueryLayerService"], function (Q, L, GeoPlatform, ServiceTypes, OSM, JQueryLayerService) {
-            return root.LayerFactory = factory(Q, L, GeoPlatform, ServiceTypes, OSM, JQueryLayerService);
+        define(["q", "L" /*eaflet*/, "GeoPlatform", "ServiceTypes", "OSM"], function (Q, L, GeoPlatform, ServiceTypes, OSM) {
+            return root.LayerFactory = factory(Q, L, GeoPlatform, ServiceTypes, OSM);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.LayerFactory = factory(require('q'), require('L'), require('GeoPlatform'), require('ServiceTypes'), require('OSM'), require('JQueryLayerService'));
+        module.exports = root.LayerFactory = factory(require('q'), require('L'), require('GeoPlatform'), require('ServiceTypes'), require('OSM'));
     } else {
-        GeoPlatform.LayerFactory = factory(Q, L /*eaflet*/, GeoPlatform, GeoPlatform.ServiceTypes, GeoPlatform.OSM, GeoPlatform.JQueryLayerService);
+        GeoPlatform.LayerFactory = factory(Q, L /*eaflet*/, GeoPlatform, GeoPlatform.ServiceTypes, GeoPlatform.OSM);
     }
-})(undefined || window, function (Q, L /*eaflet*/
-, GeoPlatform, ServiceTypes, OSM, JQueryLayerService) {
+})(undefined || window, function (Q, L /*eaflet*/, GeoPlatform, ServiceTypes, OSM) {
 
     /**
      * @param {Object} layer - GeoPlatform Layer
