@@ -32,9 +32,13 @@
         "less": "^2.7.1",
         "less-plugin-autoprefix": "^1.5.1",
         "matchdep": "^0.3.0",
-        "pre-commit": "^1.2.2"
+        "pre-commit": "^1.2.2",
+        "gp.client": "git+https://github.com/GeoPlatform/client-api.git#develop"
     },
     "pre-commit": [
         "distro"
-    ]
+    ],
+    "dependencies": {
+        "geoplatform.client": "git+https://github.com/GeoPlatform/client-api.git#develop"
+    }
 }

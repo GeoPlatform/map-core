@@ -56,1048 +56,58 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return L.GeoPlatform;
 });
 
+/**
+ *
+ */
+
 (function (root, factory) {
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "GeoPlatform"], function (Q, GeoPlatform) {
-            return root.ItemService = factory(Q, GeoPlatform);
+        define(["q", "L" /*eaflet*/, "GeoPlatform"], function (Q, L, GeoPlatform) {
+            return root.FeatureStyleResolver = factory(Q, L, GeoPlatform);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.ItemService = factory(require('q'), require('GeoPlatform'));
+        module.exports = root.FeatureStyleResolver = factory(require('q'), require('L'), require('GeoPlatform'));
     } else {
-        GeoPlatform.ItemService = factory(Q, GeoPlatform);
+        GeoPlatform.FeatureStyleResolver = factory(Q, L /*eaflet*/, GeoPlatform);
     }
-})(undefined || window, function (Q, GeoPlatform) {
+})(undefined || window, function (Q, L /*eaflet*/, GeoPlatform) {
+
+    if (!L) {
+        throw new Error("Missing Leaflet");
+    }
+    if (!L.GeoPlatform) {
+        throw new Error("Missing GeoPlatform extensions to Leaflet");
+    }
 
     /**
-     * ItemService
-     * service for working with the GeoPlatform API to
-     * retrieve and manipulate items.
-     *
-     * Ex Searching Items
-     *      let params = { q: 'test' };
-     *      itemService.search(params).then(response=>{
-     *          console.log(response.results.length + " of " + response.totalResults);
-     *      }).catch(e=>{...});
-     *
-     * Ex Fetch Item:
-     *      itemService.get(itemId).then(item=>{...}).catch(e=>{...});
-     *
-     * Ex Saving Item:
-     *      itemService.save(item).then(item=>{...}).catch(e=>{...});
-     *
-     * Ex Deleting Item:
-     *      itemService.remove(itemId).then(()=>{...}).catch(e=>{...});
-     *
-     * Ex Patching Item:
-     *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
-     *
+     * Fetches style information from GeoPlatform UAL
+     * @param {string} id - identifier of layer to resolve style for
      */
-    var ItemService = function () {
-        function ItemService() {
-            _classCallCheck(this, ItemService);
-
-            this.baseUrl = GeoPlatform.ualUrl + '/api/items';
-            this.timeout = GeoPlatform.timeout || 10000;
-        }
-
-        /**
-         * @param {number} milliseconds - override environment variable timeout
-         */
-
-
-        _createClass(ItemService, [{
-            key: "timeout",
-            value: function timeout(milliseconds) {
-                this.timeout = milliseconds;
+    L.GeoPlatform.featureStyleResolver = function (id) {
+        var deferred = Q.defer();
+        jQuery.ajax({
+            url: GeoPlatform.ualUrl + '/api/layers/' + id + '/style',
+            dataType: 'json',
+            success: function success(data) {
+                deferred.resolve(data);
+            },
+            error: function error(xhr, status, message) {
+                var em = "L.GeoPlatform.FeatureStyleResolver() -\n                   Error loading style information for layer " + id + " : " + message;
+                var error = new Error(em);
+                deferred.reject(error);
             }
-
-            /**
-             * @param {string} id - identifier of item to fetch
-             * @return {Promise} resolving Item object or an error
-             */
-
-        }, {
-            key: "get",
-            value: function get(id) {
-                return Q.reject(new Error("Must use a subclass of ItemService"));
-            }
-
-            /**
-             * @param {Object} itemObj - item to create or update
-             * @return {Promise} resolving Item object or an error
-             */
-
-        }, {
-            key: "save",
-            value: function save(itemObj) {
-                return Q.reject(new Error("Must use a subclass of ItemService"));
-            }
-
-            /**
-             * @param {string} id - identifier of item to delete
-             * @return {Promise} resolving true if successful or an error
-             */
-
-        }, {
-            key: "remove",
-            value: function remove(id) {
-                return Q.reject(new Error("Must use a subclass of ItemService"));
-            }
-
-            /**
-             * @param {string} id - identifier of item to patch
-             * @param {Object} patch - HTTP-PATCH compliant set of properties to patch
-             * @return {Promise} resolving Item object or an error
-             */
-
-        }, {
-            key: "patch",
-            value: function patch(id, _patch) {
-                return Q.reject(new Error("Must use a subclass of ItemService"));
-            }
-        }, {
-            key: "search",
-            value: function search(arg) {
-
-                return Q.reject(new Error("Must use a subclass of ItemService"));
-            }
-        }]);
-
-        return ItemService;
-    }();
-
-    return ItemService;
-});
-
-(function (root, factory) {
-    if (typeof define === "function" && define.amd) {
-        // Now we're wrapping the factory and assigning the return
-        // value to the root (window) and returning it as well to
-        // the AMD loader.
-        define(["jquery", "q", "GeoPlatform", "ItemService"], function (jQuery, Q, GeoPlatform, ItemService) {
-            return root.JQueryItemService = factory(jQuery, Q, GeoPlatform, ItemService);
         });
-    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-        // I've not encountered a need for this yet, since I haven't
-        // run into a scenario where plain modules depend on CommonJS
-        // *and* I happen to be loading in a CJS browser environment
-        // but I'm including it for the sake of being thorough
-        module.exports = root.JQueryItemService = factory(require("jquery"), require('q'), require('GeoPlatform'), require('ItemService'));
-    } else {
-        GeoPlatform.JQueryItemService = factory(jQuery, Q, GeoPlatform, GeoPlatform.ItemService);
-    }
-})(undefined || window, function (jQuery, Q, GeoPlatform, ItemService) {
-
-    var METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"];
-
-    /**
-     * JQuery ItemService
-     * service for working with the GeoPlatform API to
-     * retrieve and manipulate items.
-     *
-     * Ex Searching Items
-     *      let params = { q: 'test' };
-     *      itemService.search(params).then(response=>{
-     *          console.log(response.results.length + " of " + response.totalResults);
-     *      }).catch(e=>{...});
-     *
-     * Ex Fetch Item:
-     *      itemService.get(itemId).then(item=>{...}).catch(e=>{...});
-     *
-     * Ex Saving Item:
-     *      itemService.save(item).then(item=>{...}).catch(e=>{...});
-     *
-     * Ex Deleting Item:
-     *      itemService.remove(itemId).then(()=>{...}).catch(e=>{...});
-     *
-     * Ex Patching Item:
-     *      itemService.patch(itemId,patch).then(item=>{...}).catch(e=>{...});
-     *
-     *
-     * Example of adding custom request options:
-     *
-     *      let options = {
-     *          headers: { 'X-My-Header': 'myHeaderValue' },
-     *          xhrFields: { withCredentials: true }
-     *      };
-     *      itemService.get(itemId, options).then(item=> {...}).catch(e=>{...});
-     *
-     */
-
-    var JQueryItemService = function (_ItemService) {
-        _inherits(JQueryItemService, _ItemService);
-
-        function JQueryItemService() {
-            _classCallCheck(this, JQueryItemService);
-
-            return _possibleConstructorReturn(this, (JQueryItemService.__proto__ || Object.getPrototypeOf(JQueryItemService)).call(this));
-        }
-
-        /**
-         * @param {string} id - identifier of item to fetch
-         * @param {Object} options - optional set of request options to apply to xhr request
-         * @return {Promise} resolving Item object or an error
-         */
-
-
-        _createClass(JQueryItemService, [{
-            key: "get",
-            value: function get(id, options) {
-                var _this2 = this;
-
-                return Q.resolve(true).then(function () {
-                    var opts = _this2.buildRequest("GET", _this2.baseUrl + '/' + id, null, options);
-                    var d = Q.defer();
-                    opts.success = function (data) {
-                        d.resolve(data);
-                    };
-                    opts.error = function (xhr, status, message) {
-                        d.reject(new Error(message));
-                    };
-                    jQuery.ajax(opts);
-                    return d.promise;
-                }).catch(function (e) {
-                    var err = new Error("ItemService.save() - Error fetching item: " + e.message);
-                    return Q.reject(err);
-                });
-            }
-
-            /**
-             * @param {Object} itemObj - item to create or update
-             * @param {Object} options - optional set of request options to apply to xhr request
-             * @return {Promise} resolving Item object or an error
-             */
-
-        }, {
-            key: "save",
-            value: function save(itemObj, options) {
-                var _this3 = this;
-
-                return Q.resolve(true).then(function () {
-
-                    var method = 'POST',
-                        url = _this3.baseUrl;
-                    if (itemObj.id) {
-                        method = "PUT";
-                        url += '/' + itemObj.id;
-                    }
-
-                    var opts = _this3.buildRequest(method, url, itemObj, options);
-
-                    var d = Q.defer();
-                    opts.success = function (data) {
-                        d.resolve(data);
-                    };
-                    opts.error = function (xhr, status, message) {
-                        d.reject(new Error(message));
-                    };
-                    jQuery.ajax(opts);
-                    return d.promise;
-                }).catch(function (e) {
-                    var err = new Error("ItemService.save() - Error saving item: " + e.message);
-                    return Q.reject(err);
-                });
-            }
-
-            /**
-             * @param {string} id - identifier of item to delete
-             * @param {Object} options - optional set of request options to apply to xhr request
-             * @return {Promise} resolving true if successful or an error
-             */
-
-        }, {
-            key: "remove",
-            value: function remove(id, options) {
-                var _this4 = this;
-
-                return Q.resolve(true).then(function () {
-
-                    var opts = _this4.buildRequest("DELETE", _this4.baseUrl + '/' + id, null, options);
-                    var d = Q.defer();
-                    opts.success = function (data) {
-                        d.resolve(true);
-                    };
-                    opts.error = function (xhr, status, message) {
-                        d.reject(new Error(message));
-                    };
-                    jQuery.ajax(opts);
-                    return d.promise;
-                }).catch(function (e) {
-                    var err = new Error("ItemService.save() - Error deleting item: " + e.message);
-                    return Q.reject(err);
-                });
-            }
-
-            /**
-             * @param {string} id - identifier of item to patch
-             * @param {Object} patch - HTTP-PATCH compliant set of properties to patch
-             * @param {Object} options - optional set of request options to apply to xhr request
-             * @return {Promise} resolving Item object or an error
-             */
-
-        }, {
-            key: "patch",
-            value: function patch(id, _patch2, options) {
-                var _this5 = this;
-
-                return Q.resolve(true).then(function () {
-
-                    var opts = _this5.buildRequest("PATCH", _this5.baseUrl + '/' + id, _patch2, options);
-                    var d = Q.defer();
-                    opts.success = function (data) {
-                        d.resolve(data);
-                    };
-                    opts.error == function (xhr, status, message) {
-                        d.reject(new Error(message));
-                    };
-                    jQuery.ajax(opts);
-                    return d.promise;
-                }).catch(function (e) {
-                    var err = new Error("ItemService.save() - Error patching item: " + e.message);
-                    return Q.reject(err);
-                });
-            }
-
-            /**
-             * @param {Object} arg - either JS object of query parameters or GeoPlatform.Query instance
-             * @param {Object} options - optional set of request options to apply to xhr request
-             * @return {Promise} resolving search results
-             */
-
-        }, {
-            key: "search",
-            value: function search(arg, options) {
-                var _this6 = this;
-
-                return Q.resolve(true).then(function () {
-
-                    var params = arg;
-
-                    if (arg && typeof arg.getQuery !== 'undefined') {
-                        //if passed a GeoPlatform.Query object,
-                        // convert to parameters object
-                        params = arg.getQuery();
-                    }
-
-                    var opts = _this6.buildRequest("GET", _this6.baseUrl, params, options);
-                    var d = Q.defer();
-                    opts.success = function (data) {
-                        d.resolve(data);
-                    };
-                    opts.error = function (xhr, status, message) {
-                        d.reject(new Error(message));
-                    };
-                    jQuery.ajax(opts);
-                    return d.promise;
-                }).catch(function (e) {
-                    var err = new Error("ItemService.search() - Error searching items: " + e.message);
-                    return Q.reject(err);
-                });
-            }
-
-            /**
-             * @param {string} method - one of "GET", "POST", "PUT", "DELETE", "PATCH"
-             * @param {string} url - destination of xhr request
-             * @param {Object} data - object to be sent with request
-             * @param {Object} options - optional object defining request options
-             * @return {Object} request options for xhr
-             */
-
-        }, {
-            key: "buildRequest",
-            value: function buildRequest(method, url, data, options) {
-
-                if (METHODS.indexOf(method) < 0) throw new Error("Unsupported HTTP method " + method);
-
-                if (!url) throw new Error("Must specify a URL for HTTP requests");
-
-                //define default options
-                var opts = {
-                    method: method,
-                    url: url,
-                    dataType: 'json', //expected response type
-                    timeout: this.timeout
-                };
-                if (data) {
-                    opts.data = data;
-                    if ("POST" === method || "PUT" === method || "PATCH" === method) {
-                        opts.processData = false;
-                        opts.contentType = 'application/json';
-                    }
-                }
-
-                //copy over user-supplied options
-                if (options && (typeof options === "undefined" ? "undefined" : _typeof(options)) === 'object') {
-                    for (var o in options) {
-                        if (options.hasOwnProperty(o)) {
-                            opts[o] = options[o];
-                        }
-                    }
-                }
-
-                return opts;
-            }
-        }]);
-
-        return JQueryItemService;
-    }(ItemService);
-
-    return JQueryItemService;
-});
-
-(function (root, factory) {
-    if (typeof define === "function" && define.amd) {
-        // Now we're wrapping the factory and assigning the return
-        // value to the root (window) and returning it as well to
-        // the AMD loader.
-        define(["GeoPlatform"], function (GeoPlatform) {
-            return root.Query = factory(GeoPlatform);
-        });
-    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-        // I've not encountered a need for this yet, since I haven't
-        // run into a scenario where plain modules depend on CommonJS
-        // *and* I happen to be loading in a CJS browser environment
-        // but I'm including it for the sake of being thorough
-        module.exports = root.Query = factory(require('GeoPlatform'));
-    } else {
-        GeoPlatform.Query = factory(GeoPlatform);
-    }
-})(undefined || window, function (GeoPlatform) {
-    var Query = function () {
-        function Query() {
-            _classCallCheck(this, Query);
-
-            //fields list sent to MDR in order to have these properties for display in search results
-            this._fields = ['created', 'modified', 'publishers', 'themes', 'description', 'extent'];
-
-            //facets list sent to MDR in order to get aggregation numbers
-            this._facets = ['types', 'themes', 'publishers', 'serviceTypes', 'schemes', 'visibility', 'createdBy'];
-
-            this.sortOptions = [{ value: "label,asc", label: "Name (A-Z)" }, { value: "label,desc", label: "Name (Z-A)" }, { value: "type,asc", label: "Type (A-Z)" }, { value: "type,desc", label: "Type (Z-A)" }, { value: "modified,desc", label: "Most recently modified" }, { value: "modified,asc", label: "Least recently modified" }, { value: "_score,desc", label: "Relevance" }];
-
-            //list of this.query variables for mapping to parameters
-            this.parameters = {
-                TYPES: 'type',
-                THEMES_ID: 'theme.id',
-                THEMES_LABEL: 'theme.label',
-                THEMES_URI: 'theme.uri',
-                PUBLISHERS: 'publisher.id',
-                PUBLISHERS_LABEL: 'publisher.label',
-                PUBLISHERS_URI: 'publisher.uri',
-                CREATED_BY: 'createdBy',
-                CONTRIBUTED_BY: 'contributedBy',
-                CREATOR: 'creator.id',
-                SVC_TYPES: 'serviceType.id',
-                SCHEMES_ID: 'scheme.id',
-                SCHEMES_LABEL: 'scheme.label',
-                SCHEMES_URI: 'scheme.uri',
-                VISIBILITY: 'visibility',
-                QUERY: 'q',
-                KEYWORDS: 'keyword',
-                EXTENT: 'extent',
-                MODIFIED_BEFORE: 'modified.max',
-                MODIFIED_AFTER: 'modified.min',
-                BEGINS: 'startDate.min',
-                ENDS: 'endDate.max',
-                RESOURCE_TYPE: 'resourceType'
-            };
-
-            this.query = this.defaultQuery = {
-                start: 0,
-                size: 10,
-                total: 0,
-                sort: "modified,desc",
-                fields: this._fields,
-                includeFacets: this._facets
-            };
-        }
-
-        _createClass(Query, [{
-            key: "getQuery",
-            value: function getQuery() {
-                var result = {};
-                for (var prop in this.query) {
-                    var value = this.query[prop];
-                    if (typeof value.push !== 'undefined') {
-                        value = value.join(',');
-                    }
-                    result[prop] = value;
-                }
-                return result;
-            }
-        }, {
-            key: "parameter",
-            value: function parameter(name, value) {
-                this.setParameter(name, value);
-                return this;
-            }
-        }, {
-            key: "setParameter",
-            value: function setParameter(name, value) {
-                this.query[name] = value;
-            }
-        }, {
-            key: "getParameter",
-            value: function getParameter(key) {
-                return this.getParameter(ke);
-            }
-        }, {
-            key: "applyParameters",
-            value: function applyParameters(obj) {
-                for (var p in obj) {
-                    if (obj.hasOwnProperty(p)) {
-                        this.setParameter(p, obj[p]);
-                    }
-                }
-            }
-        }, {
-            key: "q",
-            value: function q(text) {
-                this.setQ(text);
-                return this;
-            }
-
-            /**
-             * @param {string} text - free text query
-             */
-
-        }, {
-            key: "setQ",
-            value: function setQ(text) {
-                this.setParameter(this.parameters.QUERY, text);
-            }
-        }, {
-            key: "getQ",
-            value: function getQ() {
-                return this.getParameter(this.parameters.QUERY);
-            }
-        }, {
-            key: "keywords",
-            value: function keywords(text) {
-                this.setQ(text);
-                return this;
-            }
-
-            /**
-             * @param {string} text - free text query
-             */
-
-        }, {
-            key: "setKeywords",
-            value: function setKeywords(text) {
-                if (text && typeof text.push !== 'undefined') text = text.join(',');
-                this.setParameter(this.parameters.KEYWORDS, text);
-            }
-        }, {
-            key: "getKeywords",
-            value: function getKeywords() {
-                return this.getParameter(this.parameters.KEYWORDS);
-            }
-        }, {
-            key: "types",
-            value: function types(_types) {
-                this.setTypes(_types);
-                return this;
-            }
-
-            /**
-             * @param {array[string]} types - name of class(es) to request
-             */
-
-        }, {
-            key: "setTypes",
-            value: function setTypes(types) {
-                if (types && types.push === 'undefined') types = [types];
-                this.setParameter(this.parameters.TYPES, types);
-            }
-        }, {
-            key: "getTypes",
-            value: function getTypes() {
-                return this.getParameter(this.parameters.TYPES);
-            }
-        }, {
-            key: "createdBy",
-            value: function createdBy(user) {
-                this.setCreatedBy(user);
-                return this;
-            }
-
-            /**
-             * @param {string} user - username
-             * @param {boolean} fireUpdate -
-             */
-
-        }, {
-            key: "setCreatedBy",
-            value: function setCreatedBy(user) {
-                this.setParameter(this.parameters.CREATED_BY, user);
-            }
-        }, {
-            key: "getCreatedBy",
-            value: function getCreatedBy() {
-                return this.getParameter(this.parameters.CREATED_BY);
-            }
-        }, {
-            key: "themes",
-            value: function themes(_themes, key) {
-                this.setThemes(_themes);
-                return this;
-            }
-
-            /**
-             * @param {array[string]} themes - themes to constrain by
-             * @param {string} key - optional, theme property to use
-             */
-
-        }, {
-            key: "setThemes",
-            value: function setThemes(themes, key) {
-                if (themes && themes.push === 'undefined') themes = [themes];
-                var param = this.parameters.THEMES_ID;
-                if (key && 'label' === key) param = this.parameters.THEMES_LABEL;else if (key && 'uri' === key) param = this.parameters.THEMES_URI;
-                this.setParameter(param, themes);
-            }
-        }, {
-            key: "getThemes",
-            value: function getThemes() {
-                return this.getParameter(this.parameters.THEMES);
-            }
-        }, {
-            key: "publishers",
-            value: function publishers(_publishers, key) {
-                this.setPublishers(_publishers);
-                return this;
-            }
-
-            /**
-             * @param {array[string]} publishers - publishing orgs to constrain by
-             * @param {string} key - optional, publisher property to use
-             */
-
-        }, {
-            key: "setPublishers",
-            value: function setPublishers(publishers, key) {
-                if (publishers && publishers.push === 'undefined') publishers = [publishers];
-                var param = this.parameters.PUBLISHERS_ID;
-                if (key && 'label' === key) param = this.parameters.PUBLISHERS_LABEL;else if (key && 'uri' === key) param = this.parameters.PUBLISHERS_URI;
-                this.setParameter(param, publishers);
-            }
-        }, {
-            key: "getPublishers",
-            value: function getPublishers() {
-                return this.getParameter(this.parameters.PUBLISHERS);
-            }
-        }, {
-            key: "serviceTypes",
-            value: function serviceTypes(types) {
-                this.setServiceTypes(types);
-                return this;
-            }
-
-            /**
-             * @param {array[string]} types - ids
-             */
-
-        }, {
-            key: "setServiceTypes",
-            value: function setServiceTypes(types) {
-                if (types && types.push === 'undefined') types = [types];
-                this.setParameter(this.parameters.SERVICE_TYPES, types);
-            }
-        }, {
-            key: "getServiceTypes",
-            value: function getServiceTypes() {
-                return this.getParameter(this.parameters.SERVICE_TYPES);
-            }
-        }, {
-            key: "schemes",
-            value: function schemes(_schemes, key) {
-                this.setSchemes(_schemes);
-                return this;
-            }
-
-            /**
-             * @param {array[string]} schemes - ids
-             * @param {string} key - optional, scheme property to use
-             */
-
-        }, {
-            key: "setSchemes",
-            value: function setSchemes(schemes, key) {
-                if (schemes && schemes.push === 'undefined') schemes = [schemes];
-                var param = this.parameters.SCHEMES_ID;
-                if (key && 'label' === key) param = this.parameters.SCHEMES_LABEL;else if (key && 'uri' === key) param = this.parameters.SCHEMES_URI;
-                this.setParameter(param, schemes);
-            }
-        }, {
-            key: "getSchemes",
-            value: function getSchemes() {
-                return this.getParameter(this.parameters.SCHEMES);
-            }
-        }, {
-            key: "visibility",
-            value: function visibility(vis) {
-                this.setVisibility(vis);
-                return this;
-            }
-
-            /**
-             * @param {string} visibility - one of 'public' or 'private'
-             * @param {boolean} fireUpdate
-             */
-
-        }, {
-            key: "setVisibility",
-            value: function setVisibility(visibility) {
-                this.setParameter(this.parameters.VISIBILITY, visibility);
-            }
-        }, {
-            key: "getVisibility",
-            value: function getVisibility() {
-                this.getParameter(this.parameters.VISIBILITY);
-            }
-        }, {
-            key: "modified",
-            value: function modified(date, beforeOrAfter) {
-                this.setModified(date, beforeOrAfter);
-                return this;
-            }
-
-            /**
-             * @param {Date} date - date to compare against
-             * @param {boolean} beforeOrAfter - flag specifying which boundary condition (true = before, false = after)
-             * @param {boolean} fireUpdate - flag specifying whether to trigger update automatically
-             */
-
-        }, {
-            key: "setModified",
-            value: function setModified(date, beforeOrAfter) {
-
-                //if no date was supplied, consider it "unset" for both properties
-                if (!date) {
-                    this.setParameter(this.parameters.MODIFIED_BEFORE, null);
-                    this.setParameter(this.parameters.MODIFIED_AFTER, null);
-                    return;
-                }
-
-                var dir = beforeOrAfter && (beforeOrAfter === true || beforeOrAfter === "true");
-                var prop = dir ? this.parameters.MODIFIED_BEFORE : this.parameters.MODIFIED_AFTER; //property being set
-                var oppProp = dir ? this.parameters.MODIFIED_AFTER : this.parameters.MODIFIED_BEFORE; //unset opposite property
-                var arg = date && date.getTime ? date.getTime() : date;
-
-                this.setParameter(oppProp, null);
-                this.setParameter(prop, arg);
-            }
-        }, {
-            key: "getModified",
-            value: function getModified() {
-                return this.getParameter(this.parameters.MODIFIED_BEFORE) || this.getParameter(this.parameters.MODIFIED_AFTER);
-            }
-        }, {
-            key: "extent",
-            value: function extent(bbox) {
-                this.setExtent(bbox);
-                return this;
-            }
-
-            /**
-             * @param {string} bboxStr - form of "minx,miny,maxx,maxy"
-             */
-
-        }, {
-            key: "setExtent",
-            value: function setExtent(bbox) {
-                if (bbox && typeof bbox.toBboxString !== 'undefined') bbox = bbox.toBboxString();
-                this.setParameter(this.parameters.EXTENT, bbox);
-            }
-
-            /**
-             * @return {string} bbox string or null if not set
-             */
-
-        }, {
-            key: "getExtent",
-            value: function getExtent() {
-                return this.getParameter(this.parameters.EXTENT);
-            }
-        }, {
-            key: "begins",
-            value: function begins(date) {
-                this.setBegins(date);
-                return this;
-            }
-        }, {
-            key: "setBeginDate",
-            value: function setBeginDate(date) {
-                if (date && date instanceof Date) date = date.getTime();
-                this.setParameter(this.parameters.BEGINS, date);
-            }
-        }, {
-            key: "getBeginDate",
-            value: function getBeginDate() {
-                var date = this.getParameter(this.parameter.BEGINS);
-                if (date) date = new Date(date);
-                return date;
-            }
-        }, {
-            key: "ends",
-            value: function ends(date) {
-                this.setEnds(date);
-                return this;
-            }
-        }, {
-            key: "setEndDate",
-            value: function setEndDate(date) {
-                if (date && date instanceof Date) date = date.getTime();
-                this.setParameter(this.parameters.ENDS, date);
-            }
-        }, {
-            key: "getEndDate",
-            value: function getEndDate() {
-                var date = this.getParameter(this.parameter.ENDS);
-                if (date) date = new Date(date);
-                return date;
-            }
-        }, {
-            key: "between",
-            value: function between(begin, end) {
-                this.setBetween(begin, end);
-                return this;
-            }
-        }, {
-            key: "setBetween",
-            value: function setBetween(begin, end) {
-                this.begins(begin);
-                this.ends(end);
-            }
-        }, {
-            key: "resourceTypes",
-            value: function resourceTypes(types) {
-                this.setResourceTypes(types);
-                return this;
-            }
-        }, {
-            key: "setResourceTypes",
-            value: function setResourceTypes(types) {
-                if (types && types.push === 'undefined') types = [types];
-                this.setParameter(this.parameters.RESOURCE_TYPE, types);
-            }
-        }, {
-            key: "getResourceTypes",
-            value: function getResourceTypes() {
-                return this.getParameter(this.parameters.RESOURCE_TYPE);
-            }
-        }, {
-            key: "facets",
-            value: function facets(names) {
-                this.setFacets(names);
-                return this;
-            }
-
-            /*
-             * @param {array[string]} names - names of facets
-             */
-
-        }, {
-            key: "setFacets",
-            value: function setFacets(names) {
-                this.query.includeFacets = names;
-            }
-        }, {
-            key: "getFacets",
-            value: function getFacets() {
-                return this.query.includeFacets;
-            }
-        }, {
-            key: "fields",
-            value: function fields(_fields) {
-                this.setFields(_fields);
-                return this;
-            }
-
-            /**
-             * @param {array[string]} fields - list of field names to request for each search result
-             */
-
-        }, {
-            key: "setFields",
-            value: function setFields(fields) {
-                if (fields && typeof fields.push === 'undefined') fields = [fields];
-                this.query.fields = fields;
-            }
-        }, {
-            key: "getFields",
-            value: function getFields() {
-                return this.query.fields;
-            }
-
-            /**
-             * @param {int} start - beginning index of results to request
-             */
-
-        }, {
-            key: "start",
-            value: function start(_start) {
-                this.setStart(_start);
-                return this;
-            }
-        }, {
-            key: "setStart",
-            value: function setStart(start) {
-                if (isNaN(start)) return;
-                this.query.start = start;
-            }
-        }, {
-            key: "getStart",
-            value: function getStart() {
-                return this.query.start;
-            }
-
-            /**
-             * @param {int} page - page of results to fetch
-             */
-
-        }, {
-            key: "page",
-            value: function page(_page) {
-                this.setPage(_page);
-                return this;
-            }
-        }, {
-            key: "setPage",
-            value: function setPage(page) {
-                if (isNaN(page)) return;
-                this.query.start = page * this.query.size;
-            }
-        }, {
-            key: "getPage",
-            value: function getPage() {
-                return this.query.start;
-            }
-
-            /**
-             * @param {int} size - page size to request
-             */
-
-        }, {
-            key: "pageSize",
-            value: function pageSize(size) {
-                this.setPageSize(size);
-                return this;
-            }
-        }, {
-            key: "setPageSize",
-            value: function setPageSize(size) {
-                if (isNaN(size)) return;
-                this.query.size = size;
-
-                //find out which page in the new scheme the current first-result of current page
-                // will show up in, and set start so that it shows up with the new page size
-                var page = Math.floor(this.query.start * 1 / this.query.size * 1);
-                this.query.start = page * (this.query.size * 1);
-            }
-        }, {
-            key: "getPageSize",
-            value: function getPageSize() {
-                return this.query.size;
-            }
-
-            /**
-             * @param {string} sort - form of <field>,<dir> or just field name
-             * @param {string} order - optional, either 'asc' or 'desc'
-             */
-
-        }, {
-            key: "sort",
-            value: function sort(_sort, order) {
-                this.setSort(_sort, order);
-                return this;
-            }
-
-            /**
-             * @param {string} sort - form of <field>,<dir> or just field name
-             * @param {string} order - optional, either 'asc' or 'desc'
-             */
-
-        }, {
-            key: "setSort",
-            value: function setSort(sort, order) {
-                order = order && (order !== 'asc' || order !== 'desc') ? 'desc' : order;
-                if (sort && sort.indexOf(',') < 0) sort = sort + ',' + order;
-                this.query.sort = sort;
-            }
-        }, {
-            key: "getSort",
-            value: function getSort() {
-                return this.query.sort;
-            }
-        }, {
-            key: "getSortField",
-            value: function getSortField() {
-                return this.query.sort.split(',')[0];
-            }
-        }, {
-            key: "getSortOrder",
-            value: function getSortOrder() {
-                return this.query.sort.split(',')[1] === 'asc';
-            }
-
-            /**
-             * @return {array} list of key-value pairs of sort options
-             */
-
-        }, {
-            key: "getSortOptions",
-            value: function getSortOptions() {
-                return this.sortOptions.slice(0);
-            }
-
-            /**
-             *
-             */
-
-        }, {
-            key: "clear",
-            value: function clear() {
-                this.query = this.defaultQuery;
-            }
-        }]);
-
-        return Query;
-    }();
-
-    return Query;
-});
-
-(function (root, factory) {
-    if (typeof define === "function" && define.amd) {
-        // Now we're wrapping the factory and assigning the return
-        // value to the root (window) and returning it as well to
-        // the AMD loader.
-        define(["Query"], function (Query) {
-            return root.QueryFactory = factory(Query);
-        });
-    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-        // I've not encountered a need for this yet, since I haven't
-        // run into a scenario where plain modules depend on CommonJS
-        // *and* I happen to be loading in a CJS browser environment
-        // but I'm including it for the sake of being thorough
-        module.exports = root.QueryFactory = factory(require('Query'));
-    } else {
-        GeoPlatform.QueryFactory = factory(GeoPlatform.Query);
-    }
-})(undefined || window, function (Query) {
-
-    return function () {
-        return new Query();
+        return deferred.promise;
     };
+
+    return L.GeoPlatform.FeatureStyleResolver;
 });
 
 (function (root, factory) {
@@ -1184,147 +194,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     };
 
     return L.GeoPlatform.featurePopupTemplate;
-});
-
-/**
- *
- */
-
-(function (root, factory) {
-    if (typeof define === "function" && define.amd) {
-        // Now we're wrapping the factory and assigning the return
-        // value to the root (window) and returning it as well to
-        // the AMD loader.
-        define(["q", "L" /*eaflet*/, "GeoPlatform"], function (Q, L, GeoPlatform) {
-            return root.FeatureStyleResolver = factory(Q, L, GeoPlatform);
-        });
-    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-        // I've not encountered a need for this yet, since I haven't
-        // run into a scenario where plain modules depend on CommonJS
-        // *and* I happen to be loading in a CJS browser environment
-        // but I'm including it for the sake of being thorough
-        module.exports = root.FeatureStyleResolver = factory(require('q'), require('L'), require('GeoPlatform'));
-    } else {
-        GeoPlatform.FeatureStyleResolver = factory(Q, L /*eaflet*/, GeoPlatform);
-    }
-})(undefined || window, function (Q, L /*eaflet*/, GeoPlatform) {
-
-    if (!L) {
-        throw new Error("Missing Leaflet");
-    }
-    if (!L.GeoPlatform) {
-        throw new Error("Missing GeoPlatform extensions to Leaflet");
-    }
-
-    /**
-     * Fetches style information from GeoPlatform UAL
-     * @param {string} id - identifier of layer to resolve style for
-     */
-    L.GeoPlatform.featureStyleResolver = function (id) {
-        var deferred = Q.defer();
-        jQuery.ajax({
-            url: GeoPlatform.ualUrl + '/api/layers/' + id + '/style',
-            dataType: 'json',
-            success: function success(data) {
-                deferred.resolve(data);
-            },
-            error: function error(xhr, status, message) {
-                var em = "L.GeoPlatform.FeatureStyleResolver() -\n                   Error loading style information for layer " + id + " : " + message;
-                var error = new Error(em);
-                deferred.reject(error);
-            }
-        });
-        return deferred.promise;
-    };
-
-    return L.GeoPlatform.FeatureStyleResolver;
-});
-
-(function (root, factory) {
-    if (typeof define === "function" && define.amd) {
-        // Now we're wrapping the factory and assigning the return
-        // value to the root (window) and returning it as well to
-        // the AMD loader.
-        define(["jquery", "q", "GeoPlatform", "JQueryItemService"], function (jQuery, Q, GeoPlatform, JQueryItemService) {
-            return root.JQueryServiceService = factory(jQuery, Q, GeoPlatform, JQueryItemService);
-        });
-    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-        // I've not encountered a need for this yet, since I haven't
-        // run into a scenario where plain modules depend on CommonJS
-        // *and* I happen to be loading in a CJS browser environment
-        // but I'm including it for the sake of being thorough
-        module.exports = root.JQueryServiceService = factory(require("jquery"), require('q'), require('GeoPlatform'), require('JQueryItemService'));
-    } else {
-        GeoPlatform.JQueryServiceService = factory(jQuery, Q, GeoPlatform, GeoPlatform.JQueryItemService);
-    }
-})(undefined || window, function (jQuery, Q, GeoPlatform, JQueryItemService) {
-
-    // ( function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
-
-    'use strict';
-
-    /**
-     * GeoPlatform Service service
-     * service for working with the GeoPlatform API to
-     * retrieve and manipulate service objects.
-     *
-     * @see GeoPlatform.JQueryItemService
-     */
-
-    var JQueryServiceService = function (_JQueryItemService) {
-        _inherits(JQueryServiceService, _JQueryItemService);
-
-        function JQueryServiceService() {
-            _classCallCheck(this, JQueryServiceService);
-
-            var _this7 = _possibleConstructorReturn(this, (JQueryServiceService.__proto__ || Object.getPrototypeOf(JQueryServiceService)).call(this));
-
-            _this7.baseUrl = GeoPlatform.ualUrl + '/api/services';
-            return _this7;
-        }
-
-        /**
-         * Fetch metadata from the specified GeoPlatform Service's
-         * web-accessible implementation using either GetCapabilities
-         * or ESRI documentInfo.
-         * @param {Object} service - GeoPlatform Service object
-         * @param {Object} options - optional set of request options to apply to xhr request
-         * @return {Promise} resolving service metadata
-         */
-
-
-        _createClass(JQueryServiceService, [{
-            key: "about",
-            value: function about(service, options) {
-                var _this8 = this;
-
-                return Q.resolve(true).then(function () {
-
-                    if (!service) {
-                        throw new Error("Must provide service to get metadata about");
-                    }
-
-                    var d = Q.defer();
-                    var opts = _this8.buildRequest('POST', _this8.baseUrl + '/about', service, options);
-                    opts.success = function (data) {
-                        d.resolve(data);
-                    };
-                    opts.error = function (xhr, status, message) {
-                        d.reject(new Error(message));
-                    };
-                    jQuery.ajax(opts);
-                    return d.promise;
-                }).catch(function (e) {
-                    var err = new Error("JQueryServiceService.about() -\n                    Error describing service: " + e.message);
-                    return Q.reject(err);
-                });
-            }
-        }]);
-
-        return JQueryServiceService;
-    }(JQueryItemService);
-
-    return JQueryServiceService;
 });
 
 /*
@@ -2680,7 +1549,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         },
 
         initialize: function initialize(options) {
-            var _this9 = this;
+            var _this = this;
 
             var self = this;
             options = options || {};
@@ -2688,7 +1557,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             if (GeoPlatform.leafletPane) options.pane = GeoPlatform.leafletPane;
 
             var getGPStyle = function getGPStyle() {
-                return _this9._gpStyle;
+                return _this._gpStyle;
             };
             options.style = options.style || getGPStyle();
 
@@ -2733,7 +1602,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         },
 
         loadStyle: function loadStyle(gpLayerId) {
-            var _this10 = this;
+            var _this2 = this;
 
             var self = this;
 
@@ -2768,8 +1637,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             // console.log("Using style: " + JSON.stringify(style));
                             return style;
                         }, json);
-                        _this10.options.style = styleFn;
-                        _this10.setStyle(styleFn);
+                        _this2.options.style = styleFn;
+                        _this2.setStyle(styleFn);
                         return;
                     } else if (json && typeof json.push !== 'undefined') {
                         //multiple styles returned
@@ -2783,14 +1652,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     if (style.shape) {
                         var obj = jQuery.extend({}, style);
                         obj.style = style;
-                        _this10._gpStyle = style;
+                        _this2._gpStyle = style;
 
                         //setStyle on Cluster.FeatureLayer doesn't appear to work consistently for
                         // non-clustered features.
                         // this.setStyle(obj);
                         //So instead, we manually set it on all features of the layer (that aren't clustered)
-                        for (var _id in _this10._layers) {
-                            _this10._layers[_id].setStyle(obj);
+                        for (var id in _this2._layers) {
+                            _this2._layers[id].setStyle(obj);
                         }
                     }
                 }).catch(function (e) {
@@ -3095,7 +1964,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         },
 
         initialize: function initialize(options) {
-            var _this11 = this;
+            var _this3 = this;
 
             var self = this;
 
@@ -3113,7 +1982,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             options.spiderfyDistanceMultiplier = 2;
 
             var getGPStyle = function getGPStyle() {
-                return _this11._gpStyle;
+                return _this3._gpStyle;
             };
             options.style = options.style || getGPStyle;
             if (options.styleResolver) {
@@ -3153,8 +2022,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             //clustered features
             if (this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
-                for (var _id2 in this.cluster._featureGroup._layers) {
-                    var layer = this.cluster._featureGroup._layers[_id2];
+                for (var id in this.cluster._featureGroup._layers) {
+                    var layer = this.cluster._featureGroup._layers[id];
                     if (layer._icon) {
                         jQuery(layer._icon).toggleClass('invisible');
                     }
@@ -3163,8 +2032,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             //non-clustered features
             if (this._layers) {
-                for (var _id3 in this._layers) {
-                    this._layers[_id3].toggleVisibility();
+                for (var _id in this._layers) {
+                    this._layers[_id].toggleVisibility();
                 }
             }
         },
@@ -3173,8 +2042,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             //clustered features
             if (this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
-                for (var _id4 in this.cluster._featureGroup._layers) {
-                    var layer = this.cluster._featureGroup._layers[_id4];
+                for (var id in this.cluster._featureGroup._layers) {
+                    var layer = this.cluster._featureGroup._layers[id];
                     if (layer._icon) {
                         //probably is a more efficient way to do this,
                         // but this works currently.
@@ -3188,8 +2057,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             //non-clustered features
             if (this._layers) {
-                for (var _id5 in this._layers) {
-                    this._layers[_id5].setVisibility(bool);
+                for (var _id2 in this._layers) {
+                    this._layers[_id2].setVisibility(bool);
                 }
             }
         },
@@ -3198,8 +2067,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             //clustered features
             if (this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
-                for (var _id6 in this.cluster._featureGroup._layers) {
-                    var layer = this.cluster._featureGroup._layers[_id6];
+                for (var id in this.cluster._featureGroup._layers) {
+                    var layer = this.cluster._featureGroup._layers[id];
                     if (layer._icon) {
                         jQuery(layer._icon).css({ opacity: opacity });
                     }
@@ -3208,8 +2077,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             //non-clustered features
             if (this._layers) {
-                for (var _id7 in this._layers) {
-                    var _layer = this._layers[_id7];
+                for (var _id3 in this._layers) {
+                    var _layer = this._layers[_id3];
                     if (_layer.setOpacity) _layer.setOpacity(opacity);
                 }
             }
@@ -3222,7 +2091,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         },
 
         loadStyle: function loadStyle(gpLayerId) {
-            var _this12 = this;
+            var _this4 = this;
 
             if (this.options.styleLoader) {
                 this.options.styleLoader(gpLayerId).then(function (json) {
@@ -3257,10 +2126,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             // console.log("Using style: " + JSON.stringify(style));
                             return style;
                         }, json);
-                        _this12.options.style = styleFn;
+                        _this4.options.style = styleFn;
                         setTimeout(function (layer, style) {
                             layer.setStyle(style);
-                        }, 1000, _this12, styleFn);
+                        }, 1000, _this4, styleFn);
                         return;
                     } else if (json && typeof json.push !== 'undefined') {
                         //multiple styles returned
@@ -3274,14 +2143,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     if (style.shape) {
                         var obj = jQuery.extend({}, style);
                         obj.style = style;
-                        _this12._gpStyle = style;
+                        _this4._gpStyle = style;
 
                         //setStyle on Cluster.FeatureLayer doesn't appear to work consistently for
                         // non-clustered features.
                         // this.setStyle(obj);
                         //So instead, we manually set it on all features of the layer (that aren't clustered)
-                        for (var _id8 in _this12._layers) {
-                            _this12._layers[_id8].setStyle(obj);
+                        for (var id in _this4._layers) {
+                            _this4._layers[id].setStyle(obj);
                         }
                     }
                 }).catch(function (e) {
@@ -3356,140 +2225,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     // })(jQuery, L/*eaflet*/,GeoPlatform);
 
     return L.GeoPlatform.ClusteredFeatureLayer;
-});
-
-(function (root, factory) {
-    if (typeof define === "function" && define.amd) {
-        // Now we're wrapping the factory and assigning the return
-        // value to the root (window) and returning it as well to
-        // the AMD loader.
-        define(["jquery", "q", "GeoPlatform", "JQueryItemService"], function (jQuery, Q, GeoPlatform, JQueryItemService) {
-            return root.JQueryLayerService = factory(jQuery, Q, GeoPlatform, JQueryItemService);
-        });
-    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-        // I've not encountered a need for this yet, since I haven't
-        // run into a scenario where plain modules depend on CommonJS
-        // *and* I happen to be loading in a CJS browser environment
-        // but I'm including it for the sake of being thorough
-        module.exports = root.JQueryLayerService = factory(require("jquery"), require('q'), require('GeoPlatform'), require('JQueryItemService'));
-    } else {
-        GeoPlatform.JQueryLayerService = factory(jQuery, Q, GeoPlatform, GeoPlatform.JQueryItemService);
-    }
-})(undefined || window, function (jQuery, Q, GeoPlatform, JQueryItemService) {
-
-    'use strict';
-
-    /**
-     * GeoPlatform Map service
-     * service for working with the GeoPlatform API to
-     * retrieve and manipulate map objects.
-     *
-     * @see GeoPlatform.JQueryItemService
-     */
-
-    var JQueryLayerService = function (_JQueryItemService2) {
-        _inherits(JQueryLayerService, _JQueryItemService2);
-
-        function JQueryLayerService() {
-            _classCallCheck(this, JQueryLayerService);
-
-            var _this13 = _possibleConstructorReturn(this, (JQueryLayerService.__proto__ || Object.getPrototypeOf(JQueryLayerService)).call(this));
-
-            _this13.baseUrl = GeoPlatform.ualUrl + '/api/layers';
-            return _this13;
-        }
-
-        /**
-         * @param {Object} options - optional set of request options to apply to xhr request
-         * @return {Promise} resolving style JSON object
-         */
-
-
-        _createClass(JQueryLayerService, [{
-            key: "style",
-            value: function style(options) {
-                var _this14 = this;
-
-                return Q.resolve(true).then(function () {
-
-                    var d = Q.defer();
-                    var url = _this14.baseUrl + '/' + id + '/style';
-                    var opts = _this14.buildRequest("GET", url, null, options);
-                    opts.success = function (data) {
-                        d.resolve(data);
-                    };
-                    opts.error = function (xhr, status, message) {
-                        var m = "GeoPlatform.LayerService.style() - Error fetching item style: " + message;
-                        var err = new Error(m);
-                        d.reject(err);
-                    };
-                    jQuery.ajax(opts);
-                    return d.promise;
-                }).catch(function (e) {
-                    var err = new Error("ItemService.save() - Error deleting item: " + e.message);
-                    return Q.reject(err);
-                });
-            }
-
-            /**
-             * @param {Object} req identifying extent, x, y
-             * @param {Object} options - optional set of request options to apply to xhr request
-             * @return {Promise} resolving feature JSON object
-             */
-
-        }, {
-            key: "describe",
-            value: function describe(req, options) {
-                var _this15 = this;
-
-                return Q.resolve(true).then(function () {
-
-                    if (!req) {
-                        throw new Error("Must provide describe req");
-                    }
-
-                    var keys = ['bbox', 'height', 'width', 'x', 'y'];
-                    var missing = keys.find(function (key) {
-                        return !req[key];
-                    });
-                    if (missing) {
-                        throw new Error("Must specify " + missing + " in describe req");
-                    }
-
-                    var params = {
-                        srs: 'EPSG:4326',
-                        bbox: req.bbox,
-                        height: req.height,
-                        width: req.width,
-                        info_format: 'text/xml',
-                        x: req.x,
-                        y: req.y,
-                        i: req.x, //WMS 1.3.0
-                        j: req.y //WMS 1.3.0
-                    };
-
-                    var d = Q.defer();
-                    var url = _this15.baseUrl + '/' + id + '/describe';
-                    var opts = _this15.buildRequest("GET", url, params, options);
-                    opts.success = function (data) {
-                        d.resolve(data);
-                    };
-                    opts.error = function (xhr, status, message) {
-                        d.reject(new Error(message));
-                    };
-                    jQuery.ajax(opts);
-                    return d.promise;
-                }).catch(function (e) {
-                    var err = new Error("JQueryLayerService.describe() -\n                    Error describing layer feature: " + e.message);
-                    return Q.reject(err);
-                });
-            }
-        }]);
-
-        return JQueryLayerService;
-    }(JQueryItemService);
-
-    return JQueryLayerService;
 });
 
 (function (root, factory) {
@@ -3675,53 +2410,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return L.GeoPlatform.LayerFactory;
 });
 
-(function (root, factory) {
-    if (typeof define === "function" && define.amd) {
-        // Now we're wrapping the factory and assigning the return
-        // value to the root (window) and returning it as well to
-        // the AMD loader.
-        define(["jquery", "q", "GeoPlatform", "JQueryItemService"], function (jQuery, Q, GeoPlatform, JQueryItemService) {
-            return root.JQueryMapService = factory(jQuery, Q, GeoPlatform, JQueryItemService);
-        });
-    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
-        // I've not encountered a need for this yet, since I haven't
-        // run into a scenario where plain modules depend on CommonJS
-        // *and* I happen to be loading in a CJS browser environment
-        // but I'm including it for the sake of being thorough
-        module.exports = root.JQueryMapService = factory(require("jquery"), require('q'), require('GeoPlatform'), require('JQueryItemService'));
-    } else {
-        GeoPlatform.JQueryMapService = factory(jQuery, Q, GeoPlatform, GeoPlatform.JQueryItemService);
-    }
-})(undefined || window, function (jQuery, Q, GeoPlatform, JQueryItemService) {
-
-    'use strict';
-
-    /**
-     * GeoPlatform Map service
-     * service for working with the GeoPlatform API to
-     * retrieve and manipulate map objects.
-     *
-     * @see GeoPlatform.JQueryItemService
-     */
-
-    var JQueryMapService = function (_JQueryItemService3) {
-        _inherits(JQueryMapService, _JQueryItemService3);
-
-        function JQueryMapService() {
-            _classCallCheck(this, JQueryMapService);
-
-            var _this16 = _possibleConstructorReturn(this, (JQueryMapService.__proto__ || Object.getPrototypeOf(JQueryMapService)).call(this));
-
-            _this16.baseUrl = GeoPlatform.ualUrl + '/api/maps';
-            return _this16;
-        }
-
-        return JQueryMapService;
-    }(JQueryItemService);
-
-    return JQueryMapService;
-});
-
 // /**
 //  *
 //  */
@@ -3792,47 +2480,47 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function MapInstance(key) {
             _classCallCheck(this, MapInstance);
 
-            var _this17 = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
+            var _this5 = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
 
-            _this17.service = new JQueryMapService();
+            _this5.service = new JQueryMapService();
 
             //generate random key (see factory below)
-            _this17._key = key || Math.ceil(Math.random() * 9999);
+            _this5._key = key || Math.ceil(Math.random() * 9999);
 
             //registry id of current map if available
-            _this17._mapId = null,
+            _this5._mapId = null,
 
             //definition of map (ie, from server)
-            _this17._mapDef = _this17.initializeMapDefinition(),
+            _this5._mapDef = _this5.initializeMapDefinition(),
 
             //primary map instance (ie, leaflet)
-            _this17._mapInstance = null,
+            _this5._mapInstance = null,
 
             //default map extent (if map doesn't have one for being saved)
-            _this17._defaultExtent = null,
+            _this5._defaultExtent = null,
 
             //current base layer object and leaflet instance
-            _this17._baseLayerDef = null, _this17._baseLayer = null,
+            _this5._baseLayerDef = null, _this5._baseLayer = null,
 
             //set definitions of layer states (including layer info) on map
-            _this17._layerStates = [],
+            _this5._layerStates = [],
 
             //map layer def ids with leaflet instances
-            _this17._layerCache = {},
+            _this5._layerCache = {},
 
             //errors generated by layers loading
-            _this17._layerErrors = [],
+            _this5._layerErrors = [],
 
             //layer used to store features on map
-            _this17._featureLayer = null, _this17._featureLayerVisible = true,
+            _this5._featureLayer = null, _this5._featureLayerVisible = true,
 
             //set of registered map tools
-            _this17._tools = [],
+            _this5._tools = [],
 
             //state management
-            _this17.state = { dirty: false };
+            _this5.state = { dirty: false };
 
-            _this17._geoJsonLayerOpts = {
+            _this5._geoJsonLayerOpts = {
                 style: function style(feature) {
                     if (feature.properties.style) return feature.properties.style;
                 },
@@ -3869,7 +2557,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             };
 
-            return _this17;
+            return _this5;
         }
 
         _createClass(MapInstance, [{
@@ -4212,7 +2900,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "setBaseLayer",
             value: function setBaseLayer(layer) {
-                var _this18 = this;
+                var _this6 = this;
 
                 var promise = null;
                 if (!layer) {
@@ -4224,18 +2912,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     var leafletLayer = L.GeoPlatform.LayerFactory(layer);
                     if (!leafletLayer) return;
 
-                    _this18._mapInstance.addLayer(leafletLayer);
+                    _this6._mapInstance.addLayer(leafletLayer);
                     leafletLayer.setZIndex(0); //set at bottom
 
-                    var oldBaseLayer = _this18._baseLayer;
+                    var oldBaseLayer = _this6._baseLayer;
                     if (oldBaseLayer) {
-                        _this18._mapInstance.removeLayer(oldBaseLayer);
+                        _this6._mapInstance.removeLayer(oldBaseLayer);
                     }
 
                     //remember new base layer
-                    _this18._baseLayer = leafletLayer;
-                    _this18._baseLayerDef = layer;
-                    _this18.touch('baselayer:changed', layer);
+                    _this6._baseLayer = leafletLayer;
+                    _this6._baseLayerDef = layer;
+                    _this6.touch('baselayer:changed', layer);
                 }).catch(function (e) {
                     console.log("MapInstance.setBaseLayer() - Error getting base layer for map : " + e.message);
                 });
@@ -4299,7 +2987,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "addLayers",
             value: function addLayers(layers) {
-                var _this19 = this;
+                var _this7 = this;
 
                 layers.each(function (obj, index) {
 
@@ -4318,7 +3006,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     if (!layer) return; //layer info is missing, skip it
 
                     //DT-442 prevent adding layer that already exists on map
-                    if (_this19._layerCache[layer.id]) return;
+                    if (_this7._layerCache[layer.id]) return;
 
                     if (!state) state = { opacity: 1, visibility: true, layer: JSON.parse(JSON.stringify(layer)) };
 
@@ -4327,16 +3015,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                         //listen for layer errors so we can inform the user
                         // that a layer hasn't been loaded in a useful way
-                        leafletLayer.on('tileerror', _this19.handleLayerError);
+                        leafletLayer.on('tileerror', _this7.handleLayerError);
 
                         var z = layers.length - index;
                         state.zIndex = z;
                         // console.log("Setting z of " + z + " on " + layer.label);
 
-                        _this19._layerCache[layer.id] = leafletLayer;
-                        _this19._mapInstance.addLayer(leafletLayer);
+                        _this7._layerCache[layer.id] = leafletLayer;
+                        _this7._mapInstance.addLayer(leafletLayer);
                         if (leafletLayer.setZIndex) leafletLayer.setZIndex(z);
-                        _this19._layerStates.push(state); //put it in at top of list
+                        _this7._layerStates.push(state); //put it in at top of list
 
                         // if layer is initially "off" or...
                         // if layer is initially not 100% opaque
@@ -4344,8 +3032,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             // initialize layer visibility and opacity async, or else
                             // some of the layers won't get properly initialized
                             setTimeout(function (layer, state) {
-                                _this19.setLayerVisibility(layer, state.visibility);
-                                _this19.setLayerOpacity(layer, state.opacity);
+                                _this7.setLayerVisibility(layer, state.visibility);
+                                _this7.setLayerOpacity(layer, state.opacity);
                                 //TODO notify of change
                             }, 500, leafletLayer, state);
                         }
@@ -4588,7 +3276,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "addFeature",
             value: function addFeature(json, fireEvent) {
-                var _this20 = this;
+                var _this8 = this;
 
                 // var type = json.type;
                 // var coordinates = json.coordinates;
@@ -4602,7 +3290,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 // _featureLayer.addData(json);
                 var opts = jQuery.extend({}, this._geoJsonLayerOpts);
                 L.geoJson(json, opts).eachLayer(function (l) {
-                    return _this20.addFeatureLayer(l);
+                    return _this8.addFeatureLayer(l);
                 });
 
                 if (typeof fireEvent === 'undefined' || fireEvent === true) this.touch('features:changed');else this.touch();
@@ -4645,7 +3333,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "replaceFeature",
             value: function replaceFeature(featureJson) {
-                var _this21 = this;
+                var _this9 = this;
 
                 //find existing layer for this feature
                 var layer = this.getFeatureLayer(featureJson.properties.id);
@@ -4656,7 +3344,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                     //add replacement
                     L.geoJson(featureJson, this._geoJsonLayerOpts).eachLayer(function (l) {
-                        return _this21.addFeatureLayer(l);
+                        return _this9.addFeatureLayer(l);
                     });
 
                     this.touch("map:feature:changed");
@@ -4769,7 +3457,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "saveMap",
             value: function saveMap(md) {
-                var _this22 = this;
+                var _this10 = this;
 
                 var metadata = md || {};
                 metadata.resourceTypes = metadata.resourceTypes || [];
@@ -4793,11 +3481,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.service.save(content).then(function (result) {
 
                     //track new map's info so we can update it with next save
-                    if (!_this22._mapId) _this22._mapId = result.id;
+                    if (!_this10._mapId) _this10._mapId = result.id;
 
-                    _this22._mapDef = result;
-                    _this22._defaultExtent = result.extent;
-                    _this22.clean();
+                    _this10._mapDef = result;
+                    _this10._defaultExtent = result.extent;
+                    _this10.clean();
                     d.resolve(result);
                 }).catch(function (error) {
                     d.reject(error);
@@ -4830,7 +3518,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "loadMap",
             value: function loadMap(mapId) {
-                var _this23 = this;
+                var _this11 = this;
 
                 return this.fetchMap(mapId).then(function (map) {
 
@@ -4849,7 +3537,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             //update view count
                             var views = map.statistics ? map.statistics.numViews || 0 : 0;
                             var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
-                            _this23.service.patch(map.id, patch).then(function (updated) {
+                            _this11.service.patch(map.id, patch).then(function (updated) {
                                 map.statistics = updated.statistics;
                             }).catch(function (e) {
                                 console.log("Error updating view count for map: " + e);
@@ -4858,7 +3546,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }
 
                     //load the map into the viewer
-                    _this23.loadMapFromObj(map);
+                    _this11.loadMapFromObj(map);
 
                     return map;
                 }).catch(function (err) {
@@ -4876,7 +3564,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "loadMapFromObj",
             value: function loadMapFromObj(map) {
-                var _this24 = this;
+                var _this12 = this;
 
                 // console.log(map);
 
@@ -4904,7 +3592,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 //remove existing layers
                 this._mapInstance.eachLayer(function (l) {
-                    _this24._mapInstance.removeLayer(l);
+                    _this12._mapInstance.removeLayer(l);
                 });
                 this._layerCache = {};
                 this._layerStates = [];

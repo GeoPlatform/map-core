@@ -18,28 +18,33 @@ This library requires the following dependencies be present in your application:
 
 
 ### GeoPlatform Dependencies
-- [ng-common](https://github.com/GeoPlatform/ng-common)
+- [Geoplatform Client API](https://github.com/GeoPlatform/client-api)
 
 
-### Miscellaneous Dependencies
+### Including Map Core in your app
 
 Map core should be included in your app _after_ you provided environment-specific
 configuration variables. It expects `window.GeoPlatform` to exist at runtime.
+See Environment Variables below for details on what is expected to be provided.
 
 ```html
 <!-- define 'GeoPlatform' namespace and set env variables-->
 <script src="env.js"></script>
 <!-- include ng-common -->
-<script src="geoplatform.common.js"></script>
+<script src="geoplatform.client.js"></script>
 <!-- include map core -->
 <script src="geoplatform.mapcore.js"></script>
 ```
 
-If you are using Angular 1.x, import the mapcore.ng.js file to get access to
-"NG" services which leverage Angular's $http service when fetching data.
+If you are using Angular 1.x, make sure to import the client.ng.js after client.js
+but before mapcore.js to get access to "NG" services which leverage Angular's
+$http service when fetching data.
 
 ```html
-<script src="geoplatform.mapcore.ng.js"></script>
+<script src="env.js"></script>
+<script src="geoplatform.client.js"></script>       
+<script src="geoplatform.client.ng.js"></script>    <!-- NG -->
+<script src="geoplatform.mapcore.js"></script>
 ```
 
 ## Environment Variables
@@ -49,14 +54,11 @@ within is shown below.
 ```javascript
 GeoPlatform = {
 
-    //environment the application is deployed within
+    //REQUIRED: environment the application is deployed within
+    // one of "development", "sit", "stg", "prd", or "production"
     "env" : "development",
 
-    //URLs to GeoPlatform identity management services
-    "idmUrl" : "https://sitidp.geoplatform.us",
-    "idspUrl" : "https://sitsp.geoplatform.us",
-
-    //URL to GeoPlatform UAL for API usage
+    //REQUIRED: URL to GeoPlatform UAL for API usage
     "ualUrl" : "https://sit-ual.geoplatform.us",
 
     //timeout max for requests
@@ -106,10 +108,6 @@ within the GeoPlatform namespace.
 ### Map instances
 To learn how to bind GeoPlatform Maps, Layers, and GeoJSON features to
 Leaflet maps, see the [Map Instances](src/map/instance.md) documentation.
-
-### GeoPlatform APIs
-To learn how to use the GeoPlatform API to fetch, create, update, and remove
-GeoPlatform Assets, see the [GeoPlatform API](api.md) documentation.
 
 ### Using Map Core with Angular
 The default services used within Map Core components will still be jQuery-based,
