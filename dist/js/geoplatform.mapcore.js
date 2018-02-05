@@ -231,7 +231,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     var query = QueryFactory().types('dct:Standard').resourceTypes('ServiceType').pageSize(50);
 
-    new JQueryItemService().search(query).then(function (data) {
+    new JQueryItemService(GeoPlatform.ualUrl).search(query).then(function (data) {
 
         for (var i = 0; i < data.results.length; ++i) {
 

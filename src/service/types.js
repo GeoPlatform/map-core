@@ -49,7 +49,7 @@
         .resourceTypes('ServiceType')
         .pageSize(50)
 
-    new JQueryItemService().search(query)
+    new JQueryItemService(GeoPlatform.ualUrl).search(query)
     .then( data => {
 
         for(let i=0; i<data.results.length; ++i) {
