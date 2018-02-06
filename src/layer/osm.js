@@ -6,9 +6,10 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "GeoPlatform", "QueryFactory", "JQueryLayerService"],
-            function(Q, GeoPlatform, QueryFactory, JQueryLayerService) {
-                return (root.OSM = factory(Q, GeoPlatform, QueryFactory, JQueryLayerService));
+        define(["q", "GeoPlatform", "QueryFactory", "LayerService", "JQueryHttpClient"],
+            function(Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient) {
+                return (root.OSM = factory(
+                    Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -20,14 +21,16 @@
                 require('q'),
                 require('GeoPlatform'),
                 require('QueryFactory'),
-                require('JQueryLayerService')
+                require('LayerService'),
+                require('JQueryHttpClient')
             )
         );
     } else {
         GeoPlatform.OSM = factory(Q, GeoPlatform,
-            GeoPlatform.QueryFactory, GeoPlatform.JQueryLayerService);
+            GeoPlatform.QueryFactory, GeoPlatform.LayerService,
+            GeoPlatform.JQueryHttpClient);
     }
-}(this||window, function(Q, GeoPlatform, QueryFactory, JQueryLayerService) {
+}(this||window, function(Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient) {
 
     /**
      * @param {LayerService} layerService - optional, GeoPlatform Layer service to use to fetch the layer
@@ -50,8 +53,9 @@
             let query = QueryFactory()
                 .fields('*')
                 .resourceTypes("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
-            let svc = layerService || new JQueryLayerService();
-            return svc.search(query)
+            if(!layerService)
+                layerService = new LayerService(GeoPlatform.ualUrl, new JQueryHttpClient());
+            return layerService.search(query)
             .then( response => response.results.length ? response.results[0] : null)
             .catch( e => Q.reject(e));
         }

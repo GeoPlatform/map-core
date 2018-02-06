@@ -9,9 +9,10 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "OSM", "JQueryMapService"],
-            function(jQuery, Q, L, GeoPlatform, OSM, JQueryMapService){
-                return (root.MapInstance = factory(jQuery, Q, L, GeoPlatform, OSM, JQueryMapService));
+        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "OSM", "MapService", "JQueryHttpClient"],
+            function(jQuery, Q, L, GeoPlatform, OSM, MapService, JQueryHttpClient){
+                return (root.MapInstance =
+                    factory(jQuery, Q, L, GeoPlatform, OSM, MapService, JQueryHttpClient));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -25,15 +26,18 @@
                 require('L'),
                 require('GeoPlatform'),
                 require('OSM'),
-                require('JQueryMapService')
+                require('MapService'),
+                require('JQueryHttpClient')
             )
         );
     } else {
         GeoPlatform.MapInstance = factory(
             jQuery, Q, L, GeoPlatform,
-            GeoPlatform.OSM, GeoPlatform.JQueryMapService);
+            GeoPlatform.OSM, GeoPlatform.MapService,
+            GeoPlatform.JQueryHttpClient);
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform, OSM, JQueryMapService) {
+}(this||window, function(jQuery, Q, L/*eaflet*/,
+    GeoPlatform, OSM, MapService, JQueryHttpClient) {
 
     "use strict";
 
@@ -77,7 +81,7 @@
         constructor(key) {
             super();
 
-            this.service = new JQueryMapService();
+            this.service = new MapService(GeoPlatform.ualUrl, new JQueryHttpClient());
 
             //generate random key (see factory below)
             this._key = key || Math.ceil(Math.random()*9999);

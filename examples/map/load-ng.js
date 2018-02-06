@@ -23,7 +23,7 @@ let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //use Angular-based MapService instead of default (JQuery)
-let service = new GeoPlatform.NGMapService();
+let service = new GeoPlatform.MapService(GeoPlatform.ualUrl, new GeoPlatform.NGHttpClient());
 mapInstance.setService(service);
 
 //just for example purposes, find the first map available

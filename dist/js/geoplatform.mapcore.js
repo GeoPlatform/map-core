@@ -206,19 +206,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "GeoPlatform", "JQueryItemService", "QueryFactory"], function (jQuery, Q, GeoPlatform, JQueryItemService, QueryFactory) {
-            return root.ServiceTypes = factory(jQuery, Q, GeoPlatform, JQueryItemService, QueryFactory);
+        define(["jquery", "q", "GeoPlatform", "ItemService", "JQueryHttpClient", "QueryFactory"], function (jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory) {
+            return root.ServiceTypes = factory(jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.ServiceTypes = factory(require("jquery"), require('q'), require('GeoPlatform'), require('JQueryItemService'), require('QueryFactory'));
+        module.exports = root.ServiceTypes = factory(require("jquery"), require('q'), require('GeoPlatform'), require('ItemService'), require('JQueryHttpClient'), require('QueryFactory'));
     } else {
-        GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform, GeoPlatform.JQueryItemService, GeoPlatform.QueryFactory);
+        GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform, GeoPlatform.ItemService, GeoPlatform.JQueryHttpClient, GeoPlatform.QueryFactory);
     }
-})(undefined || window, function (jQuery, Q, GeoPlatform, JQueryItemService, QueryFactory) {
+})(undefined || window, function (jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory) {
 
     var ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
     var esriExpr = /Esri REST ([A-Za-z]+) Service/;
@@ -231,7 +231,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     var query = QueryFactory().types('dct:Standard').resourceTypes('ServiceType').pageSize(50);
 
-    new JQueryItemService(GeoPlatform.ualUrl).search(query).then(function (data) {
+    new ItemService(GeoPlatform.ualUrl, new JQueryHttpClient()).search(query).then(function (data) {
 
         for (var i = 0; i < data.results.length; ++i) {
 
@@ -2232,19 +2232,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "GeoPlatform", "QueryFactory", "JQueryLayerService"], function (Q, GeoPlatform, QueryFactory, JQueryLayerService) {
-            return root.OSM = factory(Q, GeoPlatform, QueryFactory, JQueryLayerService);
+        define(["q", "GeoPlatform", "QueryFactory", "LayerService", "JQueryHttpClient"], function (Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient) {
+            return root.OSM = factory(Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.OSM = factory(require('q'), require('GeoPlatform'), require('QueryFactory'), require('JQueryLayerService'));
+        module.exports = root.OSM = factory(require('q'), require('GeoPlatform'), require('QueryFactory'), require('LayerService'), require('JQueryHttpClient'));
     } else {
-        GeoPlatform.OSM = factory(Q, GeoPlatform, GeoPlatform.QueryFactory, GeoPlatform.JQueryLayerService);
+        GeoPlatform.OSM = factory(Q, GeoPlatform, GeoPlatform.QueryFactory, GeoPlatform.LayerService, GeoPlatform.JQueryHttpClient);
     }
-})(undefined || window, function (Q, GeoPlatform, QueryFactory, JQueryLayerService) {
+})(undefined || window, function (Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient) {
 
     /**
      * @param {LayerService} layerService - optional, GeoPlatform Layer service to use to fetch the layer
@@ -2262,8 +2262,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         get: function get(layerService) {
             var query = QueryFactory().fields('*').resourceTypes("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
-            var svc = layerService || new JQueryLayerService();
-            return svc.search(query).then(function (response) {
+            if (!layerService) layerService = new LayerService(GeoPlatform.ualUrl, new JQueryHttpClient());
+            return layerService.search(query).then(function (response) {
                 return response.results.length ? response.results[0] : null;
             }).catch(function (e) {
                 return Q.reject(e);
@@ -2278,19 +2278,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "GeoPlatform", "OSM", "JQueryLayerService"], function (Q, GeoPlatform, OSM, JQueryLayerService) {
-            return root.defaultBaseLayer = factory(Q, GeoPlatform, OSM, JQueryLayerService);
+        define(["q", "GeoPlatform", "OSM", "LayerService", "JQueryHttpClient"], function (Q, GeoPlatform, OSM, LayerService, JQueryHttpClient) {
+            return root.defaultBaseLayer = factory(Q, GeoPlatform, OSM, LayerService, JQueryHttpClient);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.defaultBaseLayer = factory(require('q'), require('GeoPlatform'), require('OSM'), require('JQueryLayerService'));
+        module.exports = root.defaultBaseLayer = factory(require('q'), require('GeoPlatform'), require('OSM'), require('LayerService'), require('JQueryHttpClient'));
     } else {
-        GeoPlatform.defaultBaseLayer = factory(Q, GeoPlatform, GeoPlatform.OSM, GeoPlatform.JQueryLayerService);
+        GeoPlatform.defaultBaseLayer = factory(Q, GeoPlatform, GeoPlatform.OSM, GeoPlatform.LayerService, GeoPlatform.JQueryHttpClient);
     }
-})(undefined || window, function (Q, GeoPlatform, OSM, JQueryLayerService) {
+})(undefined || window, function (Q, GeoPlatform, OSM, LayerService, JQueryHttpClient) {
 
     /**
      * If a default base layer is defined using the 'defaultBaseLayer'
@@ -2301,8 +2301,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return function (layerService) {
         if (!GeoPlatform.defaultBaseLayerId) return OSM.get();
 
-        var svc = layerService || new JQueryLayerService();
-        return svc.get(GeoPlatform.defaultBaseLayerId).catch(function (e) {
+        if (!layerService) layerService = new LayerService(GeoPlatform.ualUrl, new JQueryHttpClient());
+        return layerService.get(GeoPlatform.defaultBaseLayerId).catch(function (e) {
             return Q.resolve(OSM.get());
         });
     };
@@ -2420,19 +2420,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform", "OSM", "JQueryMapService"], function (jQuery, Q, L, GeoPlatform, OSM, JQueryMapService) {
-            return root.MapInstance = factory(jQuery, Q, L, GeoPlatform, OSM, JQueryMapService);
+        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform", "OSM", "MapService", "JQueryHttpClient"], function (jQuery, Q, L, GeoPlatform, OSM, MapService, JQueryHttpClient) {
+            return root.MapInstance = factory(jQuery, Q, L, GeoPlatform, OSM, MapService, JQueryHttpClient);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'), require('OSM'), require('JQueryMapService'));
+        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'), require('OSM'), require('MapService'), require('JQueryHttpClient'));
     } else {
-        GeoPlatform.MapInstance = factory(jQuery, Q, L, GeoPlatform, GeoPlatform.OSM, GeoPlatform.JQueryMapService);
+        GeoPlatform.MapInstance = factory(jQuery, Q, L, GeoPlatform, GeoPlatform.OSM, GeoPlatform.MapService, GeoPlatform.JQueryHttpClient);
     }
-})(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform, OSM, JQueryMapService) {
+})(undefined || window, function (jQuery, Q, L /*eaflet*/
+, GeoPlatform, OSM, MapService, JQueryHttpClient) {
 
     "use strict";
 
@@ -2482,7 +2483,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             var _this5 = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
 
-            _this5.service = new JQueryMapService();
+            _this5.service = new MapService(GeoPlatform.ualUrl, new JQueryHttpClient());
 
             //generate random key (see factory below)
             _this5._key = key || Math.ceil(Math.random() * 9999);

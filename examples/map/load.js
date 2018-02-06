@@ -20,7 +20,7 @@ mapInstance.setMap(leafletMap);
 //just for example purposes, find the first map available
 let query = GeoPlatform.QueryFactory().keywords('WMV');
 
-let service = new GeoPlatform.JQueryMapService();
+let service = new GeoPlatform.MapService(GeoPlatform.ualUrl, new GeoPlatform.JQueryHttpClient());
 
 service.search(query)
 .then( response => {

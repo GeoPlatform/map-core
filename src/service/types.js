@@ -9,10 +9,11 @@
          // Now we're wrapping the factory and assigning the return
          // value to the root (window) and returning it as well to
          // the AMD loader.
-         define(["jquery", "q", "GeoPlatform", "JQueryItemService", "QueryFactory"],
-             function(jQuery, Q, GeoPlatform, JQueryItemService, QueryFactory) {
+         define(["jquery", "q", "GeoPlatform", "ItemService",
+         "JQueryHttpClient", "QueryFactory"],
+             function(jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory) {
                  return (root.ServiceTypes = factory(
-                     jQuery, Q, GeoPlatform, JQueryItemService, QueryFactory));
+                     jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory));
              });
      } else if(typeof module === "object" && module.exports) {
          // I've not encountered a need for this yet, since I haven't
@@ -24,15 +25,18 @@
                  require("jquery"),
                  require('q'),
                  require('GeoPlatform'),
-                 require('JQueryItemService'),
+                 require('ItemService'),
+                 require('JQueryHttpClient'),
                  require('QueryFactory')
              )
          );
      } else {
          GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform,
-             GeoPlatform.JQueryItemService, GeoPlatform.QueryFactory);
+             GeoPlatform.ItemService, GeoPlatform.JQueryHttpClient,
+             GeoPlatform.QueryFactory);
      }
- }(this||window, function(jQuery, Q, GeoPlatform, JQueryItemService, QueryFactory) {
+ }(this||window, function(jQuery, Q, GeoPlatform, ItemService,
+     JQueryHttpClient, QueryFactory) {
 
 
     const ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
@@ -49,7 +53,7 @@
         .resourceTypes('ServiceType')
         .pageSize(50)
 
-    new JQueryItemService(GeoPlatform.ualUrl).search(query)
+    new ItemService(GeoPlatform.ualUrl, new JQueryHttpClient()).search(query)
     .then( data => {
 
         for(let i=0; i<data.results.length; ++i) {

@@ -6,9 +6,10 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "GeoPlatform", "OSM", "JQueryLayerService"],
-            function(Q, GeoPlatform, OSM, JQueryLayerService) {
-                return (root.defaultBaseLayer = factory(Q, GeoPlatform, OSM, JQueryLayerService));
+        define(["q", "GeoPlatform", "OSM", "LayerService", "JQueryHttpClient"],
+            function(Q, GeoPlatform, OSM, LayerService, JQueryHttpClient) {
+                return (root.defaultBaseLayer =
+                    factory(Q, GeoPlatform, OSM, LayerService, JQueryHttpClient));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -20,15 +21,17 @@
                 require('q'),
                 require('GeoPlatform'),
                 require('OSM'),
-                require('JQueryLayerService')
+                require('LayerService'),
+                require('JQueryHttpClient')
             )
         );
     } else {
         GeoPlatform.defaultBaseLayer = factory(
             Q, GeoPlatform, GeoPlatform.OSM,
-            GeoPlatform.JQueryLayerService);
+            GeoPlatform.LayerService,
+            GeoPlatform.JQueryHttpClient);
     }
-}(this||window, function(Q, GeoPlatform, OSM, JQueryLayerService) {
+}(this||window, function(Q, GeoPlatform, OSM, LayerService, JQueryHttpClient) {
 
     /**
      * If a default base layer is defined using the 'defaultBaseLayer'
@@ -40,8 +43,9 @@
         if(!GeoPlatform.defaultBaseLayerId)
             return OSM.get();
 
-        let svc = layerService || new JQueryLayerService();
-        return svc.get(GeoPlatform.defaultBaseLayerId)
+        if(!layerService)
+            layerService = new LayerService(GeoPlatform.ualUrl, new JQueryHttpClient());
+        return layerService.get(GeoPlatform.defaultBaseLayerId)
         .catch(e => Q.resolve( OSM.get() ));
     };
 

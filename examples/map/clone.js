@@ -17,7 +17,7 @@ let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //just for example purposes, find the first map available
-let mapService = new GeoPlatform.JQueryMapService();
+let mapService = new GeoPlatform.MapService(GeoPlatform.ualUrl, new GeoPlatform.JQueryHttpClient());
 mapService.search().then( response => {
     if(response.results.length) {
 
