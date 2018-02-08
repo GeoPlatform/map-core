@@ -44,7 +44,7 @@
                     fn(arr[i]);
                 } catch(e) { }
             }
-        }
+        };
     }
 
     return L.GeoPlatform;

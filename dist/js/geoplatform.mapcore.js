@@ -2483,7 +2483,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             var _this5 = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
 
-            _this5.service = new MapService(GeoPlatform.ualUrl, new JQueryHttpClient());
+            var httpClient = new JQueryHttpClient();
+            _this5.mapService = new MapService(GeoPlatform.ualUrl, httpClient);
+            _this5.layerService = new LayerService(GeoPlatform.ualUrl, httpClient);
 
             //generate random key (see factory below)
             _this5._key = key || Math.ceil(Math.random() * 9999);
@@ -2519,7 +2521,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             _this5._tools = [],
 
             //state management
-            _this5.state = { dirty: false };
+            _this5.state = { dirty: false }; // jshint ignore:line
+
 
             _this5._geoJsonLayerOpts = {
                 style: function style(feature) {
@@ -2575,7 +2578,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "setService",
             value: function setService(mapService) {
-                this.service = mapService;
+                this.mapService = mapService;
             }
 
             //-----------------
@@ -2689,6 +2692,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "processLayerError",
             value: function processLayerError(error, id) {
+                var _this6 = this;
 
                 var finder = function finder(l) {
                     return l.id === id;
@@ -2710,16 +2714,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         params[p[0]] = p[1];
                     });
 
-                    // LayerService.validate(params, {}, function(res) {
-                    //     //no error here, maybe service is flaky...
-                    // }, function(res) {
-                    //     // console.log("Updating error for " + id + " with message");
-                    //     var def = _layerStates.find(finder);
-                    //     obj.message = "Layer '" + def.label + "' failed to completely load. " +
-                    //             "It may be inaccessible or misconfigured. Reported cause: " + res.data;
-                    //     notify('wmv:error', obj);
-                    //
-                    // });
+                    this.layerService.validate(id, params).catch(function (e) {
+                        var def = _this6._layerStates.find(finder);
+                        obj.message = "Layer '" + def.label + "' failed to completely load. " + "It may be inaccessible or misconfigured. Reported cause: " + e.message;
+                        _this6.notify('layer:error', obj);
+                    });
                 }
             }
 
@@ -2901,7 +2900,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "setBaseLayer",
             value: function setBaseLayer(layer) {
-                var _this6 = this;
+                var _this7 = this;
 
                 var promise = null;
                 if (!layer) {
@@ -2913,20 +2912,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     var leafletLayer = L.GeoPlatform.LayerFactory(layer);
                     if (!leafletLayer) return;
 
-                    _this6._mapInstance.addLayer(leafletLayer);
+                    _this7._mapInstance.addLayer(leafletLayer);
                     leafletLayer.setZIndex(0); //set at bottom
 
-                    var oldBaseLayer = _this6._baseLayer;
+                    var oldBaseLayer = _this7._baseLayer;
                     if (oldBaseLayer) {
-                        _this6._mapInstance.removeLayer(oldBaseLayer);
+                        _this7._mapInstance.removeLayer(oldBaseLayer);
                     }
 
                     //remember new base layer
-                    _this6._baseLayer = leafletLayer;
-                    _this6._baseLayerDef = layer;
-                    _this6.touch('baselayer:changed', layer);
+                    _this7._baseLayer = leafletLayer;
+                    _this7._baseLayerDef = layer;
+                    _this7.touch('baselayer:changed', layer);
                 }).catch(function (e) {
                     console.log("MapInstance.setBaseLayer() - Error getting base layer for map : " + e.message);
+                    _this7._layerErrors.push({ id: layer.id, message: e.message });
                 });
             }
 
@@ -2988,7 +2988,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "addLayers",
             value: function addLayers(layers) {
-                var _this7 = this;
+                var _this8 = this;
 
                 layers.each(function (obj, index) {
 
@@ -3007,41 +3007,73 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     if (!layer) return; //layer info is missing, skip it
 
                     //DT-442 prevent adding layer that already exists on map
-                    if (_this7._layerCache[layer.id]) return;
+                    if (_this8._layerCache[layer.id]) return;
 
-                    if (!state) state = { opacity: 1, visibility: true, layer: JSON.parse(JSON.stringify(layer)) };
-
-                    var leafletLayer = L.GeoPlatform.LayerFactory(layer);
-                    if (leafletLayer) {
-
-                        //listen for layer errors so we can inform the user
-                        // that a layer hasn't been loaded in a useful way
-                        leafletLayer.on('tileerror', _this7.handleLayerError);
-
-                        var z = layers.length - index;
-                        state.zIndex = z;
-                        // console.log("Setting z of " + z + " on " + layer.label);
-
-                        _this7._layerCache[layer.id] = leafletLayer;
-                        _this7._mapInstance.addLayer(leafletLayer);
-                        if (leafletLayer.setZIndex) leafletLayer.setZIndex(z);
-                        _this7._layerStates.push(state); //put it in at top of list
-
-                        // if layer is initially "off" or...
-                        // if layer is initially not 100% opaque
-                        if (!state.visibility || state.opacity < 1) {
-                            // initialize layer visibility and opacity async, or else
-                            // some of the layers won't get properly initialized
-                            setTimeout(function (layer, state) {
-                                _this7.setLayerVisibility(layer, state.visibility);
-                                _this7.setLayerOpacity(layer, state.opacity);
-                                //TODO notify of change
-                            }, 500, leafletLayer, state);
-                        }
+                    if (!state) {
+                        state = {
+                            opacity: 1,
+                            visibility: true,
+                            layer: JSON.parse(JSON.stringify(layer))
+                        };
                     }
+
+                    var z = layers.length - index;
+                    state.zIndex = z;
+
+                    _this8.addLayerWithState(layer, state);
                 });
 
                 this.touch('layers:changed');
+            }
+
+            /**
+             * @param {Object} layer - GeoPlatform Layer instance
+             * @param {Object} state - GeoPlatform Layer State
+             */
+
+        }, {
+            key: "addLayerWithState",
+            value: function addLayerWithState(layer, state) {
+                var _this9 = this;
+
+                var leafletLayer = null;
+                try {
+                    if (!layer || !state) throw new Error("Invalid argument, missing layer and or state");
+
+                    leafletLayer = L.GeoPlatform.LayerFactory(layer);
+
+                    if (!leafletLayer) throw new Error("Layer factory returned nothing");
+                } catch (e) {
+                    this._layerErrors.push({
+                        id: layer.id,
+                        message: 'MapInstance.addLayerWithState() - ' + 'Could not create a Leaflet layer: ' + e.message
+                    });
+                }
+
+                if (!leafletLayer) return;
+
+                //listen for layer errors so we can inform the user
+                // that a layer hasn't been loaded in a useful way
+                leafletLayer.on('tileerror', this.handleLayerError);
+
+                this._layerCache[layer.id] = leafletLayer;
+                this._mapInstance.addLayer(leafletLayer);
+
+                if (!isNaN(state.zIndex) && leafletLayer.setZIndex) leafletLayer.setZIndex(state.zIndex);
+
+                this._layerStates.push(state);
+
+                // if layer is initially "off" or...
+                // if layer is initially not 100% opaque
+                if (!state.visibility || state.opacity < 1) {
+                    // initialize layer visibility and opacity async, or else
+                    // some of the layers won't get properly initialized
+                    setTimeout(function (layer, state) {
+                        _this9.setLayerVisibility(layer, state.visibility);
+                        _this9.setLayerOpacity(layer, state.opacity);
+                        //TODO notify of change
+                    }, 500, leafletLayer, state);
+                }
             }
 
             /**
@@ -3277,7 +3309,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "addFeature",
             value: function addFeature(json, fireEvent) {
-                var _this8 = this;
+                var _this10 = this;
 
                 // var type = json.type;
                 // var coordinates = json.coordinates;
@@ -3291,7 +3323,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 // _featureLayer.addData(json);
                 var opts = jQuery.extend({}, this._geoJsonLayerOpts);
                 L.geoJson(json, opts).eachLayer(function (l) {
-                    return _this8.addFeatureLayer(l);
+                    return _this10.addFeatureLayer(l);
                 });
 
                 if (typeof fireEvent === 'undefined' || fireEvent === true) this.touch('features:changed');else this.touch();
@@ -3334,7 +3366,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "replaceFeature",
             value: function replaceFeature(featureJson) {
-                var _this9 = this;
+                var _this11 = this;
 
                 //find existing layer for this feature
                 var layer = this.getFeatureLayer(featureJson.properties.id);
@@ -3345,7 +3377,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                     //add replacement
                     L.geoJson(featureJson, this._geoJsonLayerOpts).eachLayer(function (l) {
-                        return _this9.addFeatureLayer(l);
+                        return _this11.addFeatureLayer(l);
                     });
 
                     this.touch("map:feature:changed");
@@ -3458,7 +3490,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "saveMap",
             value: function saveMap(md) {
-                var _this10 = this;
+                var _this12 = this;
 
                 var metadata = md || {};
                 metadata.resourceTypes = metadata.resourceTypes || [];
@@ -3479,14 +3511,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
 
                 // console.log("Updating: " + JSON.stringify(map));
-                this.service.save(content).then(function (result) {
+                this.mapService.save(content).then(function (result) {
 
                     //track new map's info so we can update it with next save
-                    if (!_this10._mapId) _this10._mapId = result.id;
+                    if (!_this12._mapId) _this12._mapId = result.id;
 
-                    _this10._mapDef = result;
-                    _this10._defaultExtent = result.extent;
-                    _this10.clean();
+                    _this12._mapDef = result;
+                    _this12._defaultExtent = result.extent;
+                    _this12.clean();
                     d.resolve(result);
                 }).catch(function (error) {
                     d.reject(error);
@@ -3506,7 +3538,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function fetchMap(mapId) {
                 //Having to send cache busting parameter to avoid CORS header cache
                 // not sending correct Origin value
-                return this.service.get(mapId);
+                return this.mapService.get(mapId);
             }
 
             /**
@@ -3519,7 +3551,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "loadMap",
             value: function loadMap(mapId) {
-                var _this11 = this;
+                var _this13 = this;
 
                 return this.fetchMap(mapId).then(function (map) {
 
@@ -3538,7 +3570,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             //update view count
                             var views = map.statistics ? map.statistics.numViews || 0 : 0;
                             var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
-                            _this11.service.patch(map.id, patch).then(function (updated) {
+                            _this13.mapService.patch(map.id, patch).then(function (updated) {
                                 map.statistics = updated.statistics;
                             }).catch(function (e) {
                                 console.log("Error updating view count for map: " + e);
@@ -3547,7 +3579,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }
 
                     //load the map into the viewer
-                    _this11.loadMapFromObj(map);
+                    _this13.loadMapFromObj(map);
 
                     return map;
                 }).catch(function (err) {
@@ -3565,7 +3597,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "loadMapFromObj",
             value: function loadMapFromObj(map) {
-                var _this12 = this;
+                var _this14 = this;
 
                 // console.log(map);
 
@@ -3593,7 +3625,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 //remove existing layers
                 this._mapInstance.eachLayer(function (l) {
-                    _this12._mapInstance.removeLayer(l);
+                    _this14._mapInstance.removeLayer(l);
                 });
                 this._layerCache = {};
                 this._layerStates = [];

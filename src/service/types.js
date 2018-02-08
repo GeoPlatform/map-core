@@ -51,7 +51,7 @@
     let query = QueryFactory()
         .types('dct:Standard')
         .resourceTypes('ServiceType')
-        .pageSize(50)
+        .pageSize(50);
 
     new ItemService(GeoPlatform.ualUrl, new JQueryHttpClient()).search(query)
     .then( data => {

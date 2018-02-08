@@ -81,7 +81,10 @@
         constructor(key) {
             super();
 
-            this.service = new MapService(GeoPlatform.ualUrl, new JQueryHttpClient());
+            let httpClient = new JQueryHttpClient();
+            this.mapService = new MapService(GeoPlatform.ualUrl, httpClient);
+            this.layerService = new LayerService(GeoPlatform.ualUrl, httpClient);
+
 
             //generate random key (see factory below)
             this._key = key || Math.ceil(Math.random()*9999);
@@ -118,9 +121,9 @@
             //set of registered map tools
             this._tools = [],
 
-
             //state management
-            this.state = { dirty: false };
+            this.state = { dirty: false }; // jshint ignore:line
+
 
             this._geoJsonLayerOpts = {
                 style: function(feature) {
@@ -172,7 +175,7 @@
          * @param {ItemService} mapService - service to use to CRUD map objects
          */
         setService(mapService) {
-            this.service = mapService;
+            this.mapService = mapService;
         }
 
 
@@ -288,17 +291,13 @@
                     params[p[0]] = p[1];
                 });
 
-                // LayerService.validate(params, {}, function(res) {
-                //     //no error here, maybe service is flaky...
-                // }, function(res) {
-                //     // console.log("Updating error for " + id + " with message");
-                //     var def = _layerStates.find(finder);
-                //     obj.message = "Layer '" + def.label + "' failed to completely load. " +
-                //             "It may be inaccessible or misconfigured. Reported cause: " + res.data;
-                //     notify('wmv:error', obj);
-                //
-                // });
-
+                this.layerService.validate(id, params)
+                .catch(e => {
+                    var def = this._layerStates.find(finder);
+                    obj.message = "Layer '" + def.label + "' failed to completely load. " +
+                            "It may be inaccessible or misconfigured. Reported cause: " + e.message;
+                    this.notify('layer:error', obj);
+                });
             }
         }
 
@@ -460,6 +459,7 @@
             })
             .catch(e => {
                 console.log(`MapInstance.setBaseLayer() - Error getting base layer for map : ${e.message}`);
+                this._layerErrors.push({id:layer.id, message: e.message});
             });
         }
 
@@ -521,41 +521,74 @@
                 //DT-442 prevent adding layer that already exists on map
                 if(this._layerCache[layer.id]) return;
 
-                if(!state)
-                    state = { opacity: 1, visibility: true, layer: JSON.parse(JSON.stringify(layer)) };
-
-                var leafletLayer = L.GeoPlatform.LayerFactory(layer);
-                if(leafletLayer) {
-
-                    //listen for layer errors so we can inform the user
-                    // that a layer hasn't been loaded in a useful way
-                    leafletLayer.on('tileerror', this.handleLayerError);
-
-                    let z = layers.length - index;
-                    state.zIndex = z;
-                    // console.log("Setting z of " + z + " on " + layer.label);
-
-                    this._layerCache[layer.id] = leafletLayer;
-                    this._mapInstance.addLayer(leafletLayer);
-                    if(leafletLayer.setZIndex)
-                        leafletLayer.setZIndex(z);
-                    this._layerStates.push(state);            //put it in at top of list
-
-                    // if layer is initially "off" or...
-                    // if layer is initially not 100% opaque
-                    if(!state.visibility || state.opacity < 1) {
-                        // initialize layer visibility and opacity async, or else
-                        // some of the layers won't get properly initialized
-                        setTimeout( (layer, state) => {
-                            this.setLayerVisibility(layer, state.visibility);
-                            this.setLayerOpacity(layer, state.opacity);
-                            //TODO notify of change
-                        }, 500, leafletLayer, state);
-                    }
+                if(!state) {
+                    state = {
+                        opacity: 1,
+                        visibility: true,
+                        layer: JSON.parse(JSON.stringify(layer))
+                    };
                 }
+
+                let z = layers.length - index;
+                state.zIndex = z;
+
+                this.addLayerWithState(layer, state);
+
             });
 
             this.touch('layers:changed');
+        }
+
+        /**
+         * @param {Object} layer - GeoPlatform Layer instance
+         * @param {Object} state - GeoPlatform Layer State
+         */
+        addLayerWithState(layer, state) {
+
+            var leafletLayer = null;
+            try {
+                if(!layer || !state)
+                    throw new Error("Invalid argument, missing layer and or state");
+
+                leafletLayer = L.GeoPlatform.LayerFactory(layer);
+
+                if(!leafletLayer)
+                    throw new Error("Layer factory returned nothing");
+
+            } catch(e) {
+                this._layerErrors.push({
+                    id:layer.id,
+                    message: 'MapInstance.addLayerWithState() - ' +
+                        'Could not create a Leaflet layer: ' + e.message
+                });
+            }
+
+            if(!leafletLayer) return;
+
+            //listen for layer errors so we can inform the user
+            // that a layer hasn't been loaded in a useful way
+            leafletLayer.on('tileerror', this.handleLayerError);
+
+            this._layerCache[layer.id] = leafletLayer;
+            this._mapInstance.addLayer(leafletLayer);
+
+            if( !isNaN(state.zIndex) && leafletLayer.setZIndex )
+                leafletLayer.setZIndex(state.zIndex);
+
+            this._layerStates.push(state);
+
+
+            // if layer is initially "off" or...
+            // if layer is initially not 100% opaque
+            if(!state.visibility || state.opacity < 1) {
+                // initialize layer visibility and opacity async, or else
+                // some of the layers won't get properly initialized
+                setTimeout( (layer, state) => {
+                    this.setLayerVisibility(layer, state.visibility);
+                    this.setLayerOpacity(layer, state.opacity);
+                    //TODO notify of change
+                }, 500, leafletLayer, state);
+            }
         }
 
         /**
@@ -939,7 +972,7 @@
             }
 
             // console.log("Updating: " + JSON.stringify(map));
-            this.service.save(content)
+            this.mapService.save(content)
             .then( result => {
 
                 //track new map's info so we can update it with next save
@@ -964,7 +997,7 @@
         fetchMap (mapId) {
             //Having to send cache busting parameter to avoid CORS header cache
             // not sending correct Origin value
-            return this.service.get(mapId);
+            return this.mapService.get(mapId);
         }
 
         /**
@@ -995,7 +1028,7 @@
                         //update view count
                         let views = map.statistics ? (map.statistics.numViews||0) : 0;
                         let patch = [ { op: 'replace', path: '/statistics/numViews', value: views+1 } ];
-                        this.service.patch(map.id, patch)
+                        this.mapService.patch(map.id, patch)
                         .then( updated => { map.statistics = updated.statistics; })
                         .catch( e => { console.log("Error updating view count for map: " + e); });
                     }, 1000, map);
