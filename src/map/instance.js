@@ -9,10 +9,14 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform", "OSM", "MapService", "JQueryHttpClient"],
-            function(jQuery, Q, L, GeoPlatform, OSM, MapService, JQueryHttpClient){
+        define(["jquery", "q", "L"/*eaflet*/,
+            "GeoPlatform", "OSM", "MapService",
+            "LayerService", "JQueryHttpClient"],
+            function(jQuery, Q, L, GeoPlatform, OSM,
+                MapService, LayerService, JQueryHttpClient){
                 return (root.MapInstance =
-                    factory(jQuery, Q, L, GeoPlatform, OSM, MapService, JQueryHttpClient));
+                    factory(jQuery, Q, L, GeoPlatform, OSM,
+                        MapService, LayerService, JQueryHttpClient));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -27,17 +31,20 @@
                 require('GeoPlatform'),
                 require('OSM'),
                 require('MapService'),
+                require('LayerService'),
                 require('JQueryHttpClient')
             )
         );
     } else {
         GeoPlatform.MapInstance = factory(
             jQuery, Q, L, GeoPlatform,
-            GeoPlatform.OSM, GeoPlatform.MapService,
+            GeoPlatform.OSM,
+            GeoPlatform.MapService,
+            GeoPlatform.LayerService,
             GeoPlatform.JQueryHttpClient);
     }
 }(this||window, function(jQuery, Q, L/*eaflet*/,
-    GeoPlatform, OSM, MapService, JQueryHttpClient) {
+    GeoPlatform, OSM, MapService, LayerService, JQueryHttpClient) {
 
     "use strict";
 

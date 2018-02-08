@@ -2420,20 +2420,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform", "OSM", "MapService", "JQueryHttpClient"], function (jQuery, Q, L, GeoPlatform, OSM, MapService, JQueryHttpClient) {
-            return root.MapInstance = factory(jQuery, Q, L, GeoPlatform, OSM, MapService, JQueryHttpClient);
+        define(["jquery", "q", "L" /*eaflet*/
+        , "GeoPlatform", "OSM", "MapService", "LayerService", "JQueryHttpClient"], function (jQuery, Q, L, GeoPlatform, OSM, MapService, LayerService, JQueryHttpClient) {
+            return root.MapInstance = factory(jQuery, Q, L, GeoPlatform, OSM, MapService, LayerService, JQueryHttpClient);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'), require('OSM'), require('MapService'), require('JQueryHttpClient'));
+        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'), require('OSM'), require('MapService'), require('LayerService'), require('JQueryHttpClient'));
     } else {
-        GeoPlatform.MapInstance = factory(jQuery, Q, L, GeoPlatform, GeoPlatform.OSM, GeoPlatform.MapService, GeoPlatform.JQueryHttpClient);
+        GeoPlatform.MapInstance = factory(jQuery, Q, L, GeoPlatform, GeoPlatform.OSM, GeoPlatform.MapService, GeoPlatform.LayerService, GeoPlatform.JQueryHttpClient);
     }
 })(undefined || window, function (jQuery, Q, L /*eaflet*/
-, GeoPlatform, OSM, MapService, JQueryHttpClient) {
+, GeoPlatform, OSM, MapService, LayerService, JQueryHttpClient) {
 
     "use strict";
 
