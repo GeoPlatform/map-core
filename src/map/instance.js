@@ -10,13 +10,13 @@
         // value to the root (window) and returning it as well to
         // the AMD loader.
         define(["jquery", "q", "L"/*eaflet*/,
-            "GeoPlatform", "OSM", "MapService",
-            "LayerService", "JQueryHttpClient"],
-            function(jQuery, Q, L, GeoPlatform, OSM,
-                MapService, LayerService, JQueryHttpClient){
+            "GeoPlatform", "OSM", "ItemTypes",
+            "ServiceFactory", "JQueryHttpClient"],
+            function(jQuery, Q, L, GeoPlatform, OSM, ItemTypes,
+                ServiceFactory, JQueryHttpClient){
                 return (root.MapInstance =
                     factory(jQuery, Q, L, GeoPlatform, OSM,
-                        MapService, LayerService, JQueryHttpClient));
+                        ItemTypes, ServiceFactory, JQueryHttpClient));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -30,8 +30,8 @@
                 require('L'),
                 require('GeoPlatform'),
                 require('OSM'),
-                require('MapService'),
-                require('LayerService'),
+                require('ItemTypes'),
+                require('ServiceFactory'),
                 require('JQueryHttpClient')
             )
         );
@@ -39,12 +39,12 @@
         GeoPlatform.MapInstance = factory(
             jQuery, Q, L, GeoPlatform,
             GeoPlatform.OSM,
-            GeoPlatform.MapService,
-            GeoPlatform.LayerService,
+            GeoPlatform.ItemTypes,
+            GeoPlatform.ServiceFactory,
             GeoPlatform.JQueryHttpClient);
     }
 }(this||window, function(jQuery, Q, L/*eaflet*/,
-    GeoPlatform, OSM, MapService, LayerService, JQueryHttpClient) {
+    GeoPlatform, OSM, ItemTypes, ServiceFactory, JQueryHttpClient) {
 
     "use strict";
 
@@ -88,10 +88,8 @@
         constructor(key) {
             super();
 
-            let httpClient = new JQueryHttpClient();
-            this.mapService = new MapService(GeoPlatform.ualUrl, httpClient);
-            this.layerService = new LayerService(GeoPlatform.ualUrl, httpClient);
-
+            this.setHttpClient(new JQueryHttpClient());
+            this.setServiceFactory(ServiceFactory);
 
             //generate random key (see factory below)
             this._key = key || Math.ceil(Math.random()*9999);
@@ -172,6 +170,28 @@
 
         }
 
+        dispose () {
+            this.destroyMap();
+            this.svcCache = null;
+            this.serviceFactory = null;
+            this.httpClient = null;
+            this._key = null;
+            this._mapId = null;
+            this._mapDef = null;
+            this._mapInstance = null;
+            this._defaultExtent = null;
+            this._baseLayerDef = null;
+            this._baseLayer = null;
+            this._layerStates = null;
+            this._layerCache = null;
+            this._layerErrors= null;
+            this._featureLayer = null;
+            this._featureLayerVisible = true;
+            this._tools = null;
+            this.state = null;
+            this._geoJsonLayerOpts = null;
+        }
+
 
         getKey () {
             return this._key;
@@ -180,9 +200,36 @@
         /**
          * Override default (JQuery-based) map service used by this instance
          * @param {ItemService} mapService - service to use to CRUD map objects
+         * @deprecated use setServiceFactory instead
          */
         setService(mapService) {
-            this.mapService = mapService;
+            // this.mapService = mapService;
+        }
+
+        /**
+         * @param {ServiceFactory} factory - GeoPlatform ServiceFactory to instantiate services for maps and layers
+         */
+        setServiceFactory(factory) {
+            this.svcCache = {}; //wipe out cached services
+            this.serviceFactory = factory;
+        }
+
+        /**
+         * @param {HttpClient} httpClient - HttpClient impl to use with the new factory
+         */
+        setHttpClient(httpClient) {
+            this.svcCache = {}; //wipe out cached services
+            this.httpClient = httpClient;
+        }
+
+        /**
+         * @param {string} type - GeoPlatform Object model type to support ("Map", "Layer", etc)
+         * @return {ItemService} item service implementation for the requested type
+         */
+        getService(type) {
+            if(!this.svcCache[type])
+                this.svcCache[type] = this.serviceFactory(type, GeoPlatform.ualUrl, this.httpClient);
+            return this.svcCache[type];
         }
 
 
@@ -200,7 +247,7 @@
 
         initializeMapDefinition() {
             return {
-                type: "Map",
+                type: ItemTypes.MAP,
                 title: "My New Map",
                 label: "My New Map",
                 description: "This map needs a description",
@@ -979,8 +1026,7 @@
             }
 
             // console.log("Updating: " + JSON.stringify(map));
-            this.mapService.save(content)
-            .then( result => {
+            this.getService(ItemTypes.MAP).save(content).then( result => {
 
                 //track new map's info so we can update it with next save
                 if(!this._mapId)
@@ -1004,7 +1050,8 @@
         fetchMap (mapId) {
             //Having to send cache busting parameter to avoid CORS header cache
             // not sending correct Origin value
-            return this.mapService.get(mapId);
+            return this.getService(ItemTypes.MAP).get(mapId);
+            // return this.mapService.get(mapId);
         }
 
         /**
@@ -1035,7 +1082,8 @@
                         //update view count
                         let views = map.statistics ? (map.statistics.numViews||0) : 0;
                         let patch = [ { op: 'replace', path: '/statistics/numViews', value: views+1 } ];
-                        this.mapService.patch(map.id, patch)
+                        this.getService(ItemTypes.MAP).patch(map.id, patch)
+                        // this.mapService.patch(map.id, patch)
                         .then( updated => { map.statistics = updated.statistics; })
                         .catch( e => { console.log("Error updating view count for map: " + e); });
                     }, 1000, map);

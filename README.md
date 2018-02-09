@@ -110,21 +110,24 @@ To learn how to bind GeoPlatform Maps, Layers, and GeoJSON features to
 Leaflet maps, see the [Map Instances](src/map/instance.md) documentation.
 
 ### Using Map Core with Angular
-The default services used within Map Core components will still be jQuery-based,
+The default services used within Map Core components are jQuery-based,
 but can be overridden by passing the desired service implementation.
 
 ```javascript
 //use angular $http to fetch OSM base layer definition
-let ngLayerSvc = new GeoPlatform.NGLayerService();
+let ngLayerSvc = new GeoPlatform.LayerService(new GeoPlatform.NGHttpClient());
 GeoPlatform.OSM.get(ngLayerSvc).then( layer => {...}).catch( e => {...});
 ```
 
+To change the underlying service transport used by MapInstance, set the
+desired HttpClient implementation like so:
+
 ```javascript
 //use angular $http to load and save maps inside MapInstance
-let ngMapSvc = new GeoPlatform.NGMapService();
 let mapInstance = GeoPlatform.MapFactory.get();
-mapInstance.setService(ngMapSvc);
+mapInstance.setHttpClient(new GeoPlatform.NGHttpClient());  //use angular
 ```
+
 
 ### Miscellaneous
 

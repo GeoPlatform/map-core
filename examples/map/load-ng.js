@@ -5,6 +5,7 @@ angular.module('loadNG', []).config(function myAppConfig ($httpProvider) {
     $httpProvider.defaults.withCredentials = true;
 });
 
+const TYPE_MAP = GeoPlatform.ItemTypes.MAP;
 
 let elem = document.getElementById('map');
 let mapOptions = {
@@ -22,15 +23,14 @@ let leafletMap = L.map(elem, mapOptions);
 let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
-//use Angular-based MapService instead of default (JQuery)
-let service = new GeoPlatform.MapService(GeoPlatform.ualUrl, new GeoPlatform.NGHttpClient());
-mapInstance.setService(service);
+//use Angular-based service instead of default (JQuery)
+mapInstance.setHttpClient(new GeoPlatform.NGHttpClient());
 
 //just for example purposes, find the first map available
 let query = GeoPlatform.QueryFactory().keywords('WMV');
 
-service.search(query)
-.then( response => {
+let service = mapInstance.getService(TYPE_MAP);
+service.search(query).then( response => {
     if(response.results.length) {
 
         //Note: search results do not contain resolved

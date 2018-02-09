@@ -2421,20 +2421,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // value to the root (window) and returning it as well to
         // the AMD loader.
         define(["jquery", "q", "L" /*eaflet*/
-        , "GeoPlatform", "OSM", "MapService", "LayerService", "JQueryHttpClient"], function (jQuery, Q, L, GeoPlatform, OSM, MapService, LayerService, JQueryHttpClient) {
-            return root.MapInstance = factory(jQuery, Q, L, GeoPlatform, OSM, MapService, LayerService, JQueryHttpClient);
+        , "GeoPlatform", "OSM", "ItemTypes", "ServiceFactory", "JQueryHttpClient"], function (jQuery, Q, L, GeoPlatform, OSM, ItemTypes, ServiceFactory, JQueryHttpClient) {
+            return root.MapInstance = factory(jQuery, Q, L, GeoPlatform, OSM, ItemTypes, ServiceFactory, JQueryHttpClient);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'), require('OSM'), require('MapService'), require('LayerService'), require('JQueryHttpClient'));
+        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'), require('OSM'), require('ItemTypes'), require('ServiceFactory'), require('JQueryHttpClient'));
     } else {
-        GeoPlatform.MapInstance = factory(jQuery, Q, L, GeoPlatform, GeoPlatform.OSM, GeoPlatform.MapService, GeoPlatform.LayerService, GeoPlatform.JQueryHttpClient);
+        GeoPlatform.MapInstance = factory(jQuery, Q, L, GeoPlatform, GeoPlatform.OSM, GeoPlatform.ItemTypes, GeoPlatform.ServiceFactory, GeoPlatform.JQueryHttpClient);
     }
 })(undefined || window, function (jQuery, Q, L /*eaflet*/
-, GeoPlatform, OSM, MapService, LayerService, JQueryHttpClient) {
+, GeoPlatform, OSM, ItemTypes, ServiceFactory, JQueryHttpClient) {
 
     "use strict";
 
@@ -2484,9 +2484,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             var _this5 = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
 
-            var httpClient = new JQueryHttpClient();
-            _this5.mapService = new MapService(GeoPlatform.ualUrl, httpClient);
-            _this5.layerService = new LayerService(GeoPlatform.ualUrl, httpClient);
+            _this5.setHttpClient(new JQueryHttpClient());
+            _this5.setServiceFactory(ServiceFactory);
 
             //generate random key (see factory below)
             _this5._key = key || Math.ceil(Math.random() * 9999);
@@ -2566,6 +2565,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         _createClass(MapInstance, [{
+            key: "dispose",
+            value: function dispose() {
+                this.destroyMap();
+                this.svcCache = null;
+                this.serviceFactory = null;
+                this.httpClient = null;
+                this._key = null;
+                this._mapId = null;
+                this._mapDef = null;
+                this._mapInstance = null;
+                this._defaultExtent = null;
+                this._baseLayerDef = null;
+                this._baseLayer = null;
+                this._layerStates = null;
+                this._layerCache = null;
+                this._layerErrors = null;
+                this._featureLayer = null;
+                this._featureLayerVisible = true;
+                this._tools = null;
+                this.state = null;
+                this._geoJsonLayerOpts = null;
+            }
+        }, {
             key: "getKey",
             value: function getKey() {
                 return this._key;
@@ -2574,12 +2596,47 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             /**
              * Override default (JQuery-based) map service used by this instance
              * @param {ItemService} mapService - service to use to CRUD map objects
+             * @deprecated use setServiceFactory instead
              */
 
         }, {
             key: "setService",
-            value: function setService(mapService) {
-                this.mapService = mapService;
+            value: function setService(mapService) {}
+            // this.mapService = mapService;
+
+
+            /**
+             * @param {ServiceFactory} factory - GeoPlatform ServiceFactory to instantiate services for maps and layers
+             */
+
+        }, {
+            key: "setServiceFactory",
+            value: function setServiceFactory(factory) {
+                this.svcCache = {}; //wipe out cached services
+                this.serviceFactory = factory;
+            }
+
+            /**
+             * @param {HttpClient} httpClient - HttpClient impl to use with the new factory
+             */
+
+        }, {
+            key: "setHttpClient",
+            value: function setHttpClient(httpClient) {
+                this.svcCache = {}; //wipe out cached services
+                this.httpClient = httpClient;
+            }
+
+            /**
+             * @param {string} type - GeoPlatform Object model type to support ("Map", "Layer", etc)
+             * @return {ItemService} item service implementation for the requested type
+             */
+
+        }, {
+            key: "getService",
+            value: function getService(type) {
+                if (!this.svcCache[type]) this.svcCache[type] = this.serviceFactory(type, GeoPlatform.ualUrl, this.httpClient);
+                return this.svcCache[type];
             }
 
             //-----------------
@@ -2604,7 +2661,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: "initializeMapDefinition",
             value: function initializeMapDefinition() {
                 return {
-                    type: "Map",
+                    type: ItemTypes.MAP,
                     title: "My New Map",
                     label: "My New Map",
                     description: "This map needs a description",
@@ -3512,7 +3569,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
 
                 // console.log("Updating: " + JSON.stringify(map));
-                this.mapService.save(content).then(function (result) {
+                this.getService(ItemTypes.MAP).save(content).then(function (result) {
 
                     //track new map's info so we can update it with next save
                     if (!_this12._mapId) _this12._mapId = result.id;
@@ -3539,7 +3596,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function fetchMap(mapId) {
                 //Having to send cache busting parameter to avoid CORS header cache
                 // not sending correct Origin value
-                return this.mapService.get(mapId);
+                return this.getService(ItemTypes.MAP).get(mapId);
+                // return this.mapService.get(mapId);
             }
 
             /**
@@ -3571,7 +3629,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             //update view count
                             var views = map.statistics ? map.statistics.numViews || 0 : 0;
                             var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
-                            _this13.mapService.patch(map.id, patch).then(function (updated) {
+                            _this13.getService(ItemTypes.MAP).patch(map.id, patch)
+                            // this.mapService.patch(map.id, patch)
+                            .then(function (updated) {
                                 map.statistics = updated.statistics;
                             }).catch(function (e) {
                                 console.log("Error updating view count for map: " + e);
