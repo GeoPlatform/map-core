@@ -17,7 +17,20 @@ let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //just for example purposes, find the first map available
-let mapService = new GeoPlatform.MapService(GeoPlatform.ualUrl, new GeoPlatform.JQueryHttpClient());
+
+
+//---------------------------------------------------------
+//Necessary to save a map using authorized endpoints in UAL
+let httpClient = new GeoPlatform.JQueryHttpClient();
+httpClient.setAuthToken(function() {
+    return null;    //SHOULD return valid auth token
+});
+mapInstance.setHttpClient(httpClient);
+//---------------------------------------------------------
+
+
+//get map service used by map instance
+let mapService = mapInstance.getService(GeoPlatform.ItemTypes.MAP);
 mapService.search().then( response => {
     if(response.results.length) {
 

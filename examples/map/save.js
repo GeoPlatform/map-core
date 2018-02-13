@@ -15,6 +15,17 @@ let leafletMap = L.map(elem, mapOptions);
 let mapInstance = GeoPlatform.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
+
+//---------------------------------------------------------
+//Necessary to save a map using authorized endpoints in UAL
+let httpClient = new GeoPlatform.JQueryHttpClient();
+httpClient.setAuthToken(function() {
+    return null;    //SHOULD return valid auth token
+});
+mapInstance.setHttpClient(httpClient);
+//---------------------------------------------------------
+
+
 GeoPlatform.OSM.get().then(osm => {
 
     mapInstance.setBaseLayer(osm);

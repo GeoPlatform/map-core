@@ -3551,15 +3551,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this12 = this;
 
                 var metadata = md || {};
-                metadata.resourceTypes = metadata.resourceTypes || [];
 
                 //add GeoPlatformMap resource type if not already present
                 var gpMapType = 'http://www.geoplatform.gov/ont/openmap/GeoplatformMap';
+                metadata.resourceTypes = metadata.resourceTypes || [];
                 if (metadata.resourceTypes.indexOf(gpMapType) < 0) metadata.resourceTypes.push(gpMapType);
 
                 var content = this.getMapResourceContent(metadata);
-
-                var d = Q.defer();
 
                 //ensure the two name properties line up
                 if (content.title && content.title !== content.label) {
@@ -3569,7 +3567,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
 
                 // console.log("Updating: " + JSON.stringify(map));
-                this.getService(ItemTypes.MAP).save(content).then(function (result) {
+                return this.getService(ItemTypes.MAP).save(content).then(function (result) {
 
                     //track new map's info so we can update it with next save
                     if (!_this12._mapId) _this12._mapId = result.id;
@@ -3577,12 +3575,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     _this12._mapDef = result;
                     _this12._defaultExtent = result.extent;
                     _this12.clean();
-                    d.resolve(result);
-                }).catch(function (error) {
-                    d.reject(error);
+                    return result;
+                }).catch(function (err) {
+                    var e = new Error("MapInstance.saveMap() - " + "The requested map could not be saved because: " + err.message);
+                    return Q.reject(e);
                 });
-
-                return d.promise;
             }
 
             /**
@@ -3597,7 +3594,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 //Having to send cache busting parameter to avoid CORS header cache
                 // not sending correct Origin value
                 return this.getService(ItemTypes.MAP).get(mapId);
-                // return this.mapService.get(mapId);
             }
 
             /**

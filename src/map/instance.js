@@ -1007,16 +1007,14 @@
         saveMap (md) {
 
             let metadata = md || {};
-            metadata.resourceTypes = metadata.resourceTypes || [];
 
             //add GeoPlatformMap resource type if not already present
             const gpMapType = 'http://www.geoplatform.gov/ont/openmap/GeoplatformMap';
+            metadata.resourceTypes = metadata.resourceTypes || [];
             if(metadata.resourceTypes.indexOf(gpMapType) < 0)
                 metadata.resourceTypes.push(gpMapType);
 
             var content = this.getMapResourceContent(metadata);
-
-            var d = Q.defer();
 
             //ensure the two name properties line up
             if(content.title && content.title !== content.label) {
@@ -1026,7 +1024,9 @@
             }
 
             // console.log("Updating: " + JSON.stringify(map));
-            this.getService(ItemTypes.MAP).save(content).then( result => {
+            return this.getService(ItemTypes.MAP)
+            .save(content)
+            .then( result => {
 
                 //track new map's info so we can update it with next save
                 if(!this._mapId)
@@ -1035,11 +1035,15 @@
                 this._mapDef = result;
                 this._defaultExtent = result.extent;
                 this.clean();
-                d.resolve(result);
+                return result;
             })
-            .catch( error => { d.reject( error); });
+            .catch(err=>{
+                let e = new Error("MapInstance.saveMap() - " +
+                    "The requested map could not be saved because: " +
+                    err.message);
+                return Q.reject(e);
+            });
 
-            return d.promise;
         }
 
         /**
@@ -1051,7 +1055,6 @@
             //Having to send cache busting parameter to avoid CORS header cache
             // not sending correct Origin value
             return this.getService(ItemTypes.MAP).get(mapId);
-            // return this.mapService.get(mapId);
         }
 
         /**
