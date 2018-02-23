@@ -2659,7 +2659,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: "getLayerState",
             value: function getLayerState(layerId) {
                 var index = this.getLayerStateIndex(layerId);
-                return index >= 0 ? _layerStates[index] : null;
+                return index >= 0 ? this._layerStates[index] : null;
             }
             //-----------------
 

@@ -247,7 +247,7 @@
 
         getLayerState (layerId) {
             let index = this.getLayerStateIndex(layerId);
-            return index >= 0 ? _layerStates[index] : null;
+            return index >= 0 ? this._layerStates[index] : null;
         }
         //-----------------
 
