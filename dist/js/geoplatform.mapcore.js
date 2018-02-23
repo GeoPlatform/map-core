@@ -2646,9 +2646,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "getLayerStateIndex",
             value: function getLayerStateIndex(layerId) {
-                return this._layerStates.indexOfObj(layerId, function (id, state) {
-                    return state.layer.id === id;
-                });
+                if (!layerId) return -1;
+                for (var i = 0; i < this._layerStates.length; ++i) {
+                    if (this._layerStates[i].layer && layerId === this._layerStates[i].layer.id) {
+                        return i;
+                    }
+                }
+                return -1;
+                // return this._layerStates.indexOfObj(layerId, (id, state) => state.layer.id === id );
             }
         }, {
             key: "getLayerState",
