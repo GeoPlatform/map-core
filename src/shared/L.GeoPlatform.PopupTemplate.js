@@ -39,6 +39,7 @@
         let props = Object.keys(feature.properties);
 
         const pFn = function(list, names) {
+            if(!list || !list.find) return null;
             let match = list.find( name => {
                 let lc = name.toLowerCase();
                 return names.indexOf(lc)>=0;

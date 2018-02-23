@@ -141,6 +141,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var props = Object.keys(feature.properties);
 
         var pFn = function pFn(list, names) {
+            if (!list || !list.find) return null;
             var match = list.find(function (name) {
                 var lc = name.toLowerCase();
                 return names.indexOf(lc) >= 0;
