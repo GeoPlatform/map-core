@@ -2058,7 +2058,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             //non-clustered features
             if (this._layers) {
                 for (var _id2 in this._layers) {
-                    this._layers[_id2].setVisibility(bool);
+                    var _layer = this._layers[_id2];
+                    if (_layer.setVisibility) _layer.setVisibility(bool);else if (_layer.setStyle) _layer.setStyle({ display: bool ? '' : 'none' });
                 }
             }
         },
@@ -2078,8 +2079,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             //non-clustered features
             if (this._layers) {
                 for (var _id3 in this._layers) {
-                    var _layer = this._layers[_id3];
-                    if (_layer.setOpacity) _layer.setOpacity(opacity);
+                    var _layer2 = this._layers[_id3];
+                    if (_layer2.setOpacity) _layer2.setOpacity(opacity);
                 }
             }
         },

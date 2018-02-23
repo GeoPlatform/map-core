@@ -204,8 +204,13 @@
 
             //non-clustered features
             if(this._layers) {
-                for(let id in this._layers)
-                    this._layers[id].setVisibility(bool);
+                for(let id in this._layers) {
+                    let layer = this._layers[id];
+                    if(layer.setVisibility)
+                        layer.setVisibility(bool);
+                    else if(layer.setStyle)
+                        layer.setStyle({display: bool ? '':'none'});
+                }
             }
         },
 
