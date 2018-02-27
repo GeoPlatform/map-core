@@ -1056,6 +1056,62 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         throw new Error("Missing GeoPlatform extensions to Leaflet");
     }
 
+    if (typeof Object.assign != 'function') {
+        // Must be writable: true, enumerable: false, configurable: true
+        Object.defineProperty(Object, "assign", {
+            value: function assign(target, varArgs) {
+                // .length of function is 2
+                'use strict';
+
+                if (target == null) {
+                    // TypeError if undefined or null
+                    throw new TypeError('Cannot convert undefined or null to object');
+                }
+
+                var to = Object(target);
+
+                for (var index = 1; index < arguments.length; index++) {
+                    var nextSource = arguments[index];
+
+                    if (nextSource != null) {
+                        // Skip over if undefined or null
+                        for (var nextKey in nextSource) {
+                            // Avoid bugs when hasOwnProperty is shadowed
+                            if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                                to[nextKey] = nextSource[nextKey];
+                            }
+                        }
+                    }
+                }
+                return to;
+            },
+            writable: true,
+            configurable: true
+        });
+    }
+
+    var paramRe = /\{ *([\w_-]+) *\}/g;
+
+    // @function template(str: String, data: Object): String
+    // Simple templating facility, accepts a template string of the form `'Hello {a}, {b}'`
+    // and a data object like `{a: 'foo', b: 'bar'}`, returns evaluated string
+    // `('Hello foo, bar')`. You can also specify functions instead of strings for
+    // data values — they will be evaluated passing `data` as an argument.
+    function template(str, data) {
+        return str.replace(paramRe, function (str, key) {
+            var value = data[key];
+            if (value === undefined) {
+                value = data[key.toLowerCase()];
+            }
+            if (value === undefined) {
+                throw new Error('No value provided for variable ' + str);
+            } else if (typeof value === 'function') {
+                value = value(data);
+            }
+            return value;
+        });
+    }
+
     /*
      * inspired by and uses code from https://github.com/mylen/leaflet.TileLayer.WMTS
      */
@@ -1122,12 +1178,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             var isTileRowTemplated = url.indexOf('{TileRow}');
             var isTileColTemplated = url.indexOf('{TileCol}');
 
-            var o = { s: this._getSubdomain(coords) };
+            var o = Object.assign({ s: this._getSubdomain(coords) }, this.wmtsParams);
             if (isTileMatrixTemplated > 0) o.TileMatrix = ident;
             if (isTileRowTemplated > 0) o.TileRow = tilerow;
             if (isTileColTemplated > 0) o.TileCol = tilecol;
-
-            url = L.Util.template(url, o);
+            for (var k in o) {
+                o[k.toLowerCase()] = o[k];
+            }
+            // url = L.Util.template(url.toLowerCase(), o);
+            url = template(url, o);
 
             var qsi = url.indexOf("?");
             if (qsi < 0 || isTileMatrixTemplated < qsi && isTileRowTemplated < qsi || isTileColTemplated < qsi) {
