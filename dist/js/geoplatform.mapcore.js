@@ -2846,60 +2846,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             }
 
-            /*
-             * method for adding feature layers to the map
-             * when these layers may be layer groups.
-             * finds leaf node layers and adds them to the
-             * map's feature group
-             */
-
-        }, {
-            key: "addFeatureLayer",
-            value: function (_addFeatureLayer) {
-                function addFeatureLayer(_x) {
-                    return _addFeatureLayer.apply(this, arguments);
-                }
-
-                addFeatureLayer.toString = function () {
-                    return _addFeatureLayer.toString();
-                };
-
-                return addFeatureLayer;
-            }(function (layer) {
-                if (!layer.feature && layer instanceof L.LayerGroup) {
-                    layer.eachLayer(addFeatureLayer);
-                } else {
-                    this._featureLayer.addLayer(layer);
-                }
-            })
-
-            //toggle visibility of parent feature layer
-
-        }, {
-            key: "setFeatureLayerVisibility",
-            value: function (_setFeatureLayerVisibility) {
-                function setFeatureLayerVisibility(_x2, _x3) {
-                    return _setFeatureLayerVisibility.apply(this, arguments);
-                }
-
-                setFeatureLayerVisibility.toString = function () {
-                    return _setFeatureLayerVisibility.toString();
-                };
-
-                return setFeatureLayerVisibility;
-            }(function (layer, visibility) {
-                if (!layer) return;
-
-                if (layer.getLayers) {
-                    layer.getLayers().each(function (child) {
-                        setFeatureLayerVisibility(child, visibility);
-                    });
-                } else {
-                    var container = layer._container || layer._path;
-                    if (container) container.style.display = visibility ? '' : 'none';
-                }
-            })
-
             /* -- State Management of internal model -- */
 
         }, {
@@ -3592,6 +3538,59 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return this._featureLayerVisible;
             }
 
+            /*
+             * method for adding feature layers to the map
+             * when these layers may be layer groups.
+             * finds leaf node layers and adds them to the
+             * map's feature group
+             */
+
+        }, {
+            key: "addFeatureLayer",
+            value: function addFeatureLayer(layer) {
+                this._addFeatureLayer(layer);
+                this.touch("features:changed");
+            }
+
+            /**
+             * Internal method, use 'addFeatureLayer' instead
+             * @param {Object} layer
+             */
+
+        }, {
+            key: "_addFeatureLayer",
+            value: function _addFeatureLayer(layer) {
+                var _this12 = this;
+
+                if (!layer.feature && layer instanceof L.LayerGroup) {
+                    layer.eachLayer(function (child) {
+                        _this12._addFeatureLayer(child);
+                    });
+                } else {
+                    this._featureLayer.addLayer(layer);
+                }
+            }
+
+            //toggle visibility of parent feature layer
+
+        }, {
+            key: "setFeatureLayerVisibility",
+            value: function setFeatureLayerVisibility(layer, visibility) {
+                var _this13 = this;
+
+                if (!layer) return;
+                this._featureLayerVisible = visibility;
+
+                if (layer.getLayers) {
+                    layer.getLayers().each(function (child) {
+                        _this13.setFeatureLayerVisibility(child, visibility);
+                    });
+                } else {
+                    var container = layer._container || layer._path;
+                    if (container) container.style.display = visibility ? '' : 'none';
+                }
+            }
+
             /* ==============================================
                Map lifecycle operations
                ============================================== */
@@ -3614,7 +3613,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "saveMap",
             value: function saveMap(md) {
-                var _this12 = this;
+                var _this14 = this;
 
                 var metadata = md || {};
 
@@ -3636,11 +3635,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return this.getService(ItemTypes.MAP).save(content).then(function (result) {
 
                     //track new map's info so we can update it with next save
-                    if (!_this12._mapId) _this12._mapId = result.id;
+                    if (!_this14._mapId) _this14._mapId = result.id;
 
-                    _this12._mapDef = result;
-                    _this12._defaultExtent = result.extent;
-                    _this12.clean();
+                    _this14._mapDef = result;
+                    _this14._defaultExtent = result.extent;
+                    _this14.clean();
                     return result;
                 }).catch(function (err) {
                     var e = new Error("MapInstance.saveMap() - " + "The requested map could not be saved because: " + err.message);
@@ -3672,7 +3671,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "loadMap",
             value: function loadMap(mapId) {
-                var _this13 = this;
+                var _this15 = this;
 
                 return this.fetchMap(mapId).then(function (map) {
 
@@ -3691,7 +3690,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             //update view count
                             var views = map.statistics ? map.statistics.numViews || 0 : 0;
                             var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
-                            _this13.getService(ItemTypes.MAP).patch(map.id, patch)
+                            _this15.getService(ItemTypes.MAP).patch(map.id, patch)
                             // this.mapService.patch(map.id, patch)
                             .then(function (updated) {
                                 map.statistics = updated.statistics;
@@ -3702,7 +3701,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }
 
                     //load the map into the viewer
-                    _this13.loadMapFromObj(map);
+                    _this15.loadMapFromObj(map);
 
                     return map;
                 }).catch(function (err) {
@@ -3720,7 +3719,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "loadMapFromObj",
             value: function loadMapFromObj(map) {
-                var _this14 = this;
+                var _this16 = this;
 
                 // console.log(map);
 
@@ -3748,7 +3747,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 //remove existing layers
                 this._mapInstance.eachLayer(function (l) {
-                    _this14._mapInstance.removeLayer(l);
+                    _this16._mapInstance.removeLayer(l);
                 });
                 this._layerCache = {};
                 this._layerStates = [];

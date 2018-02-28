@@ -362,37 +362,6 @@
             }
         }
 
-        /*
-         * method for adding feature layers to the map
-         * when these layers may be layer groups.
-         * finds leaf node layers and adds them to the
-         * map's feature group
-         */
-        addFeatureLayer(layer) {
-            if(!layer.feature && layer instanceof L.LayerGroup) {
-                layer.eachLayer(addFeatureLayer);
-            } else {
-                this._featureLayer.addLayer(layer);
-            }
-        }
-
-
-        //toggle visibility of parent feature layer
-        setFeatureLayerVisibility(layer, visibility) {
-            if(!layer) return;
-
-            if(layer.getLayers) {
-                layer.getLayers().each( (child) => {
-                    setFeatureLayerVisibility(child, visibility);
-                });
-
-            } else {
-                let container = layer._container || layer._path;
-                if(container)
-                    container.style.display = visibility ? '' : 'none';
-            }
-        }
-
 
         /* -- State Management of internal model -- */
 
@@ -994,6 +963,51 @@
         getFeaturesLayerVisibility () {
             return this._featureLayerVisible;
         }
+
+
+        /*
+         * method for adding feature layers to the map
+         * when these layers may be layer groups.
+         * finds leaf node layers and adds them to the
+         * map's feature group
+         */
+        addFeatureLayer(layer) {
+            this._addFeatureLayer(layer);
+            this.touch("features:changed");
+        }
+
+        /**
+         * Internal method, use 'addFeatureLayer' instead
+         * @param {Object} layer
+         */
+        _addFeatureLayer(layer) {
+            if(!layer.feature && layer instanceof L.LayerGroup) {
+                layer.eachLayer( (child) => {
+                    this._addFeatureLayer(child);
+                });
+            } else {
+                this._featureLayer.addLayer(layer);
+            }
+        }
+
+
+        //toggle visibility of parent feature layer
+        setFeatureLayerVisibility(layer, visibility) {
+            if(!layer) return;
+            this._featureLayerVisible = visibility;
+
+            if(layer.getLayers) {
+                layer.getLayers().each( (child) => {
+                    this.setFeatureLayerVisibility(child, visibility);
+                });
+
+            } else {
+                let container = layer._container || layer._path;
+                if(container)
+                    container.style.display = visibility ? '' : 'none';
+            }
+        }
+
 
 
         /* ==============================================
