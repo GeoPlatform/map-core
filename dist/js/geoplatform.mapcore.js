@@ -2959,6 +2959,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.touch('map:view:changed');
             }
 
+            /**
+             * @param {Object} extent - either a GP extent object or Leaflet LatLngBounds object
+             */
+
+        }, {
+            key: "setExtent",
+            value: function setExtent(extent) {
+                if (!extent) return;
+                if (typeof extent.minx !== 'undefined' && typeof extent.miny !== 'undefined' && typeof extent.maxx !== 'undefined' && typeof extent.maxy !== 'undefined') {
+                    //GP model extent
+                    this._mapInstance.fitBounds([[extent.miny, extent.minx], [extent.maxy, extent.maxx]]);
+                } else if (typeof extent.getWest !== 'undefined') {
+                    //L.LatLngBounds
+                    this._mapInstance.fitBounds(extent);
+                } else {}
+            }
+
             /* ==============================================
                 Layer operations
                ============================================== */
