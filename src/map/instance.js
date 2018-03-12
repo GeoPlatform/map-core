@@ -925,8 +925,17 @@
         focusFeature (featureId) {
             var layer = this.getFeatureLayer(featureId);
             if(layer) {
-                var extent = layer.getBounds();
-                this._mapInstance.fitBounds(extent);
+                if( typeof(layer.getBounds) !== 'undefined') {
+                    let extent = layer.getBounds();
+                    this._mapInstance.fitBounds(extent);
+                } else if(typeof(layer.getLatLng) !== 'undefined') {
+                    let latLng = layer.getLatLng();
+                    this._mapInstance.panTo(latLng);
+                } else {
+                    console.log("MapInstance.focusFeature() - Cannot focus feature because it has no bounds or lat/lng");
+                }
+            } else {
+                console.log("MapInstance.focusFeature() - Cannot focus feature because it has no layer");
             }
         }
 
