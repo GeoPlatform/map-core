@@ -440,15 +440,19 @@
          * otherwise, it will be CONUS
          */
         zoomToDefault () {
+            if(!this._mapInstance) return;
             if(this._defaultExtent) {
                 this._mapInstance.fitBounds([
                     [this._defaultExtent.miny, this._defaultExtent.minx],
                     [this._defaultExtent.maxy, this._defaultExtent.maxx]
                 ]);
             } else {
+                console.log("MapInstance.zoomToDefault() - No default extent specified");
                 this._mapInstance.setView([38, -96], 5);
             }
-            this.touch('map:view:changed');
+            try {
+                this.touch('map:view:changed');
+            } catch(e) { }
         }
 
         /**
