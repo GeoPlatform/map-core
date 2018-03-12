@@ -440,15 +440,19 @@
          * otherwise, it will be CONUS
          */
         zoomToDefault () {
+            if(!this._mapInstance) return;
             if(this._defaultExtent) {
                 this._mapInstance.fitBounds([
                     [this._defaultExtent.miny, this._defaultExtent.minx],
                     [this._defaultExtent.maxy, this._defaultExtent.maxx]
                 ]);
             } else {
+                console.log("MapInstance.zoomToDefault() - No default extent specified");
                 this._mapInstance.setView([38, -96], 5);
             }
-            this.touch('map:view:changed');
+            try {
+                this.touch('map:view:changed');
+            } catch(e) { }
         }
 
         /**
@@ -925,8 +929,17 @@
         focusFeature (featureId) {
             var layer = this.getFeatureLayer(featureId);
             if(layer) {
-                var extent = layer.getBounds();
-                this._mapInstance.fitBounds(extent);
+                if( typeof(layer.getBounds) !== 'undefined') {
+                    let extent = layer.getBounds();
+                    this._mapInstance.fitBounds(extent);
+                } else if(typeof(layer.getLatLng) !== 'undefined') {
+                    let latLng = layer.getLatLng();
+                    this._mapInstance.panTo(latLng);
+                } else {
+                    console.log("MapInstance.focusFeature() - Cannot focus feature because it has no bounds or lat/lng");
+                }
+            } else {
+                console.log("MapInstance.focusFeature() - Cannot focus feature because it has no layer");
             }
         }
 
