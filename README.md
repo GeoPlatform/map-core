@@ -34,6 +34,8 @@ See Environment Variables below for details on what is expected to be provided.
 <script src="geoplatform.client.js"></script>
 <!-- include map core -->
 <script src="geoplatform.mapcore.js"></script>
+    - or -
+<script src="http://dyk46gk69472z.cloudfront.net/gp.mapcore/0.0.1/js/geoplatform.mapcore.min.js"></script>  (from CDN)
 ```
 
 If you are using Angular 1.x, make sure to import the client.ng.js after client.js
