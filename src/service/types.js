@@ -5,16 +5,22 @@
  */
 
  (function (root, factory) {
+
      if(typeof define === "function" && define.amd) {
          // Now we're wrapping the factory and assigning the return
          // value to the root (window) and returning it as well to
          // the AMD loader.
-         define(["jquery", "q", "GeoPlatform", "ItemService",
-         "JQueryHttpClient", "QueryFactory"],
-             function(jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory) {
-                 return (root.ServiceTypes = factory(
-                     jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory));
-             });
+         define('ServiceTypes', [
+             "jquery", "q",
+             "geoplatform.client/src/services/item",
+             "geoplatform.client/src/http/jq",
+             "geoplatform.client/src/shared/query-factory",
+             "geoplatform.client/src/shared/config"
+         ],
+         function(jQuery, Q, ItemService, HttpClient, QueryFactory, Config) {
+             return (root.ServiceTypes = factory(
+                 jQuery, Q, ItemService, HttpClient, QueryFactory, Config));
+         });
      } else if(typeof module === "object" && module.exports) {
          // I've not encountered a need for this yet, since I haven't
          // run into a scenario where plain modules depend on CommonJS
@@ -24,19 +30,18 @@
              root.ServiceTypes = factory(
                  require("jquery"),
                  require('q'),
-                 require('GeoPlatform'),
-                 require('ItemService'),
-                 require('JQueryHttpClient'),
-                 require('QueryFactory')
+                 require('geoplatform.client').ItemService,
+                 require('geoplatform.client').HttpClient,
+                 require('geoplatform.client').QueryFactory,
+                 require('geoplatform.client').Config
              )
          );
      } else {
-         GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform,
+         GeoPlatform.ServiceTypes = factory(jQuery, Q,
              GeoPlatform.ItemService, GeoPlatform.JQueryHttpClient,
-             GeoPlatform.QueryFactory);
+             GeoPlatform.QueryFactory, GeoPlatform);
      }
- }(this||window, function(jQuery, Q, GeoPlatform, ItemService,
-     JQueryHttpClient, QueryFactory) {
+ }(this||window, function(jQuery, Q, ItemService, HttpClient, QueryFactory, GeoPlatform) {
 
 
     const ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
@@ -48,12 +53,18 @@
 
     var types = {};
 
+    let url = GeoPlatform.ualUrl;
+    if(!url) {
+        console.log("WARN : ServiceTypes - no GeoPlatform API URL configured, unable to load service types");
+        return types;
+    }
+
     let query = QueryFactory()
         .types('dct:Standard')
         .resourceTypes('ServiceType')
         .pageSize(50);
 
-    new ItemService(GeoPlatform.ualUrl, new JQueryHttpClient()).search(query)
+    new ItemService(url, new HttpClient()).search(query)
     .then( data => {
 
         for(let i=0; i<data.results.length; ++i) {

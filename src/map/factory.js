@@ -1,11 +1,16 @@
 
 (function (root, factory) {
+
+    //reference global "config" object for GeoPlatform settings
+    // if it's not defined, stub it out
+    var globalGP = root && root.GeoPlatform ? root.GeoPlatform : {};
+
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["MapInstance"],function(MapInstance){
-            return (root.MapInstance = factory(MapInstance));
+        define("MapFactory", ["./instance"],function(MapInstance){
+            return (root.MapFactory = factory(MapInstance));
         });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -13,7 +18,7 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.MapInstance = factory(require('MapInstance'))
+            root.MapFactory = factory(require('./instance'))
         );
     } else {
         GeoPlatform.MapFactory = factory(GeoPlatform.MapInstance);

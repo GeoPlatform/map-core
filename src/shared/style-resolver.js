@@ -4,13 +4,14 @@
  */
 
  (function (root, factory) {
+
      if(typeof define === "function" && define.amd) {
          // Now we're wrapping the factory and assigning the return
          // value to the root (window) and returning it as well to
          // the AMD loader.
-         define(["q", "L"/*eaflet*/, "GeoPlatform"],
-             function(Q, L, GeoPlatform) {
-                 return (root.FeatureStyleResolver = factory(Q, L, GeoPlatform));
+         define('FeatureStyleResolver', ["q", "leaflet","geoplatform.client/src/shared/config"],
+             function(Q, L, Config) {
+                 return (root.FeatureStyleResolver = factory(Q, L, Config));
              });
      } else if(typeof module === "object" && module.exports) {
          // I've not encountered a need for this yet, since I haven't
@@ -20,8 +21,8 @@
          module.exports = (
              root.FeatureStyleResolver = factory(
                  require('q'),
-                 require('L'),
-                 require('GeoPlatform')
+                 require('leaflet'),
+                 require('geoplatform.client').Config
              )
          );
      } else {

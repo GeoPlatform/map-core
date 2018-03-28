@@ -2,14 +2,15 @@
 
 
 (function (root, factory) {
+
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "L"/*eaflet*/, "GeoPlatform", "ServiceTypes", "OSM"],
-            function(Q, L, GeoPlatform, ServiceTypes, OSM) {
-                return (root.LayerFactory = factory(
-                    Q, L, GeoPlatform, ServiceTypes, OSM));
+        define('LayerFactory', [
+            "q", "leaflet", "../service/types", "./osm", 'geoplatform.client/src/shared/config'],
+            function(Q, L, ServiceTypes, OSM, Config) {
+                return (root.LayerFactory = factory(Q, L, ServiceTypes, OSM, Config));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -19,19 +20,19 @@
         module.exports = (
             root.LayerFactory = factory(
                 require('q'),
-                require('L'),
-                require('GeoPlatform'),
-                require('ServiceTypes'),
-                require('OSM')
+                require('leaflet'),
+                require('../service/types'),
+                require('./osm'),
+                require('geoplatform.client').Config
             )
         );
     } else {
         GeoPlatform.LayerFactory = factory(
-            Q, L/*eaflet*/, GeoPlatform,
+            Q, L/*eaflet*/,
             GeoPlatform.ServiceTypes,
-            GeoPlatform.OSM);
+            GeoPlatform.OSM, GeoPlatform);
     }
-}(this||window, function(Q, L/*eaflet*/, GeoPlatform, ServiceTypes, OSM) {
+}(this||window, function(Q, L/*eaflet*/, ServiceTypes, OSM, globalGP) {
 
 
     /**
@@ -79,48 +80,91 @@
             format  = layer.supportedFormats ? layer.supportedFormats[0] : null,
             opts = {};
 
-        switch(typeUri) {
 
-            case ServiceTypes.ESRI_MAP_SERVER.uri:
-                opts = {
-                    layers: layer.layerName,
-                    transparent: true,
-                    format: format || "png32"
-                };
-                if(srs) opts.srs = srs;
-                if(GeoPlatform.leafletPane)
-                    opts.pane = GeoPlatform.leafletPane;
-                return L.tileLayer.esri(url, opts);
+        if(ServiceTypes.ESRI_MAP_SERVER &&
+            ServiceTypes.ESRI_MAP_SERVER.uri === typeUri) {
+            opts = {
+                layers: layer.layerName,
+                transparent: true,
+                format: format || "png32"
+            };
+            if(srs) opts.srs = srs;
+            if(GeoPlatform.leafletPane)
+                opts.pane = GeoPlatform.leafletPane;
+            return L.tileLayer.esri(url, opts);
 
-            case ServiceTypes.ESRI_FEATURE_SERVER.uri:
-                return L.GeoPlatform.clusteredFeatures(layer);
+        } else if(ServiceTypes.ESRI_FEATURE_SERVER &&
+            ServiceTypes.ESRI_FEATURE_SERVER.uri === typeUri) {
+            return L.GeoPlatform.clusteredFeatures(layer);
 
-            case ServiceTypes.ESRI_TILE_SERVER.uri:
-                opts = { url: url, useCors: true };
-                if(GeoPlatform.leafletPane)
-                    opts.pane = GeoPlatform.leafletPane;
-                return L.esri.tiledMapLayer(opts);
+        } else if(ServiceTypes.ESRI_TILE_SERVER &&
+            ServiceTypes.ESRI_TILE_SERVER.uri === typeUri) {
+            opts = { url: url, useCors: true };
+            if(GeoPlatform.leafletPane)
+                opts.pane = GeoPlatform.leafletPane;
+            return L.esri.tiledMapLayer(opts);
 
-            case ServiceTypes.FEED.uri:
-                return L.GeoPlatform.geoJsonFeed(layer);
+        } else if(ServiceTypes.FEED && ServiceTypes.FEED.uri === typeUri) {
+            return L.GeoPlatform.geoJsonFeed(layer);
 
-            case ServiceTypes.WMS.uri:
-                return L.GeoPlatform.wms(layer);
+        } else if(ServiceTypes.WMS && ServiceTypes.WMS.uri === typeUri) {
+            return L.GeoPlatform.wms(layer);
 
-            case ServiceTypes.WMST.uri:
-                return L.GeoPlatform.wmst(layer);
+        } else if(ServiceTypes.WMST && ServiceTypes.WMST.uri === typeUri) {
+            return L.GeoPlatform.wmst(layer);
 
-            case ServiceTypes.WMTS.uri:
-                return L.GeoPlatform.wmts(layer);
+        } else if(ServiceTypes.WMTS && ServiceTypes.WMTS.uri === typeUri) {
+            return L.GeoPlatform.wmts(layer);
 
-            case ServiceTypes.WFS.uri:
-
-            case ServiceTypes.WCS.uri:
-
-                return null;
-
-            default: return null;
+        } else {
+            console.log("LayerFactory() - Could not create Leaflet layer for " +
+                "GeoPlatform Layer with service type: " + typeUri);
+            return null;
         }
+
+
+        // switch(typeUri) {
+        //
+        //     case ServiceTypes.ESRI_MAP_SERVER.uri:
+        //         opts = {
+        //             layers: layer.layerName,
+        //             transparent: true,
+        //             format: format || "png32"
+        //         };
+        //         if(srs) opts.srs = srs;
+        //         if(GeoPlatform.leafletPane)
+        //             opts.pane = GeoPlatform.leafletPane;
+        //         return L.tileLayer.esri(url, opts);
+        //
+        //     case ServiceTypes.ESRI_FEATURE_SERVER.uri:
+        //         return L.GeoPlatform.clusteredFeatures(layer);
+        //
+        //     case ServiceTypes.ESRI_TILE_SERVER.uri:
+        //         opts = { url: url, useCors: true };
+        //         if(GeoPlatform.leafletPane)
+        //             opts.pane = GeoPlatform.leafletPane;
+        //         return L.esri.tiledMapLayer(opts);
+        //
+        //     case ServiceTypes.FEED.uri:
+        //         return L.GeoPlatform.geoJsonFeed(layer);
+        //
+        //     case ServiceTypes.WMS.uri:
+        //         return L.GeoPlatform.wms(layer);
+        //
+        //     case ServiceTypes.WMST.uri:
+        //         return L.GeoPlatform.wmst(layer);
+        //
+        //     case ServiceTypes.WMTS.uri:
+        //         return L.GeoPlatform.wmts(layer);
+        //
+        //     case ServiceTypes.WFS.uri:
+        //
+        //     case ServiceTypes.WCS.uri:
+        //
+        //         return null;
+        //
+        //     default: return null;
+        // }
     };
 
     return L.GeoPlatform.LayerFactory;

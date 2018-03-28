@@ -21,7 +21,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["L" /*eaflet*/], function (L) {
+        define('L_GeoPlatform', ["leaflet"], function (L) {
             return root.L_GeoPlatform = factory(L);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -29,7 +29,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.L_GeoPlatform = factory(require('L'));
+        module.exports = root.L_GeoPlatform = factory(require('leaflet'));
     } else {
         GeoPlatform.L_GeoPlatform = factory(L /*eaflet*/);
     }
@@ -61,19 +61,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  */
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "L" /*eaflet*/, "GeoPlatform"], function (Q, L, GeoPlatform) {
-            return root.FeatureStyleResolver = factory(Q, L, GeoPlatform);
+        define('FeatureStyleResolver', ["q", "leaflet", "geoplatform.client/src/shared/config"], function (Q, L, Config) {
+            return root.FeatureStyleResolver = factory(Q, L, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.FeatureStyleResolver = factory(require('q'), require('L'), require('GeoPlatform'));
+        module.exports = root.FeatureStyleResolver = factory(require('q'), require('leaflet'), require('geoplatform.client').Config);
     } else {
         GeoPlatform.FeatureStyleResolver = factory(Q, L /*eaflet*/, GeoPlatform);
     }
@@ -111,19 +112,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, L, GeoPlatform) {
-            return root.featurePopupTemplate = factory(jQuery, L, GeoPlatform);
+        define('featurePopupTemplate', ["jquery", "leaflet", "geoplatform.client/src/shared/config"], function (jQuery, L, Config) {
+            return root.featurePopupTemplate = factory(jQuery, L, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.featurePopupTemplate = factory(require("jquery"), require('L'), require('GeoPlatform'));
+        module.exports = root.featurePopupTemplate = factory(require("jquery"), require('leaflet'), require('geoplatform.client').Config);
     } else {
         GeoPlatform.featurePopupTemplate = factory(jQuery, L /*eaflet*/, GeoPlatform);
     }
@@ -203,23 +205,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  */
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "GeoPlatform", "ItemService", "JQueryHttpClient", "QueryFactory"], function (jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory) {
-            return root.ServiceTypes = factory(jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory);
+        define('ServiceTypes', ["jquery", "q", "geoplatform.client/src/services/item", "geoplatform.client/src/http/jq", "geoplatform.client/src/shared/query-factory", "geoplatform.client/src/shared/config"], function (jQuery, Q, ItemService, HttpClient, QueryFactory, Config) {
+            return root.ServiceTypes = factory(jQuery, Q, ItemService, HttpClient, QueryFactory, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.ServiceTypes = factory(require("jquery"), require('q'), require('GeoPlatform'), require('ItemService'), require('JQueryHttpClient'), require('QueryFactory'));
+        module.exports = root.ServiceTypes = factory(require("jquery"), require('q'), require('geoplatform.client').ItemService, require('geoplatform.client').HttpClient, require('geoplatform.client').QueryFactory, require('geoplatform.client').Config);
     } else {
-        GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform, GeoPlatform.ItemService, GeoPlatform.JQueryHttpClient, GeoPlatform.QueryFactory);
+        GeoPlatform.ServiceTypes = factory(jQuery, Q, GeoPlatform.ItemService, GeoPlatform.JQueryHttpClient, GeoPlatform.QueryFactory, GeoPlatform);
     }
-})(undefined || window, function (jQuery, Q, GeoPlatform, ItemService, JQueryHttpClient, QueryFactory) {
+})(undefined || window, function (jQuery, Q, ItemService, HttpClient, QueryFactory, GeoPlatform) {
 
     var ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
     var esriExpr = /Esri REST ([A-Za-z]+) Service/;
@@ -230,9 +233,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     var types = {};
 
+    var url = GeoPlatform.ualUrl;
+    if (!url) {
+        console.log("WARN : ServiceTypes - no GeoPlatform API URL configured, unable to load service types");
+        return types;
+    }
+
     var query = QueryFactory().types('dct:Standard').resourceTypes('ServiceType').pageSize(50);
 
-    new ItemService(GeoPlatform.ualUrl, new JQueryHttpClient()).search(query).then(function (data) {
+    new ItemService(url, new HttpClient()).search(query).then(function (data) {
 
         for (var i = 0; i < data.results.length; ++i) {
 
@@ -273,11 +282,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  */
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["L" /*eaflet*/], function (L) {
+        define('LoadingControl', ['leaflet'], function (L) {
             return root.LoadingControl = factory(L);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -285,7 +295,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.LoadingControl = factory(require('L'));
+        module.exports = root.LoadingControl = factory(require('leaflet'));
     } else {
         GeoPlatform.LoadingControl = factory(L /*eaflet*/);
     }
@@ -545,11 +555,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["L" /*eaflet*/], function (L) {
+        define('MeasureControl', ["leaflet"], function (L) {
             return root.MeasureControl = factory(L);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -557,7 +568,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.MeasureControl = factory(require('L'));
+        module.exports = root.MeasureControl = factory(require('leaflet'));
     } else {
         GeoPlatform.MeasureControl = factory(L /*eaflet*/);
     }
@@ -810,11 +821,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["L" /*eaflet*/], function (L) {
+        define('MousePositionControl', ["leaflet"], function (L) {
             return root.MousePositionControl = factory(L);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
@@ -822,7 +834,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.MousePositionControl = factory(require('L'));
+        module.exports = root.MousePositionControl = factory(require('leaflet'));
     } else {
         GeoPlatform.MousePositionControl = factory(L /*eaflet*/);
     }
@@ -885,26 +897,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
-            return root.WMSLayer = factory(jQuery, Q, L, GeoPlatform);
+        define('WMSLayer', ["jquery", "q", "leaflet", 'geoplatform.client/src/shared/config'], function (jQuery, Q, L, Config) {
+            return root.WMSLayer = factory(jQuery, Q, L, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.WMSLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+        module.exports = root.WMSLayer = factory(require("jquery"), require('q'), require('leaflet'), require('geoplatform.client').Config);
     } else {
         GeoPlatform.WMSLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
     }
 })(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
-
-    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
-
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -1028,26 +1038,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
-            return root.WMTSLayer = factory(jQuery, Q, L, GeoPlatform);
+        define('WMTSLayer', ["jquery", "q", "leaflet", 'geoplatform.client/src/shared/config'], function (jQuery, Q, L, Config) {
+            return root.WMTSLayer = factory(jQuery, Q, L, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.WMTSLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+        module.exports = root.WMTSLayer = factory(require("jquery"), require('q'), require('leaflet'), require('geoplatform.client').Config);
     } else {
         GeoPlatform.WMTSLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
     }
 })(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
-
-    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
-
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -1267,26 +1275,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
-            return root.WMSTLayer = factory(jQuery, Q, L, GeoPlatform);
+        define('WMSTLayer', ["jquery", "q", "leaflet", 'geoplatform.client/src/shared/config'], function (jQuery, Q, L, Config) {
+            return root.WMSTLayer = factory(jQuery, Q, L, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.WMSTLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+        module.exports = root.WMSTLayer = factory(require("jquery"), require('q'), require('leaflet'), require('geoplatform.client').Config);
     } else {
         GeoPlatform.WMSTLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
     }
 })(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
-
-    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
-
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -1379,26 +1385,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
-            return root.ESRITileLayer = factory(jQuery, Q, L, GeoPlatform);
+        define('ESRITileLayer', ["jquery", "q", "leaflet", 'geoplatform.client/src/shared/config'], function (jQuery, Q, L, Config) {
+            return root.ESRITileLayer = factory(jQuery, Q, L, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.ESRITileLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+        module.exports = root.ESRITileLayer = factory(require("jquery"), require('q'), require('leaflet'), require('geoplatform.client').Config);
     } else {
         GeoPlatform.ESRITileLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
     }
 })(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
-
-    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
-
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -1511,22 +1515,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
-            return root.FeatureLayer = factory(jQuery, Q, L, GeoPlatform);
+        define('FeatureLayer', ["jquery", "q", "leaflet", "geoplatform.client/src/shared/config"], function (jQuery, Q, L, Config) {
+            return root.FeatureLayer = factory(jQuery, Q, L, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.FeatureLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+        module.exports = root.FeatureLayer = factory(require("jquery"), require('q'), require('leaflet'), require('geoplatform.client').Config);
     } else {
         GeoPlatform.FeatureLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
     }
 })(undefined || window, function (jQuery, Q, L /*eaflet*/, GeoPlatform) {
-
-    // (function(jQuery, L/*eaflet*/, GeoPlatform) {
-
 
     if (!L) {
         throw new Error("Missing Leaflet");
@@ -1926,19 +1927,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L" /*eaflet*/, "GeoPlatform"], function (jQuery, Q, L, GeoPlatform) {
-            return root.ClusteredFeatureLayer = factory(jQuery, Q, L, GeoPlatform);
+        define('ClusteredFeatureLayer', ["jquery", "q", "leaflet", 'geoplatform.client/src/shared/config'], function (jQuery, Q, L, Config) {
+            return root.ClusteredFeatureLayer = factory(jQuery, Q, L, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.ClusteredFeatureLayer = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'));
+        module.exports = root.ClusteredFeatureLayer = factory(require("jquery"), require('q'), require('leaflet'), require('geoplatform.client').Config);
     } else {
         GeoPlatform.ClusteredFeatureLayer = factory(jQuery, Q, L /*eaflet*/, GeoPlatform);
     }
@@ -2289,23 +2291,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "GeoPlatform", "QueryFactory", "LayerService", "JQueryHttpClient"], function (Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient) {
-            return root.OSM = factory(Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient);
+        define('OSM', ["q", "geoplatform.client/src/shared/query-factory", "geoplatform.client/src/services/layer", "geoplatform.client/src/http/jq", 'geoplatform.client/src/shared/config'], function (Q, QueryFactory, LayerService, HttpClient, Config) {
+            return root.OSM = factory(Q, QueryFactory, LayerService, HttpClient, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.OSM = factory(require('q'), require('GeoPlatform'), require('QueryFactory'), require('LayerService'), require('JQueryHttpClient'));
+        module.exports = root.OSM = factory(require('q'), require('geoplatform.client').QueryFactory, require('geoplatform.client').LayerService, require('geoplatform.client').HttpClient, require('geoplatform.client').Config);
     } else {
-        GeoPlatform.OSM = factory(Q, GeoPlatform, GeoPlatform.QueryFactory, GeoPlatform.LayerService, GeoPlatform.JQueryHttpClient);
+        GeoPlatform.OSM = factory(Q, GeoPlatform.QueryFactory, GeoPlatform.LayerService, GeoPlatform.JQueryHttpClient, GeoPlatform);
     }
-})(undefined || window, function (Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient) {
+})(undefined || window, function (Q, QueryFactory, LayerService, HttpClient, GeoPlatform) {
 
     /**
      * @param {LayerService} layerService - optional, GeoPlatform Layer service to use to fetch the layer
@@ -2323,7 +2326,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         get: function get(layerService) {
             var query = QueryFactory().fields('*').resourceTypes("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
-            if (!layerService) layerService = new LayerService(GeoPlatform.ualUrl, new JQueryHttpClient());
+            if (!layerService) layerService = new LayerService(GeoPlatform.ualUrl, new HttpClient());
             return layerService.search(query).then(function (response) {
                 return response.results.length ? response.results[0] : null;
             }).catch(function (e) {
@@ -2335,23 +2338,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "GeoPlatform", "OSM", "LayerService", "JQueryHttpClient"], function (Q, GeoPlatform, OSM, LayerService, JQueryHttpClient) {
-            return root.defaultBaseLayer = factory(Q, GeoPlatform, OSM, LayerService, JQueryHttpClient);
+        define('defaultBaseLayer', ["q", "./osm", "geoplatform.client/src/services/layer", "geoplatform.client/src/http/jq", "geoplatform.client/src/shared/config"], function (Q, OSM, LayerService, HttpClient, Config) {
+            return root.defaultBaseLayer = factory(Q, OSM, LayerService, HttpClient, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.defaultBaseLayer = factory(require('q'), require('GeoPlatform'), require('OSM'), require('LayerService'), require('JQueryHttpClient'));
+        module.exports = root.defaultBaseLayer = factory(require('q'), require('./osm'), require('geoplatform.client').LayerService, require('geoplatform.client').HttpClient, require('geoplatform.client').Config);
     } else {
-        GeoPlatform.defaultBaseLayer = factory(Q, GeoPlatform, GeoPlatform.OSM, GeoPlatform.LayerService, GeoPlatform.JQueryHttpClient);
+        GeoPlatform.defaultBaseLayer = factory(Q, GeoPlatform.OSM, GeoPlatform.LayerService, GeoPlatform.JQueryHttpClient, GeoPlatform);
     }
-})(undefined || window, function (Q, GeoPlatform, OSM, LayerService, JQueryHttpClient) {
+})(undefined || window, function (Q, OSM, LayerService, HttpClient, GeoPlatform) {
 
     /**
      * If a default base layer is defined using the 'defaultBaseLayer'
@@ -2362,7 +2366,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return function (layerService) {
         if (!GeoPlatform.defaultBaseLayerId) return OSM.get();
 
-        if (!layerService) layerService = new LayerService(GeoPlatform.ualUrl, new JQueryHttpClient());
+        if (!layerService) layerService = new LayerService(GeoPlatform.ualUrl, new HttpClient());
         return layerService.get(GeoPlatform.defaultBaseLayerId).catch(function (e) {
             return Q.resolve(OSM.get());
         });
@@ -2370,23 +2374,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "L" /*eaflet*/, "GeoPlatform", "ServiceTypes", "OSM"], function (Q, L, GeoPlatform, ServiceTypes, OSM) {
-            return root.LayerFactory = factory(Q, L, GeoPlatform, ServiceTypes, OSM);
+        define('LayerFactory', ["q", "leaflet", "../service/types", "./osm", 'geoplatform.client/src/shared/config'], function (Q, L, ServiceTypes, OSM, Config) {
+            return root.LayerFactory = factory(Q, L, ServiceTypes, OSM, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.LayerFactory = factory(require('q'), require('L'), require('GeoPlatform'), require('ServiceTypes'), require('OSM'));
+        module.exports = root.LayerFactory = factory(require('q'), require('leaflet'), require('../service/types'), require('./osm'), require('geoplatform.client').Config);
     } else {
-        GeoPlatform.LayerFactory = factory(Q, L /*eaflet*/, GeoPlatform, GeoPlatform.ServiceTypes, GeoPlatform.OSM);
+        GeoPlatform.LayerFactory = factory(Q, L /*eaflet*/
+        , GeoPlatform.ServiceTypes, GeoPlatform.OSM, GeoPlatform);
     }
-})(undefined || window, function (Q, L /*eaflet*/, GeoPlatform, ServiceTypes, OSM) {
+})(undefined || window, function (Q, L /*eaflet*/, ServiceTypes, OSM, globalGP) {
 
     /**
      * @param {Object} layer - GeoPlatform Layer
@@ -2425,47 +2431,76 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             format = layer.supportedFormats ? layer.supportedFormats[0] : null,
             opts = {};
 
-        switch (typeUri) {
-
-            case ServiceTypes.ESRI_MAP_SERVER.uri:
-                opts = {
-                    layers: layer.layerName,
-                    transparent: true,
-                    format: format || "png32"
-                };
-                if (srs) opts.srs = srs;
-                if (GeoPlatform.leafletPane) opts.pane = GeoPlatform.leafletPane;
-                return L.tileLayer.esri(url, opts);
-
-            case ServiceTypes.ESRI_FEATURE_SERVER.uri:
-                return L.GeoPlatform.clusteredFeatures(layer);
-
-            case ServiceTypes.ESRI_TILE_SERVER.uri:
-                opts = { url: url, useCors: true };
-                if (GeoPlatform.leafletPane) opts.pane = GeoPlatform.leafletPane;
-                return L.esri.tiledMapLayer(opts);
-
-            case ServiceTypes.FEED.uri:
-                return L.GeoPlatform.geoJsonFeed(layer);
-
-            case ServiceTypes.WMS.uri:
-                return L.GeoPlatform.wms(layer);
-
-            case ServiceTypes.WMST.uri:
-                return L.GeoPlatform.wmst(layer);
-
-            case ServiceTypes.WMTS.uri:
-                return L.GeoPlatform.wmts(layer);
-
-            case ServiceTypes.WFS.uri:
-
-            case ServiceTypes.WCS.uri:
-
-                return null;
-
-            default:
-                return null;
+        if (ServiceTypes.ESRI_MAP_SERVER && ServiceTypes.ESRI_MAP_SERVER.uri === typeUri) {
+            opts = {
+                layers: layer.layerName,
+                transparent: true,
+                format: format || "png32"
+            };
+            if (srs) opts.srs = srs;
+            if (GeoPlatform.leafletPane) opts.pane = GeoPlatform.leafletPane;
+            return L.tileLayer.esri(url, opts);
+        } else if (ServiceTypes.ESRI_FEATURE_SERVER && ServiceTypes.ESRI_FEATURE_SERVER.uri === typeUri) {
+            return L.GeoPlatform.clusteredFeatures(layer);
+        } else if (ServiceTypes.ESRI_TILE_SERVER && ServiceTypes.ESRI_TILE_SERVER.uri === typeUri) {
+            opts = { url: url, useCors: true };
+            if (GeoPlatform.leafletPane) opts.pane = GeoPlatform.leafletPane;
+            return L.esri.tiledMapLayer(opts);
+        } else if (ServiceTypes.FEED && ServiceTypes.FEED.uri === typeUri) {
+            return L.GeoPlatform.geoJsonFeed(layer);
+        } else if (ServiceTypes.WMS && ServiceTypes.WMS.uri === typeUri) {
+            return L.GeoPlatform.wms(layer);
+        } else if (ServiceTypes.WMST && ServiceTypes.WMST.uri === typeUri) {
+            return L.GeoPlatform.wmst(layer);
+        } else if (ServiceTypes.WMTS && ServiceTypes.WMTS.uri === typeUri) {
+            return L.GeoPlatform.wmts(layer);
+        } else {
+            console.log("LayerFactory() - Could not create Leaflet layer for " + "GeoPlatform Layer with service type: " + typeUri);
+            return null;
         }
+
+        // switch(typeUri) {
+        //
+        //     case ServiceTypes.ESRI_MAP_SERVER.uri:
+        //         opts = {
+        //             layers: layer.layerName,
+        //             transparent: true,
+        //             format: format || "png32"
+        //         };
+        //         if(srs) opts.srs = srs;
+        //         if(GeoPlatform.leafletPane)
+        //             opts.pane = GeoPlatform.leafletPane;
+        //         return L.tileLayer.esri(url, opts);
+        //
+        //     case ServiceTypes.ESRI_FEATURE_SERVER.uri:
+        //         return L.GeoPlatform.clusteredFeatures(layer);
+        //
+        //     case ServiceTypes.ESRI_TILE_SERVER.uri:
+        //         opts = { url: url, useCors: true };
+        //         if(GeoPlatform.leafletPane)
+        //             opts.pane = GeoPlatform.leafletPane;
+        //         return L.esri.tiledMapLayer(opts);
+        //
+        //     case ServiceTypes.FEED.uri:
+        //         return L.GeoPlatform.geoJsonFeed(layer);
+        //
+        //     case ServiceTypes.WMS.uri:
+        //         return L.GeoPlatform.wms(layer);
+        //
+        //     case ServiceTypes.WMST.uri:
+        //         return L.GeoPlatform.wmst(layer);
+        //
+        //     case ServiceTypes.WMTS.uri:
+        //         return L.GeoPlatform.wmts(layer);
+        //
+        //     case ServiceTypes.WFS.uri:
+        //
+        //     case ServiceTypes.WCS.uri:
+        //
+        //         return null;
+        //
+        //     default: return null;
+        // }
     };
 
     return L.GeoPlatform.LayerFactory;
@@ -2477,25 +2512,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // (function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
 (function (root, factory) {
+
+    //reference global "config" object for GeoPlatform settings
+    // if it's not defined, stub it out
+    var globalGP = root && root.GeoPlatform ? root.GeoPlatform : {};
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L" /*eaflet*/
-        , "GeoPlatform", "OSM", "ItemTypes", "ServiceFactory", "JQueryHttpClient"], function (jQuery, Q, L, GeoPlatform, OSM, ItemTypes, ServiceFactory, JQueryHttpClient) {
-            return root.MapInstance = factory(jQuery, Q, L, GeoPlatform, OSM, ItemTypes, ServiceFactory, JQueryHttpClient);
+        define("MapInstance", ["jquery", "q", "leaflet", "../layer/osm", "geoplatform.client/src/shared/types", "geoplatform.client/src/services/factory", "geoplatform.client/src/http/jq"], function (jQuery, Q, L, OSM, ItemTypes, ServiceFactory, HttpClient) {
+            return root.MapInstance = factory(jQuery, Q, L, OSM, ItemTypes, ServiceFactory, HttpClient, globalGP);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('L'), require('GeoPlatform'), require('OSM'), require('ItemTypes'), require('ServiceFactory'), require('JQueryHttpClient'));
+        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('leaflet'), require('../layer/osm'), require('geoplatform.client').ItemTypes, require('geoplatform.client').ServiceFactory, require('geoplatform.client').HttpClient, globalGP);
     } else {
-        GeoPlatform.MapInstance = factory(jQuery, Q, L, GeoPlatform, GeoPlatform.OSM, GeoPlatform.ItemTypes, GeoPlatform.ServiceFactory, GeoPlatform.JQueryHttpClient);
+        GeoPlatform.MapInstance = factory(jQuery, Q, L, GeoPlatform.OSM, GeoPlatform.ItemTypes, GeoPlatform.ServiceFactory, GeoPlatform.JQueryHttpClient, globalGP);
     }
 })(undefined || window, function (jQuery, Q, L /*eaflet*/
-, GeoPlatform, OSM, ItemTypes, ServiceFactory, JQueryHttpClient) {
+, OSM, ItemTypes, ServiceFactory, HttpClient, GeoPlatform) {
 
     "use strict";
 
@@ -2545,7 +2584,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             var _this5 = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
 
-            _this5.setHttpClient(new JQueryHttpClient());
+            _this5.setHttpClient(new HttpClient());
             _this5.setServiceFactory(ServiceFactory);
 
             //generate random key (see factory below)
@@ -3887,19 +3926,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
+
+    //reference global "config" object for GeoPlatform settings
+    // if it's not defined, stub it out
+    var globalGP = root && root.GeoPlatform ? root.GeoPlatform : {};
+
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["MapInstance"], function (MapInstance) {
-            return root.MapInstance = factory(MapInstance);
+        define("MapFactory", ["./instance"], function (MapInstance) {
+            return root.MapFactory = factory(MapInstance);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.MapInstance = factory(require('MapInstance'));
+        module.exports = root.MapFactory = factory(require('./instance'));
     } else {
         GeoPlatform.MapFactory = factory(GeoPlatform.MapInstance);
     }

@@ -1,6 +1,6 @@
 {
     "name": "geoplatform.mapcore",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "",
     "main": "",
     "scripts": {
@@ -14,6 +14,10 @@
     ],
     "author": "Patrick Neal",
     "license": "ISC",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/GeoPlatform/map-core"
+    },
     "devDependencies": {
         "babel": "^6.5.2",
         "babel-preset-es2015": "^6.16.0",
@@ -33,12 +37,12 @@
         "less-plugin-autoprefix": "^1.5.1",
         "matchdep": "^0.3.0",
         "pre-commit": "^1.2.2",
-        "gp.client": "git+https://github.com/GeoPlatform/client-api.git#develop"
+        "geoplatform.client": "git+https://github.com/GeoPlatform/client-api.git#develop"
+    },
+    "peerDependencies": {
+        "geoplatform.client": "0.0.2"
     },
     "pre-commit": [
         "distro"
-    ],
-    "dependencies": {
-        "geoplatform.client": "git+https://github.com/GeoPlatform/client-api.git#develop"
-    }
+    ]
 }

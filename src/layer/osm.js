@@ -2,15 +2,21 @@
 
 
 (function (root, factory) {
+
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "GeoPlatform", "QueryFactory", "LayerService", "JQueryHttpClient"],
-            function(Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient) {
-                return (root.OSM = factory(
-                    Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient));
-            });
+        define('OSM', [
+            "q",
+            "geoplatform.client/src/shared/query-factory",
+            "geoplatform.client/src/services/layer",
+            "geoplatform.client/src/http/jq",
+            'geoplatform.client/src/shared/config'
+        ],
+        function(Q, QueryFactory, LayerService, HttpClient, Config) {
+            return (root.OSM = factory(Q, QueryFactory, LayerService, HttpClient, Config));
+        });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
@@ -19,18 +25,18 @@
         module.exports = (
             root.OSM = factory(
                 require('q'),
-                require('GeoPlatform'),
-                require('QueryFactory'),
-                require('LayerService'),
-                require('JQueryHttpClient')
+                require('geoplatform.client').QueryFactory,
+                require('geoplatform.client').LayerService,
+                require('geoplatform.client').HttpClient,
+                require('geoplatform.client').Config
             )
         );
     } else {
-        GeoPlatform.OSM = factory(Q, GeoPlatform,
+        GeoPlatform.OSM = factory(Q,
             GeoPlatform.QueryFactory, GeoPlatform.LayerService,
-            GeoPlatform.JQueryHttpClient);
+            GeoPlatform.JQueryHttpClient, GeoPlatform);
     }
-}(this||window, function(Q, GeoPlatform, QueryFactory, LayerService, JQueryHttpClient) {
+}(this||window, function(Q, QueryFactory, LayerService, HttpClient, GeoPlatform) {
 
     /**
      * @param {LayerService} layerService - optional, GeoPlatform Layer service to use to fetch the layer
@@ -54,7 +60,7 @@
                 .fields('*')
                 .resourceTypes("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
             if(!layerService)
-                layerService = new LayerService(GeoPlatform.ualUrl, new JQueryHttpClient());
+                layerService = new LayerService(GeoPlatform.ualUrl, new HttpClient());
             return layerService.search(query)
             .then( response => response.results.length ? response.results[0] : null)
             .catch( e => Q.reject(e));

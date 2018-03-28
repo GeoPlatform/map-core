@@ -1,12 +1,13 @@
 
 (function (root, factory) {
+
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/, "GeoPlatform"],
-            function(jQuery, Q, L, GeoPlatform) {
-                return (root.WMSLayer = factory(jQuery, Q, L, GeoPlatform));
+        define('WMSLayer', ["jquery", "q", "leaflet", 'geoplatform.client/src/shared/config'],
+            function(jQuery, Q, L, Config) {
+                return (root.WMSLayer = factory(jQuery, Q, L, Config));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -17,16 +18,14 @@
             root.WMSLayer = factory(
                 require("jquery"),
                 require('q'),
-                require('L'),
-                require('GeoPlatform')
+                require('leaflet'),
+                require('geoplatform.client').Config
             )
         );
     } else {
         GeoPlatform.WMSLayer = factory(jQuery, Q, L/*eaflet*/, GeoPlatform);
     }
 }(this||window, function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
-
-// (function(jQuery, L/*eaflet*/, GeoPlatform) {
 
 
     if(!L) {

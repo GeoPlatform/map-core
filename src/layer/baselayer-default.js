@@ -2,15 +2,21 @@
 
 
 (function (root, factory) {
+
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["q", "GeoPlatform", "OSM", "LayerService", "JQueryHttpClient"],
-            function(Q, GeoPlatform, OSM, LayerService, JQueryHttpClient) {
-                return (root.defaultBaseLayer =
-                    factory(Q, GeoPlatform, OSM, LayerService, JQueryHttpClient));
-            });
+        define('defaultBaseLayer', [
+            "q", "./osm",
+            "geoplatform.client/src/services/layer",
+            "geoplatform.client/src/http/jq",
+            "geoplatform.client/src/shared/config"
+        ],
+        function(Q, OSM, LayerService, HttpClient, Config) {
+            return (root.defaultBaseLayer =
+                factory(Q, OSM, LayerService, HttpClient, Config));
+        });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
@@ -19,19 +25,21 @@
         module.exports = (
             root.defaultBaseLayer = factory(
                 require('q'),
-                require('GeoPlatform'),
-                require('OSM'),
-                require('LayerService'),
-                require('JQueryHttpClient')
+                require('./osm'),
+                require('geoplatform.client').LayerService,
+                require('geoplatform.client').HttpClient,
+                require('geoplatform.client').Config
             )
         );
     } else {
         GeoPlatform.defaultBaseLayer = factory(
-            Q, GeoPlatform, GeoPlatform.OSM,
+            Q, GeoPlatform.OSM,
             GeoPlatform.LayerService,
-            GeoPlatform.JQueryHttpClient);
+            GeoPlatform.JQueryHttpClient,
+            GeoPlatform
+        );
     }
-}(this||window, function(Q, GeoPlatform, OSM, LayerService, JQueryHttpClient) {
+}(this||window, function(Q, OSM, LayerService, HttpClient, GeoPlatform) {
 
     /**
      * If a default base layer is defined using the 'defaultBaseLayer'
@@ -44,7 +52,7 @@
             return OSM.get();
 
         if(!layerService)
-            layerService = new LayerService(GeoPlatform.ualUrl, new JQueryHttpClient());
+            layerService = new LayerService(GeoPlatform.ualUrl, new HttpClient());
         return layerService.get(GeoPlatform.defaultBaseLayerId)
         .catch(e => Q.resolve( OSM.get() ));
     };

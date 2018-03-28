@@ -1,11 +1,12 @@
 
 
 (function (root, factory) {
+
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["L"/*eaflet*/],
+        define('MousePositionControl', ["leaflet"],
             function(L) {
                 return (root.MousePositionControl = factory(L));
             });
@@ -15,7 +16,7 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.MousePositionControl = factory(require('L'))
+            root.MousePositionControl = factory(require('leaflet'))
         );
     } else {
         GeoPlatform.MousePositionControl = factory(L/*eaflet*/);

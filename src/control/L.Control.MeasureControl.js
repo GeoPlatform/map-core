@@ -1,10 +1,11 @@
 
 (function (root, factory) {
+
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["L"/*eaflet*/],
+        define('MeasureControl', ["leaflet"],
             function(L) {
                 return (root.MeasureControl = factory(L));
             });
@@ -14,7 +15,7 @@
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
         module.exports = (
-            root.MeasureControl = factory(require('L'))
+            root.MeasureControl = factory(require('leaflet'))
         );
     } else {
         GeoPlatform.MeasureControl = factory(L/*eaflet*/);

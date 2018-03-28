@@ -5,19 +5,26 @@
 // (function(jQuery, Q, L/*eaflet*/, GeoPlatform) {
 
 (function (root, factory) {
+
+    //reference global "config" object for GeoPlatform settings
+    // if it's not defined, stub it out
+    var globalGP = root && root.GeoPlatform ? root.GeoPlatform : {};
+
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "q", "L"/*eaflet*/,
-            "GeoPlatform", "OSM", "ItemTypes",
-            "ServiceFactory", "JQueryHttpClient"],
-            function(jQuery, Q, L, GeoPlatform, OSM, ItemTypes,
-                ServiceFactory, JQueryHttpClient){
-                return (root.MapInstance =
-                    factory(jQuery, Q, L, GeoPlatform, OSM,
-                        ItemTypes, ServiceFactory, JQueryHttpClient));
-            });
+        define("MapInstance", [
+            "jquery", "q", "leaflet",
+            "../layer/osm",
+            "geoplatform.client/src/shared/types",
+            "geoplatform.client/src/services/factory",
+            "geoplatform.client/src/http/jq"
+        ],
+        function(jQuery, Q, L, OSM, ItemTypes,
+            ServiceFactory, HttpClient){
+            return (root.MapInstance = factory(jQuery, Q, L, OSM, ItemTypes, ServiceFactory, HttpClient, globalGP));
+        });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
@@ -27,24 +34,26 @@
             root.MapInstance = factory(
                 require("jquery"),
                 require('q'),
-                require('L'),
-                require('GeoPlatform'),
-                require('OSM'),
-                require('ItemTypes'),
-                require('ServiceFactory'),
-                require('JQueryHttpClient')
+                require('leaflet'),
+                require('../layer/osm'),
+                require('geoplatform.client').ItemTypes,
+                require('geoplatform.client').ServiceFactory,
+                require('geoplatform.client').HttpClient,
+                globalGP
             )
         );
     } else {
         GeoPlatform.MapInstance = factory(
-            jQuery, Q, L, GeoPlatform,
+            jQuery, Q, L,
             GeoPlatform.OSM,
             GeoPlatform.ItemTypes,
             GeoPlatform.ServiceFactory,
-            GeoPlatform.JQueryHttpClient);
+            GeoPlatform.JQueryHttpClient,
+            globalGP
+        );
     }
 }(this||window, function(jQuery, Q, L/*eaflet*/,
-    GeoPlatform, OSM, ItemTypes, ServiceFactory, JQueryHttpClient) {
+    OSM, ItemTypes, ServiceFactory, HttpClient, GeoPlatform) {
 
     "use strict";
 
@@ -88,7 +97,7 @@
         constructor(key) {
             super();
 
-            this.setHttpClient(new JQueryHttpClient());
+            this.setHttpClient(new HttpClient());
             this.setServiceFactory(ServiceFactory);
 
             //generate random key (see factory below)

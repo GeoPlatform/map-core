@@ -1,12 +1,13 @@
 
 (function (root, factory) {
+
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define(["jquery", "L"/*eaflet*/, "GeoPlatform"],
-            function(jQuery, L, GeoPlatform) {
-                return (root.featurePopupTemplate = factory(jQuery, L, GeoPlatform));
+        define('featurePopupTemplate', ["jquery", "leaflet","geoplatform.client/src/shared/config"],
+            function(jQuery, L, Config) {
+                return (root.featurePopupTemplate = factory(jQuery, L, Config));
             });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -16,15 +17,14 @@
         module.exports = (
             root.featurePopupTemplate = factory(
                 require("jquery"),
-                require('L'),
-                require('GeoPlatform')
+                require('leaflet'),
+                require('geoplatform.client').Config
             )
         );
     } else {
         GeoPlatform.featurePopupTemplate = factory(jQuery, L/*eaflet*/, GeoPlatform);
     }
 }(this||window, function(jQuery, L/*eaflet*/, GeoPlatform) {
-
 
     if(!L) {
         throw new Error("Missing Leaflet");
