@@ -32,7 +32,7 @@
             GeoPlatform.ServiceTypes,
             GeoPlatform.OSM, GeoPlatform);
     }
-}(this||window, function(Q, L/*eaflet*/, ServiceTypes, OSM, globalGP) {
+}(this||window, function(Q, L/*eaflet*/, ServiceTypes, OSM, GeoPlatform) {
 
 
     /**

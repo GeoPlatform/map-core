@@ -1,10 +1,6 @@
 
 (function (root, factory) {
 
-    //reference global "config" object for GeoPlatform settings
-    // if it's not defined, stub it out
-    var globalGP = root && root.GeoPlatform ? root.GeoPlatform : {};
-
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to

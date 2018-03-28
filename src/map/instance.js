@@ -6,24 +6,23 @@
 
 (function (root, factory) {
 
-    //reference global "config" object for GeoPlatform settings
-    // if it's not defined, stub it out
-    var globalGP = root && root.GeoPlatform ? root.GeoPlatform : {};
-
     if(typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
         define("MapInstance", [
             "jquery", "q", "leaflet",
+            '../layer/factory',
             "../layer/osm",
             "geoplatform.client/src/shared/types",
             "geoplatform.client/src/services/factory",
-            "geoplatform.client/src/http/jq"
+            "geoplatform.client/src/http/jq",
+            "geoplatform.client/src/shared/config"
         ],
-        function(jQuery, Q, L, OSM, ItemTypes,
-            ServiceFactory, HttpClient){
-            return (root.MapInstance = factory(jQuery, Q, L, OSM, ItemTypes, ServiceFactory, HttpClient, globalGP));
+        function(jQuery, Q, L, LayerFactory, OSM, ItemTypes,
+            ServiceFactory, HttpClient, Config){
+            return (root.MapInstance = factory(jQuery, Q, L, LayerFactory,
+                OSM, ItemTypes, ServiceFactory, HttpClient, Config));
         });
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
@@ -35,24 +34,26 @@
                 require("jquery"),
                 require('q'),
                 require('leaflet'),
+                require('../layer/factory'),
                 require('../layer/osm'),
                 require('geoplatform.client').ItemTypes,
                 require('geoplatform.client').ServiceFactory,
                 require('geoplatform.client').HttpClient,
-                globalGP
+                require('geoplatform.client').Config
             )
         );
     } else {
         GeoPlatform.MapInstance = factory(
             jQuery, Q, L,
+            L.GeoPlatform.LayerFactory,
             GeoPlatform.OSM,
             GeoPlatform.ItemTypes,
             GeoPlatform.ServiceFactory,
             GeoPlatform.JQueryHttpClient,
-            globalGP
+            GeoPlatform
         );
     }
-}(this||window, function(jQuery, Q, L/*eaflet*/,
+}(this||window, function(jQuery, Q, L/*eaflet*/, LayerFactory,
     OSM, ItemTypes, ServiceFactory, HttpClient, GeoPlatform) {
 
     "use strict";
@@ -505,7 +506,7 @@
 
             promise.then( layer => {
 
-                let leafletLayer = L.GeoPlatform.LayerFactory(layer);
+                let leafletLayer = LayerFactory(layer);
                 if(!leafletLayer) return;
 
                 this._mapInstance.addLayer(leafletLayer);
@@ -615,7 +616,7 @@
                 if(!layer || !state)
                     throw new Error("Invalid argument, missing layer and or state");
 
-                leafletLayer = L.GeoPlatform.LayerFactory(layer);
+                leafletLayer = LayerFactory(layer);
 
                 if(!leafletLayer)
                     throw new Error("Layer factory returned nothing");

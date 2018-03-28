@@ -2392,7 +2392,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         GeoPlatform.LayerFactory = factory(Q, L /*eaflet*/
         , GeoPlatform.ServiceTypes, GeoPlatform.OSM, GeoPlatform);
     }
-})(undefined || window, function (Q, L /*eaflet*/, ServiceTypes, OSM, globalGP) {
+})(undefined || window, function (Q, L /*eaflet*/, ServiceTypes, OSM, GeoPlatform) {
 
     /**
      * @param {Object} layer - GeoPlatform Layer
@@ -2513,28 +2513,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 (function (root, factory) {
 
-    //reference global "config" object for GeoPlatform settings
-    // if it's not defined, stub it out
-    var globalGP = root && root.GeoPlatform ? root.GeoPlatform : {};
-
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define("MapInstance", ["jquery", "q", "leaflet", "../layer/osm", "geoplatform.client/src/shared/types", "geoplatform.client/src/services/factory", "geoplatform.client/src/http/jq"], function (jQuery, Q, L, OSM, ItemTypes, ServiceFactory, HttpClient) {
-            return root.MapInstance = factory(jQuery, Q, L, OSM, ItemTypes, ServiceFactory, HttpClient, globalGP);
+        define("MapInstance", ["jquery", "q", "leaflet", '../layer/factory', "../layer/osm", "geoplatform.client/src/shared/types", "geoplatform.client/src/services/factory", "geoplatform.client/src/http/jq", "geoplatform.client/src/shared/config"], function (jQuery, Q, L, LayerFactory, OSM, ItemTypes, ServiceFactory, HttpClient, Config) {
+            return root.MapInstance = factory(jQuery, Q, L, LayerFactory, OSM, ItemTypes, ServiceFactory, HttpClient, Config);
         });
     } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
         // *and* I happen to be loading in a CJS browser environment
         // but I'm including it for the sake of being thorough
-        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('leaflet'), require('../layer/osm'), require('geoplatform.client').ItemTypes, require('geoplatform.client').ServiceFactory, require('geoplatform.client').HttpClient, globalGP);
+        module.exports = root.MapInstance = factory(require("jquery"), require('q'), require('leaflet'), require('../layer/factory'), require('../layer/osm'), require('geoplatform.client').ItemTypes, require('geoplatform.client').ServiceFactory, require('geoplatform.client').HttpClient, require('geoplatform.client').Config);
     } else {
-        GeoPlatform.MapInstance = factory(jQuery, Q, L, GeoPlatform.OSM, GeoPlatform.ItemTypes, GeoPlatform.ServiceFactory, GeoPlatform.JQueryHttpClient, globalGP);
+        GeoPlatform.MapInstance = factory(jQuery, Q, L, L.GeoPlatform.LayerFactory, GeoPlatform.OSM, GeoPlatform.ItemTypes, GeoPlatform.ServiceFactory, GeoPlatform.JQueryHttpClient, GeoPlatform);
     }
-})(undefined || window, function (jQuery, Q, L /*eaflet*/
-, OSM, ItemTypes, ServiceFactory, HttpClient, GeoPlatform) {
+})(undefined || window, function (jQuery, Q, L /*eaflet*/, LayerFactory, OSM, ItemTypes, ServiceFactory, HttpClient, GeoPlatform) {
 
     "use strict";
 
@@ -3039,7 +3034,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 promise.then(function (layer) {
 
-                    var leafletLayer = L.GeoPlatform.LayerFactory(layer);
+                    var leafletLayer = LayerFactory(layer);
                     if (!leafletLayer) return;
 
                     _this7._mapInstance.addLayer(leafletLayer);
@@ -3170,7 +3165,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 try {
                     if (!layer || !state) throw new Error("Invalid argument, missing layer and or state");
 
-                    leafletLayer = L.GeoPlatform.LayerFactory(layer);
+                    leafletLayer = LayerFactory(layer);
 
                     if (!leafletLayer) throw new Error("Layer factory returned nothing");
                 } catch (e) {
@@ -3926,10 +3921,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 });
 
 (function (root, factory) {
-
-    //reference global "config" object for GeoPlatform settings
-    // if it's not defined, stub it out
-    var globalGP = root && root.GeoPlatform ? root.GeoPlatform : {};
 
     if (typeof define === "function" && define.amd) {
         // Now we're wrapping the factory and assigning the return

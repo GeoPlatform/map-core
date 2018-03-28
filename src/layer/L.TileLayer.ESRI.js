@@ -6,10 +6,14 @@
         // Now we're wrapping the factory and assigning the return
         // value to the root (window) and returning it as well to
         // the AMD loader.
-        define('ESRITileLayer', ["jquery", "q", "leaflet",'geoplatform.client/src/shared/config'],
-            function(jQuery, Q, L, Config) {
-                return (root.ESRITileLayer = factory(jQuery, Q, L, Config));
-            });
+        define('ESRITileLayer', [
+            "jquery", "q", "leaflet",
+            'geoplatform.client/src/shared/config'
+        ],
+        function(jQuery, Q, L, Config) {
+            return (root.ESRITileLayer = factory(jQuery, Q, L, Config));
+        });
+
     } else if(typeof module === "object" && module.exports) {
         // I've not encountered a need for this yet, since I haven't
         // run into a scenario where plain modules depend on CommonJS
