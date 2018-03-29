@@ -6,7 +6,8 @@ var pkg         = require('./package.json'),
     uglify      = require('gulp-uglify'),
     rename      = require('gulp-rename'),
     notify      = require('gulp-notify')
-    srcmaps     = require('gulp-sourcemaps');
+    srcmaps     = require('gulp-sourcemaps'),
+    rollup      = require('rollup');
 
 require('gulp-help')(gulp, { description: 'Help listing.' });
 
@@ -26,64 +27,15 @@ gulp.task('jshint', function () {
 
 
 gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
-
-    //include module first, then other src files which depend on module
-    gulp.src([
-
-        '!src/**/*-ng.js',
-
-        'src/index.js',
-
-        'src/shared/style-resolver.js',
-        'src/shared/L.GeoPlatform.PopupTemplate.js',
-
-        'src/service/types.js',
-
-        'src/control/**/*.js',
-
-        'src/layer/L.GeoPlatform.WMS.js',
-        'src/layer/L.GeoPlatform.WMTS.js',
-        'src/layer/L.GeoPlatform.WMST.js',
-        'src/layer/L.TileLayer.ESRI.js',
-        'src/layer/L.GeoPlatform.FeatureLayer.js',
-        'src/layer/L.esri.Cluster.FeatureLayer.js',
-        'src/layer/L.GeoPlatform.ClusteredFeatureLayer.js',
-        'src/layer/osm.js',
-        'src/layer/baselayer-default.js',
-        'src/layer/factory.js',
-
-        'src/map/instance.js',
-        'src/map/factory.js'
-
-        ])
-        // .pipe(srcmaps.init())
-        .pipe(concat(pkg.name + '.js'))
-        .pipe(babel({presets: ["es2015"]}))
-        .pipe(gulp.dest('dist/js'))
-        .pipe(uglify()).on('error', notify.onError("Error: <%= error.message %>"))
-        .pipe(rename({extname: ".min.js"}))
-        // .pipe(srcmaps.write('./'))
-        .pipe(gulp.dest('dist/js'))
-        .pipe(notify('Uglified JavaScript'));
-
-
-
-        // //include module first, then other src files which depend on module
-        // gulp.src([
-        //     'src/shared/item-service-ng.js',
-        //     'src/service/service-ng.js',
-        //     'src/layer/service-ng.js',
-        //     'src/map/service-ng.js'
-        //     ])
-        //     // .pipe(srcmaps.init())
-        //     .pipe(concat(pkg.name + '.ng.js'))
-        //     .pipe(babel({presets: ["es2015"]}))
-        //     .pipe(gulp.dest('dist/js'))
-        //     .pipe(uglify()).on('error', notify.onError("Error: <%= error.message %>"))
-        //     .pipe(rename({extname: ".min.js"}))
-        //     // .pipe(srcmaps.write('./'))
-        //     .pipe(gulp.dest('dist/js'))
-        //     .pipe(notify('Uglified JavaScript'));
+    return rollup.rollup({ input: './src/index.js', plugins: [] })
+    .then(bundle => {
+        return bundle.write({
+          file: './dist/js/' + pkg.name + '.js',
+          format: 'umd',
+          name: 'GeoPlatformMapCore',
+          sourcemap: true
+        });
+    });
 });
 
 gulp.task('less', 'Compile less into a single app.css.', function() {

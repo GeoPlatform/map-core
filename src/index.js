@@ -1,52 +1,72 @@
 
-/**
- * Defines the L.GeoPlatform namespace object for later usage
- * in containing the various Leaflet extensions GeoPlatform
- * makes available
- */
+import LoadingControl from './control/L.Control.Loading';
+import MeasureControl from './control/L.Control.MeasureControl';
+import MousePositionControl from './control/L.Control.MousePosition';
 
- (function (root, factory) {
-     if(typeof define === "function" && define.amd) {
-         // Now we're wrapping the factory and assigning the return
-         // value to the root (window) and returning it as well to
-         // the AMD loader.
-         define('L_GeoPlatform', ["leaflet"], function(L) {
-             return (root.L_GeoPlatform = factory(L));
-         });
-     } else if(typeof module === "object" && module.exports) {
-         // I've not encountered a need for this yet, since I haven't
-         // run into a scenario where plain modules depend on CommonJS
-         // *and* I happen to be loading in a CJS browser environment
-         // but I'm including it for the sake of being thorough
-         module.exports = (
-             root.L_GeoPlatform = factory(require('leaflet'))
-         );
-     } else {
-         GeoPlatform.L_GeoPlatform = factory(L/*eaflet*/);
-     }
- }(this||window, function(L/*eaflet*/) {
+import DefaultBaseLayer from './layer/baselayer-default';
+import LayerFactory from './layer/factory';
+import OSMLayerFactory from './layer/osm-factory';
+import ESRIClusterFeatureLayer from './layer/L.esri.Cluster.FeatureLayer';
+import {
+    ClusteredFeatureLayer,
+    clusteredFeatures,
+    geoJsonFeed
+} from './layer/cluster-feature';
+import FeatureLayer from './layer/feature';
+import {WMS, wms} from './layer/wms';
+import {WMST, wmst} from './layer/wmst';
+import {WMTS, wmts} from './layer/wmts';
+import ESRITileLayer from './layer/L.TileLayer.ESRI';
+import OSM from './layer/osm';
 
-    if(!L)
-        throw new Error("Missing Leaflet");
+import MapInstance from './map/instance';
+import MapFactory from './map/factory';
+
+import ServiceTypes from './service/types';
+
+import PopupTemplate from './shared/popup-template';
+import StyleResolver from './shared/style-resolver';
 
 
-    //if GeoPlatform extensions to Leaflet don't exist
-    // create the container
-    if(!L.GeoPlatform)
-        L.GeoPlatform = {};
+
+if(typeof(Array.prototype.each) === 'undefined') {
+    Array.prototype.each = function(fn) {
+        let arr = this, len = arr.length;
+        for(let i=0; i<len; ++i) {
+            try {
+                fn(arr[i]);
+            } catch(e) { }
+        }
+    };
+}
 
 
-    if(typeof(Array.prototype.each) === 'undefined') {
-        Array.prototype.each = function(fn) {
-            let arr = this, len = arr.length;
-            for(let i=0; i<len; ++i) {
-                try {
-                    fn(arr[i]);
-                } catch(e) { }
-            }
-        };
-    }
 
-    return L.GeoPlatform;
 
-}));
+
+export default {
+    LoadingControl,
+    MeasureControl,
+    MousePositionControl,
+    DefaultBaseLayer,
+    LayerFactory,
+    OSMLayerFactory,
+    ESRIClusterFeatureLayer,
+    ClusteredFeatureLayer,
+    clusteredFeatures,
+    geoJsonFeed,
+    FeatureLayer,
+    WMS,
+    wms,
+    WMST,
+    wmst,
+    WMTS,
+    wmts,
+    ESRITileLayer,
+    OSM,
+    MapInstance,
+    MapFactory,
+    ServiceTypes,
+    PopupTemplate,
+    StyleResolver
+};

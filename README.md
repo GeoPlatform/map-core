@@ -20,22 +20,46 @@ This library requires the following dependencies be present in your application:
 ### GeoPlatform Dependencies
 - [Geoplatform Client API](https://github.com/GeoPlatform/client-api)
 
+### Miscellaneous Requirements
+This library expects a set of configured parameters defining things such as the GeoPlatform API endpoint to communicate with and leaflet customizations.  
+
+__Note:__ If you are using a build tool like WebPack, you should ensure the Client API configuration object is properly initialized before using Map Core components.
+
+```js
+import GeoPlatform from 'geoplatform.client/src/shared/config';
+...
+//ensure GP API config is set
+if(!GeoPlatform.ualUrl) {
+    GeoPlatform.configure( ...options... );
+}
+...
+import MapInstance from 'geoplatform.mapcore/src/map/instance';
+...
+```
+
+__Note:__ If you are using a custom build setup or none at all, you must ensure the `GeoPlatform` global object is defined before including both Client API and Map Core distribution files in your app.
+
+```html
+<script> GeoPlatform = { ...configure values... } </script>
+
+<script src="geoplatform.client.js"></script>
+<script src="geoplatform.mapcore.js"></script>
+```
 
 ### Including Map Core in your app
 
 Map core should be included in your app _after_ you provided environment-specific
 configuration variables. It expects `window.GeoPlatform` to exist at runtime.
-See Environment Variables below for details on what is expected to be provided.
+See [Environment Variables](Environment_Variables) below for details on what is expected to be provided.
 
 ```html
-<!-- define 'GeoPlatform' namespace and set env variables-->
-<script src="env.js"></script>
-<!-- include ng-common -->
+...
+<!-- if not using a build tool like WebPack...-->
+<script> GeoPlatform = { ...configure values... } </script>
+
 <script src="geoplatform.client.js"></script>
-<!-- include map core -->
 <script src="geoplatform.mapcore.js"></script>
-    - or -
-<script src="http://dyk46gk69472z.cloudfront.net/gp.mapcore/0.0.1/js/geoplatform.mapcore.min.js"></script>  (from CDN)
+...
 ```
 
 If you are using Angular 1.x, make sure to import the client.ng.js after client.js
@@ -43,11 +67,18 @@ but before mapcore.js to get access to "NG" services which leverage Angular's
 $http service when fetching data.
 
 ```html
-<script src="env.js"></script>
+...
 <script src="geoplatform.client.js"></script>       
 <script src="geoplatform.client.ng.js"></script>    <!-- NG -->
 <script src="geoplatform.mapcore.js"></script>
+...
 ```
+
+Alternatively, load Map Core (and Client API) distribution files from CDN:
+```html
+<script src="http://dyk46gk69472z.cloudfront.net/gp.mapcore/_VERSION_/js/geoplatform.mapcore.min.js"></script>
+```
+
 
 ## Environment Variables
 An example of the `GeoPlatform` object and environment variables contained
@@ -57,23 +88,23 @@ within is shown below.
 GeoPlatform = {
 
     //REQUIRED: environment the application is deployed within
-    // one of "development", "sit", "stg", "prd", or "production"
+    // one of "development" or "production"
     "env" : "development",
 
     //REQUIRED: URL to GeoPlatform UAL for API usage
-    "ualUrl" : "https://sit-ual.geoplatform.us",
+    "ualUrl" : "...",
 
-    //timeout max for requests
+    //optional, timeout max for requests
     "timeout" : "5000",
 
-    //name of custom Leaflet pane to append layers to
-    "leafletPane" : "gpmvPane",
+    //optional, name of custom Leaflet pane to append layers to
+    "leafletPane" : "myCustomLeafletPane",
 
-    //identifier of GP Layer to use as default base layer
+    //optional, identifier of GP Layer to use as default base layer
     "defaultBaseLayerId" : "336e91f5f5680e37031b80c9e7a49a4c",
 
-    //{env}-{id} of application deployed
-    "appId" : "development-mv"
+    //optional, id of client application
+    "appId" : "myCustomAppId"
 
 };
 ```

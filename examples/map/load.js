@@ -1,4 +1,13 @@
 
+//configure geoplatform env variables needed to interact with the API
+GeoPlatformClient.Config.configure({
+    ualUrl : 'https://sit-ual.geoplatform.us'
+});
+
+//refresh list of service types after configuring API endpoint above
+GeoPlatformMapCore.ServiceTypes.refresh();
+
+
 
 let elem = document.getElementById('map');
 let mapOptions = {
@@ -13,14 +22,14 @@ let mapOptions = {
 };
 
 let leafletMap = L.map(elem, mapOptions);
-let mapInstance = GeoPlatform.MapFactory.get();
+let mapInstance = GeoPlatformMapCore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 
 //just for example purposes, find the first map available
-let query = GeoPlatform.QueryFactory().keywords('WMV');
+let query = GeoPlatformClient.QueryFactory().keywords('WMV');
 
-let service = new GeoPlatform.MapService(GeoPlatform.ualUrl, new GeoPlatform.JQueryHttpClient());
+let service = new GeoPlatformClient.MapService(GeoPlatformClient.Config.ualUrl, new GeoPlatformClient.JQueryHttpClient());
 
 service.search(query)
 .then( response => {

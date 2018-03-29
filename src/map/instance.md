@@ -3,11 +3,19 @@
 The following information details how to use a MapInstance to manipulate and
 manage a Leaflet map instance.
 
+## "GeoPlatform" global vs require()/import
+The majority of examples shown below use the GeoPlatform global but also work when using requires or imports.
+
+### 'L.GeoPlatform' vs 'L_GeoPlatform'
+Map Core adds custom extensions to Leaflet using the sub-namespace "L.GeoPlatform".  When using require() or import, this namespace is exported as "L_GeoPlatform", so the two are the same functionally.
+
+
 ## Creating a new map instance
 
+### Using "GeoPlatform" global
 ```javascript
 //create a Leaflet Map
-let leafletMap = L.Map('#map', { ... });
+let leafletMap = L.Map('#map', leafletOptions);
 
 //create a map instance
 let mapInstance = GeoPlatform.MapFactory.get();
@@ -15,10 +23,29 @@ let mapInstance = GeoPlatform.MapFactory.get();
 //bind leaflet map to the map instance so the leaflet
 // map can be modified through the map instance api
 mapInstance.setMap(leafletMap);
+
+GeoPlatform.OSM.get().then( layer => {
+    mapInstance.setBaseLayer(layer);
+})
 ```
 
-## Listening for events
+### Using 'require()'
+```js
+const L = require('leaflet');
+const L_GeoPlatform = require('geoplatform.mapcore/src');
+const MapFactory = require('geoplatform.mapcore/src/map/factory');
+const OSM = require('geoplatform.mapcore/src/layer/osm');
 
+let map = L.map('#map', leafletOptions);
+let mapInstance = MapFactory.get();
+mapInstance.setMap(map);
+OSM.get().then( layer => {
+    mapInstance.setBaseLayer(layer);
+});
+```
+
+
+## Listening for events
 
 ```javascript
 

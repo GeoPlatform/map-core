@@ -1,4 +1,13 @@
 
+//configure geoplatform env variables needed to interact with the API
+GeoPlatformClient.Config.configure({
+    ualUrl : 'https://sit-ual.geoplatform.us'
+});
+
+//refresh list of service types after configuring API endpoint above
+GeoPlatformMapCore.ServiceTypes.refresh();
+
+
 
 let elem = document.getElementById('map');
 let mapOptions = {
@@ -13,7 +22,7 @@ let mapOptions = {
 };
 
 let leafletMap = L.map(elem, mapOptions);
-let mapInstance = GeoPlatform.MapFactory.get();
+let mapInstance = GeoPlatformMapCore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //just for example purposes, find the first map available
@@ -21,7 +30,7 @@ mapInstance.setMap(leafletMap);
 
 //---------------------------------------------------------
 //Necessary to save a map using authorized endpoints in UAL
-let httpClient = new GeoPlatform.JQueryHttpClient();
+let httpClient = new GeoPlatformClient.JQueryHttpClient();
 httpClient.setAuthToken(function() {
     return null;    //SHOULD return valid auth token
 });
@@ -30,7 +39,7 @@ mapInstance.setHttpClient(httpClient);
 
 
 //get map service used by map instance
-let mapService = mapInstance.getService(GeoPlatform.ItemTypes.MAP);
+let mapService = mapInstance.getService(GeoPlatformClient.ItemTypes.MAP);
 mapService.search().then( response => {
     if(response.results.length) {
 

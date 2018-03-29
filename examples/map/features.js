@@ -1,3 +1,11 @@
+//configure geoplatform env variables needed to interact with the API
+GeoPlatformClient.Config.configure({
+    ualUrl : 'https://sit-ual.geoplatform.us'
+});
+
+//refresh list of service types after configuring API endpoint above
+GeoPlatformMapCore.ServiceTypes.refresh();
+
 
 //NOTE: This example requires the Leaflet.Draw plugin
 
@@ -14,11 +22,11 @@ let mapOptions = {
 };
 
 var leafletMap = L.map(elem, mapOptions);
-var mapInstance = GeoPlatform.MapFactory.get();
+var mapInstance = GeoPlatformMapCore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //load OpenStreet Map layer using API and set as base layer
-GeoPlatform.OSM.get().then(osm => {
+GeoPlatformMapCore.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
     initFeatures();
 }).catch(e => { console.log("Unable to get OSM base layer"); });

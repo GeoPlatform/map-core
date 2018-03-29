@@ -1,3 +1,10 @@
+//configure geoplatform env variables needed to interact with the API
+GeoPlatformClient.Config.configure({
+    ualUrl : 'https://sit-ual.geoplatform.us'
+});
+
+//refresh list of service types after configuring API endpoint above
+GeoPlatformMapCore.ServiceTypes.refresh();
 
 //define the application's angular module and make sure to include the $httpProvider
 // in the config function
@@ -5,7 +12,7 @@ angular.module('loadNG', []).config(function myAppConfig ($httpProvider) {
     $httpProvider.defaults.withCredentials = true;
 });
 
-const TYPE_MAP = GeoPlatform.ItemTypes.MAP;
+const TYPE_MAP = GeoPlatformClient.ItemTypes.MAP;
 
 let elem = document.getElementById('map');
 let mapOptions = {
@@ -20,14 +27,14 @@ let mapOptions = {
 };
 
 let leafletMap = L.map(elem, mapOptions);
-let mapInstance = GeoPlatform.MapFactory.get();
+let mapInstance = GeoPlatformMapCore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //use Angular-based service instead of default (JQuery)
-mapInstance.setHttpClient(new GeoPlatform.NGHttpClient());
+mapInstance.setHttpClient(new GeoPlatformClient.NGHttpClient());
 
 //just for example purposes, find the first map available
-let query = GeoPlatform.QueryFactory().keywords('WMV');
+let query = GeoPlatformClient.QueryFactory().keywords('WMV');
 
 let service = mapInstance.getService(TYPE_MAP);
 service.search(query).then( response => {

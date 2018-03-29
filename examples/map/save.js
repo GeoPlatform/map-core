@@ -1,3 +1,10 @@
+//configure geoplatform env variables needed to interact with the API
+GeoPlatformClient.Config.configure({
+    ualUrl : 'https://sit-ual.geoplatform.us'
+});
+
+//refresh list of service types after configuring API endpoint above
+GeoPlatformMapCore.ServiceTypes.refresh();
 
 let elem = document.getElementById('map');
 let mapOptions = {
@@ -12,13 +19,13 @@ let mapOptions = {
 };
 
 let leafletMap = L.map(elem, mapOptions);
-let mapInstance = GeoPlatform.MapFactory.get();
+let mapInstance = GeoPlatformMapCore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 
 //---------------------------------------------------------
 //Necessary to save a map using authorized endpoints in UAL
-let httpClient = new GeoPlatform.JQueryHttpClient();
+let httpClient = new GeoPlatformClient.JQueryHttpClient();
 httpClient.setAuthToken(function() {
     return null;    //SHOULD return valid auth token
 });
@@ -26,7 +33,7 @@ mapInstance.setHttpClient(httpClient);
 //---------------------------------------------------------
 
 
-GeoPlatform.OSM.get().then(osm => {
+GeoPlatformMapCore.OSM.get().then(osm => {
 
     mapInstance.setBaseLayer(osm);
 
