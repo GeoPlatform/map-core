@@ -3,45 +3,37 @@
 The following information details how to use a MapInstance to manipulate and
 manage a Leaflet map instance.
 
-## "GeoPlatform" global vs require()/import
-The majority of examples shown below use the GeoPlatform global but also work when using requires or imports.
-
-### 'L.GeoPlatform' vs 'L_GeoPlatform'
-Map Core adds custom extensions to Leaflet using the sub-namespace "L.GeoPlatform".  When using require() or import, this namespace is exported as "L_GeoPlatform", so the two are the same functionally.
-
-
 ## Creating a new map instance
 
-### Using "GeoPlatform" global
 ```javascript
 //create a Leaflet Map
 let leafletMap = L.Map('#map', leafletOptions);
 
-//create a map instance
-let mapInstance = GeoPlatform.MapFactory.get();
+//using es6 import
+import { MapFactory, OSM } from 'geoplatform.mapcore';
+
+//or using require()
+const MapCore = require('geoplatform.mapcore');
+const MapFactory = MapCore.MapFactory;
+const OSM = MapCore.OSM;
+
+//or using global variable
+const MapFactory = GeoPlatformMapCore.MapFactory;
+const OSM = GeoPlatformMapCore.OSM;
+
+
+//then get new map instance
+let mapInstance = MapFactory.get();
 
 //bind leaflet map to the map instance so the leaflet
 // map can be modified through the map instance api
 mapInstance.setMap(leafletMap);
 
-GeoPlatform.OSM.get().then( layer => {
-    mapInstance.setBaseLayer(layer);
-})
-```
-
-### Using 'require()'
-```js
-const L = require('leaflet');
-const L_GeoPlatform = require('geoplatform.mapcore/src');
-const MapFactory = require('geoplatform.mapcore/src/map/factory');
-const OSM = require('geoplatform.mapcore/src/layer/osm');
-
-let map = L.map('#map', leafletOptions);
-let mapInstance = MapFactory.get();
-mapInstance.setMap(map);
+//fetch the OSM layer from GeoPlatform API and set it as the
+// base layer on the map
 OSM.get().then( layer => {
     mapInstance.setBaseLayer(layer);
-});
+})
 ```
 
 
@@ -90,10 +82,10 @@ mapInstance.destroyMap();
 MapFactory caches instances created through it using keys which are available via `instance.getKey()`. You can later retrieve the same instance using its key:
 ```javascript
 let mapKey = "MY_MAP";
-let instance = GeoPlatform.MapFactory.get(mapKey);
+let instance = GeoPlatformMapCore.MapFactory.get(mapKey);
 ```
 
-To dispose of a cached map or clear all cached instances, call `GeoPlatform.MapFactory.dispose()` passing either a map's key to dispose of only that map instance or no arguments to clear the cache.
+To dispose of a cached map or clear all cached instances, call `MapFactory.dispose()` passing either a map's key to dispose of only that map instance or no arguments to clear the cache.
 
 __Note:__ Disposing of a single map will call `destroyMap()` on that instance.
 
@@ -108,7 +100,7 @@ determine accurate map state later:
 
 ```javascript
 let leafletMap = L.Map('#map', { ... });
-let mapInstance = GeoPlatform.MapFactory.get();
+let mapInstance = GeoPlatformMapCore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 leafletMap.addLayer(leafletLayerObj);
@@ -132,14 +124,14 @@ The list of supported map service types can be accessed using `GeoPlatform.Servi
 
 ```javascript
 let gpLayer = { type: "Layer", services: [{...}], ... };
-let leafletLayer = L.GeoPlatform.LayerFactory(gpLayer);
+let leafletLayer = GeoPlatformMapCore.LayerFactory(gpLayer);
 ```
 
 ### Adding new layers to a map instance
 ```javascript
 let layers = [];
 let geoplatformLayer = { ... }; //layer from GP API
-layers.push(L.GeoPlatform.LayerFactory(geoplatformLayer));
+layers.push(GeoPlatformMapCore.LayerFactory(geoplatformLayer));
 mapInstance.addLayers(layers);
 ```
 
@@ -174,13 +166,13 @@ default base layers unless otherwise specified.
 
 ```javascript
 //fetch OSM layer definition using GeoPlatform API
-GeoPlatform.OSM.get().then( osmLayer => {
+GeoPlatformMapCore.OSM.get().then( osmLayer => {
     mapInstance.setBaseLayer(osmLayer);
 });
 
 //test whether a GeoPlatform Layer is OSM or not
 let layer = { "type": "Layer", ... };
-if( GeoPlatform.OSM.test(layer) ) {
+if( GeoPlatformMapCore.OSM.test(layer) ) {
     console.log("Layer is OSM!");
 }
 
@@ -188,7 +180,7 @@ if( GeoPlatform.OSM.test(layer) ) {
 // it's recommended to fetch OSM and add to map that way,
 // but this is handy for preview maps, mini maps, and
 // similar uses of a map that don't need persistence
-let leafletLayer = L.GeoPlatform.osm();
+let leafletLayer = GeoPlatformMapCore.OSMLayerFactory();
 leafletMap.addLayer(leafletLayer);
 ```
 
@@ -276,5 +268,8 @@ mapInstance.saveMap(metadata)
 ## Map Controls
 Included in Map Core are three Leaflet map controls for use with maps:
 - [L.Control.Loading](../control/L.Control.Loading.js)
+  - _also resolved using `GeoPlatformMapCore.LoadingControl`_
 - [L.Control.MeasureControl](../control/L.Control.MeasureControl.js)
+  - _also resolved using `GeoPlatformMapCore.MeasureControl`_
 - [L.Control.MousePosition](../control/L.Control.MousePosition.js)
+  - _also resolved using `GeoPlatformMapCore.MousePosition`_

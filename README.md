@@ -7,8 +7,8 @@ This library requires the following dependencies be present in your application:
 
 ### Third Party Dependencies
 
-- [jQuery](https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js) - version 2.1+
 - [Q](https://cdnjs.cloudflare.com/ajax/libs/q.js/1.5.1/q.js) - version 1.5+
+- [jQuery](https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js) - version 2.1+
 - [Leaflet](https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js) - version 1.X+
 - [Esri Leaflet](https://cdnjs.cloudflare.com/ajax/libs/esri-leaflet/2.1.2/esri-leaflet.js) - version 2.1+
 - [Leaflet.markercluster](https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.3.0/leaflet.markercluster.js) - version 1.X+
@@ -19,6 +19,7 @@ This library requires the following dependencies be present in your application:
 
 ### GeoPlatform Dependencies
 - [Geoplatform Client API](https://github.com/GeoPlatform/client-api)
+  - _requires version XXX_  (branch 'rollup' currently)
 
 ### Miscellaneous Requirements
 This library expects a set of configured parameters defining things such as the GeoPlatform API endpoint to communicate with and leaflet customizations.  
@@ -26,66 +27,54 @@ This library expects a set of configured parameters defining things such as the 
 __Note:__ If you are using a build tool like WebPack, you should ensure the Client API configuration object is properly initialized before using Map Core components.
 
 ```js
-import GeoPlatform from 'geoplatform.client/src/shared/config';
+import { Config } from 'geoplatform.client';
 ...
 //ensure GP API config is set
-if(!GeoPlatform.ualUrl) {
-    GeoPlatform.configure( ...options... );
+if(!Config.ualUrl) {
+    Config.configure( ...options... );
 }
 ...
-import MapInstance from 'geoplatform.mapcore/src/map/instance';
+//then start importing map core components
+import { MapInstance } from 'geoplatform.mapcore';
 ...
 ```
 
-__Note:__ If you are using a custom build setup or none at all, you must ensure the `GeoPlatform` global object is defined before including both Client API and Map Core distribution files in your app.
+__Note:__ You must configure the `GeoPlatformClient.Config` environment
+variables in order to utilize certain features of Map Core, such as creating
+Leaflet layers using `GeoPlatformMapCore.LayerFactory`.  
 
 ```html
-<script> GeoPlatform = { ...configure values... } </script>
-
 <script src="geoplatform.client.js"></script>
+<script>
+    const Config = require("geoplatform.client").Config;
+    Config.configure({
+        env: 'development',
+        ualUrl: "...",
+        appId: "...",
+        ...
+    });
+</script>
 <script src="geoplatform.mapcore.js"></script>
 ```
+
+See [Environment Variables](Environment_Variables) below for details on what is expected to be provided.
 
 ### Including Map Core in your app
 
-Map core should be included in your app _after_ you provided environment-specific
-configuration variables. It expects `window.GeoPlatform` to exist at runtime.
-See [Environment Variables](Environment_Variables) below for details on what is expected to be provided.
 
-```html
-...
-<!-- if not using a build tool like WebPack...-->
-<script> GeoPlatform = { ...configure values... } </script>
-
-<script src="geoplatform.client.js"></script>
-<script src="geoplatform.mapcore.js"></script>
-...
-```
-
-If you are using Angular 1.x, make sure to import the client.ng.js after client.js
-but before mapcore.js to get access to "NG" services which leverage Angular's
-$http service when fetching data.
-
-```html
-...
-<script src="geoplatform.client.js"></script>       
-<script src="geoplatform.client.ng.js"></script>    <!-- NG -->
-<script src="geoplatform.mapcore.js"></script>
-...
-```
 
 Alternatively, load Map Core (and Client API) distribution files from CDN:
 ```html
-<script src="http://dyk46gk69472z.cloudfront.net/gp.mapcore/_VERSION_/js/geoplatform.mapcore.min.js"></script>
+<script src="http://dyk46gk69472z.cloudfront.net/gp.mapcore/_VERSION_/js/geoplatform.client.js"></script>
+<script src="http://dyk46gk69472z.cloudfront.net/gp.mapcore/_VERSION_/js/geoplatform.mapcore.js"></script>
 ```
 
 
 ## Environment Variables
-An example of the `GeoPlatform` object and environment variables contained
-within is shown below.
+An example of the environment variables passed to `GeoPlatformClient.Config.configure()` is shown below.
 
 ```javascript
-GeoPlatform = {
+{
 
     //REQUIRED: environment the application is deployed within
     // one of "development" or "production"
@@ -106,50 +95,31 @@ GeoPlatform = {
     //optional, id of client application
     "appId" : "myCustomAppId"
 
-};
+}
 ```
 
 
 ## Using Map Core
 Using map core functionality in an application is described in the following sections.
 
-### GeoPlatform versus L.GeoPlatform
-Map Core populates both the `GeoPlatform` namespace and a sub-namespace, `L.GeoPlatform`, within Leaflet's namespace (`L`).  It is important to realize these two are not interchangeable; `L.GeoPlatform` contains functions, classes, and objects that directly
-relate to usage within a Leaflet map, while "GeoPlatform" (no "L" prefix) contains
-functions, classes, and objects that do not.
-
-For example, the factory used to create Leaflet layer instances is bound within
-the L.GeoPlatform namespace: `L.GeoPlatform.LayerFactory`.  The factory used to create
-query objects for use with GeoPlatform API services is bound within the GeoPlatform
-namespace: `GeoPlatform.QueryFactory`;
-
-Some additional examples:
-- [GeoPlatform.ItemService](src/shared/item-service.js) (and it's subclasses)
-- [GeoPlatform.MapFactory](src/map/factory.js) (which creates a MapInstance)
-- [GeoPlatform.MapInstance](src/map/instance.js) (which may bind _to a Leaflet Map_ but is not a Leaflet control or extension)
-
-vs
-
-- [L.GeoPlatform.WMS](src/layer/L.GeoPlatform.WMS) (a Leaflet layer instance)
-- [L.GeoPlatform.featureStyleResolver](src/shared/style-resolver.js) (used by feature layers to load style info)
-- [L.GeoPlatform.featurePopupTemplate](src/shared/L.GeoPlatform.PopupTemplate) (used by feature layers to define popup content)
-
-_Hint:_ If something can only really be used within the context of a Leaflet map,
-it's best to define it within the L.GeoPlatform namespace. Otherwise, define it
-within the GeoPlatform namespace.
 
 ### Map instances
 To learn how to bind GeoPlatform Maps, Layers, and GeoJSON features to
 Leaflet maps, see the [Map Instances](src/map/instance.md) documentation.
+
+### Map Layers
+To learn how to add GeoPlatform Layer objects to Leaflet maps using MapCore, read
+the [LayerFactory](src/layer/factory.md) documentation.
 
 ### Using Map Core with Angular
 The default services used within Map Core components are jQuery-based,
 but can be overridden by passing the desired service implementation.
 
 ```javascript
+//example using 'GeoPlatformClient' and 'GeoPlatformMapCore' global variables
 //use angular $http to fetch OSM base layer definition
-let ngLayerSvc = new GeoPlatform.LayerService(new GeoPlatform.NGHttpClient());
-GeoPlatform.OSM.get(ngLayerSvc).then( layer => {...}).catch( e => {...});
+let ngLayerSvc = new GeoPlatformClient.LayerService(new GeoPlatformClient.NGHttpClient());
+GeoPlatformMapCore.OSM.get(ngLayerSvc).then( layer => {...}).catch( e => {...});
 ```
 
 To change the underlying service transport used by MapInstance, set the
@@ -157,8 +127,8 @@ desired HttpClient implementation like so:
 
 ```javascript
 //use angular $http to load and save maps inside MapInstance
-let mapInstance = GeoPlatform.MapFactory.get();
-mapInstance.setHttpClient(new GeoPlatform.NGHttpClient());  //use angular
+let mapInstance = GeoPlatformMapCore.MapFactory.get();
+mapInstance.setHttpClient(new GeoPlatformClient.NGHttpClient());  //use angular
 ```
 
 
