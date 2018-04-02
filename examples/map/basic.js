@@ -1,7 +1,7 @@
 
 //configure geoplatform env variables needed to interact with the API
 GeoPlatformClient.Config.configure({
-    ualUrl : 'https://sit-ual.geoplatform.us'
+    ualUrl : 'https://ual.geoplatform.gov'
 });
 
 //refresh list of service types after configuring API endpoint above
