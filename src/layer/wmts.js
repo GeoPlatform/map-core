@@ -2,6 +2,12 @@
 
 import jQuery from "jquery";
 import Q from "q";
+import {
+    TileLayer, tileLayer,
+    Browser, extend, setOptions,
+    Point, Util, LatLng
+} from 'leaflet';
+
 import {Config} from 'geoplatform.client';
 
 
@@ -62,7 +68,7 @@ function template(str, data) {
 /*
  * inspired by and uses code from https://github.com/mylen/leaflet.TileLayer.WMTS
  */
-var WMTS = !L || !L.TileLayer ? null : L.TileLayer.extend({
+var WMTS = TileLayer.extend({
 
     defaultWmtsParams: {
 
@@ -77,9 +83,9 @@ var WMTS = !L || !L.TileLayer ? null : L.TileLayer.extend({
 
     initialize: function (url, options) { // (String, Object)
         this._url = url;
-        var wmtsParams = L.extend({}, this.defaultWmtsParams);
+        var wmtsParams = extend({}, this.defaultWmtsParams);
         var tileSize = options.tileSize || this.options.tileSize;
-        if (options.detectRetina && L.Browser.retina) {
+        if (options.detectRetina && Browser.retina) {
             wmtsParams.width = wmtsParams.height = tileSize * 2;
         } else {
             wmtsParams.width = wmtsParams.height = tileSize;
@@ -92,12 +98,12 @@ var WMTS = !L || !L.TileLayer ? null : L.TileLayer.extend({
         }
         this.wmtsParams = wmtsParams;
         this.matrixIds = options.matrixIds||this.getDefaultMatrix();
-        L.setOptions(this, options);
+        setOptions(this, options);
     },
 
     onAdd: function (map) {
         this._crs = this.options.crs || map.options.crs;
-        L.TileLayer.prototype.onAdd.call(this, map);
+        TileLayer.prototype.onAdd.call(this, map);
     },
 
     getTileUrl: function (coords) { // (Point, Number) -> String
@@ -105,7 +111,7 @@ var WMTS = !L || !L.TileLayer ? null : L.TileLayer.extend({
         var nwPoint = coords.multiplyBy(tileSize);
         nwPoint.x+=1;
         nwPoint.y-=1;
-        var sePoint = nwPoint.add(new L.Point(tileSize, tileSize));
+        var sePoint = nwPoint.add(new Point(tileSize, tileSize));
         var zoom = this._tileZoom;
         var nw = this._crs.project(this._map.unproject(nwPoint, zoom));
         var se = this._crs.project(this._map.unproject(sePoint, zoom));
@@ -131,7 +137,7 @@ var WMTS = !L || !L.TileLayer ? null : L.TileLayer.extend({
         for(let k in o) {
             o[k.toLowerCase()] = o[k];
         }
-        // url = L.Util.template(url.toLowerCase(), o);
+        // url = Util.template(url.toLowerCase(), o);
         url = template(url, o);
 
         let qsi = url.indexOf("?");
@@ -141,7 +147,7 @@ var WMTS = !L || !L.TileLayer ? null : L.TileLayer.extend({
             // then the URL must not be OGC WMTS, so no need for WMTS parameters
 
         } else {
-            url = url + L.Util.getParamString(this.wmtsParams, url);
+            url = url + Util.getParamString(this.wmtsParams, url);
             if(isTileMatrixTemplated<0)
                 url += "&TileMatrix=" + ident; //tileMatrixSet
             if(isTileRowTemplated<0)
@@ -154,7 +160,7 @@ var WMTS = !L || !L.TileLayer ? null : L.TileLayer.extend({
     },
 
     setParams: function (params, noRedraw) {
-        L.extend(this.wmtsParams, params);
+        extend(this.wmtsParams, params);
         if (!noRedraw) {
             this.redraw();
         }
@@ -170,7 +176,7 @@ var WMTS = !L || !L.TileLayer ? null : L.TileLayer.extend({
         for (var i= 0; i<22; i++) {
             matrixIds3857[i]= {
                 identifier    : "" + i,
-                topLeftCorner : new L.LatLng(20037508.3428,-20037508.3428)
+                topLeftCorner : new LatLng(20037508.3428,-20037508.3428)
             };
         }
         return matrixIds3857;
@@ -216,10 +222,8 @@ function wmts(layer) {
 
 }
 
-if(L) {
-    L.TileLayer.WMTS = WMTS;
-    L.tileLayer.wmts = wmts;
-}
+TileLayer.WMTS = WMTS;
+tileLayer.wmts = wmts;
 
 export {
     WMTS as default,

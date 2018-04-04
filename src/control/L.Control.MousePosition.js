@@ -1,7 +1,8 @@
 
+import { Control, control, setOptions, DomUtil, DomEvent, Util, Map } from 'leaflet';
 
 
-var positionControl = !L || !L.Control ? null : L.Control.extend({
+var positionControl = Control.extend({
   options: {
     position: 'bottomleft',
     separator: ' : ',
@@ -14,8 +15,8 @@ var positionControl = !L || !L.Control ? null : L.Control.extend({
   },
 
   onAdd: function (map) {
-    this._container = L.DomUtil.create('div', 'leaflet-control-mouseposition');
-    L.DomEvent.disableClickPropagation(this._container);
+    this._container = DomUtil.create('div', 'leaflet-control-mouseposition');
+    DomEvent.disableClickPropagation(this._container);
     map.on('mousemove', this._onMouseMove, this);
     this._container.innerHTML=this.options.emptyString;
     return this._container;
@@ -26,8 +27,8 @@ var positionControl = !L || !L.Control ? null : L.Control.extend({
   },
 
   _onMouseMove: function (e) {
-    var lng = this.options.lngFormatter ? this.options.lngFormatter(e.latlng.lng) : L.Util.formatNum(e.latlng.lng, this.options.numDigits);
-    var lat = this.options.latFormatter ? this.options.latFormatter(e.latlng.lat) : L.Util.formatNum(e.latlng.lat, this.options.numDigits);
+    var lng = this.options.lngFormatter ? this.options.lngFormatter(e.latlng.lng) : Util.formatNum(e.latlng.lng, this.options.numDigits);
+    var lat = this.options.latFormatter ? this.options.latFormatter(e.latlng.lat) : Util.formatNum(e.latlng.lat, this.options.numDigits);
     var value = this.options.lngFirst ? lng + this.options.separator + lat : lat + this.options.separator + lng;
     var prefixAndValue = this.options.prefix + ' ' + value;
     this._container.innerHTML = prefixAndValue;
@@ -36,24 +37,20 @@ var positionControl = !L || !L.Control ? null : L.Control.extend({
 });
 
 
-if(L) {
-    if(L.Control) {
-        L.Control.MousePosition =  positionControl;
-        L.control.mousePosition = function (options) {
-            return new L.Control.MousePosition(options);
-        };
-    }
-    if(L.Map) {
-        L.Map.mergeOptions({
-            positionControl: false
-        });
+Control.MousePosition =  positionControl;
+control.mousePosition = function (options) {
+    return new Control.MousePosition(options);
+};
 
-        L.Map.addInitHook(function () {
-            if (this.options.positionControl) {
-                this.positionControl = new positionControl();
-                this.addControl(this.positionControl);
-            }
-        });
+Map.mergeOptions({
+    positionControl: false
+});
+
+Map.addInitHook(function () {
+    if (this.options.positionControl) {
+        this.positionControl = new positionControl();
+        this.addControl(this.positionControl);
     }
-}
+});
+
 export default positionControl;

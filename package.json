@@ -1,6 +1,6 @@
 {
     "name": "geoplatform.mapcore",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "description": "",
     "main": "dist/js/geoplatform.mapcore.js",
     "scripts": {
@@ -37,7 +37,13 @@
         "less": "^2.7.1",
         "less-plugin-autoprefix": "^1.5.1",
         "matchdep": "^0.3.0",
-        "pre-commit": "^1.2.2"
+        "pre-commit": "^1.2.2",
+
+        "leaflet": "1.0.3",
+        "leaflet-draw": "0.4.9",
+        "esri-leaflet": "2.1.2",
+        "leaflet.markercluster": "1.1.0",
+        "leaflet-timedimension": "~1.1.0"
     },
     "peerDependencies": {
         "geoplatform.client": "rollup"

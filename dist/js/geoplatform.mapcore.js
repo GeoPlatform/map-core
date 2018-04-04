@@ -1,15 +1,15 @@
 /* This software has been approved for release by the U.S. Department of the Interior. Although the software has been subjected to rigorous review, the DOI reserves the right to update the software as needed pursuant to further analysis and review. No warranty, expressed or implied, is made by the DOI or the U.S. Government as to the functionality of the software and related material nor shall the fact of release constitute any such warranty. Furthermore, the software is released on condition that neither the DOI nor the U.S. Government shall be held liable for any damages resulting from its authorized or unauthorized use. */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('q'), require('geoplatform.client'), require('jquery'), require('leaflet')) :
-    typeof define === 'function' && define.amd ? define(['q', 'geoplatform.client', 'jquery', 'leaflet'], factory) :
-    (global.GeoPlatformMapCore = factory(global.Q,global.GeoPlatformClient,global.jQuery,global.L));
-}(this, (function (Q,GeoPlatformClient,jQuery,L$1) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('leaflet'), require('q'), require('geoplatform.client'), require('jquery')) :
+    typeof define === 'function' && define.amd ? define(['leaflet', 'q', 'geoplatform.client', 'jquery'], factory) :
+    (global.GeoPlatformMapCore = factory(global.L,global.Q,global.GeoPlatformClient,global.jQuery));
+}(this, (function (L$1,Q,GeoPlatformClient,jQuery) { 'use strict';
 
     Q = Q && Q.hasOwnProperty('default') ? Q['default'] : Q;
     var GeoPlatformClient__default = 'default' in GeoPlatformClient ? GeoPlatformClient['default'] : GeoPlatformClient;
     jQuery = jQuery && jQuery.hasOwnProperty('default') ? jQuery['default'] : jQuery;
 
-    var loadingControl = !L || !L.Control ? null : L.Control.extend({
+    var loadingControl = L$1.Control.extend({
         options: {
             position: 'topleft',
             separate: false,
@@ -26,7 +26,7 @@
         },
 
         initialize: function initialize(options) {
-            L.setOptions(this, options);
+            L$1.setOptions(this, options);
             this._dataLoaders = {};
 
             // Try to set the zoom control this control is attached to from the
@@ -63,9 +63,9 @@
                 classes += ' leaflet-bar-part-bottom leaflet-bar-part last';
             } else {
                 // Otherwise, create a container for the indicator
-                container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-bar');
+                container = L$1.DomUtil.create('div', 'leaflet-control-zoom leaflet-bar');
             }
-            this._indicator = L.DomUtil.create('a', classes, container);
+            this._indicator = L$1.DomUtil.create('a', classes, container);
             if (this.options.spinjs) {
                 this._spinner = new Spinner(this.options.spin).spin();
                 this._indicator.appendChild(this._spinner.el);
@@ -89,7 +89,7 @@
             } else {
                 // If this control is separate from the zoomControl, call the
                 // parent method so we don't leave behind an empty container
-                return L.Control.prototype.removeFrom.call(this, map);
+                return L$1.Control.prototype.removeFrom.call(this, map);
             }
         },
 
@@ -126,28 +126,28 @@
 
         _showIndicator: function _showIndicator() {
             // Show loading indicator
-            L.DomUtil.addClass(this._indicator, 'is-loading');
+            L$1.DomUtil.addClass(this._indicator, 'is-loading');
 
             // If zoomControl exists, make the zoom-out button not last
             if (!this.options.separate) {
-                if (this.zoomControl instanceof L.Control.Zoom) {
-                    L.DomUtil.removeClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
-                } else if (typeof L.Control.Zoomslider === 'function' && this.zoomControl instanceof L.Control.Zoomslider) {
-                    L.DomUtil.removeClass(this.zoomControl._ui.zoomOut, 'leaflet-bar-part-bottom');
+                if (this.zoomControl instanceof L$1.Control.Zoom) {
+                    L$1.DomUtil.removeClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
+                } else if (typeof L$1.Control.Zoomslider === 'function' && this.zoomControl instanceof L$1.Control.Zoomslider) {
+                    L$1.DomUtil.removeClass(this.zoomControl._ui.zoomOut, 'leaflet-bar-part-bottom');
                 }
             }
         },
 
         _hideIndicator: function _hideIndicator() {
             // Hide loading indicator
-            L.DomUtil.removeClass(this._indicator, 'is-loading');
+            L$1.DomUtil.removeClass(this._indicator, 'is-loading');
 
             // If zoomControl exists, make the zoom-out button last
             if (!this.options.separate) {
-                if (this.zoomControl instanceof L.Control.Zoom) {
-                    L.DomUtil.addClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
-                } else if (typeof L.Control.Zoomslider === 'function' && this.zoomControl instanceof L.Control.Zoomslider) {
-                    L.DomUtil.addClass(this.zoomControl._ui.zoomOut, 'leaflet-bar-part-bottom');
+                if (this.zoomControl instanceof L$1.Control.Zoom) {
+                    L$1.DomUtil.addClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
+                } else if (typeof L$1.Control.Zoomslider === 'function' && this.zoomControl instanceof L$1.Control.Zoomslider) {
+                    L$1.DomUtil.addClass(this.zoomControl._ui.zoomOut, 'leaflet-bar-part-bottom');
                 }
             }
         },
@@ -232,31 +232,25 @@
         }
     });
 
-    if (L) {
-        if (L.Control) {
-            L.Control.Loading = loadingControl;
-            L.Control.loading = function (options) {
-                return new L.Control.Loading(options);
-            };
+    L$1.Control.Loading = loadingControl;
+    L$1.Control.loading = function (options) {
+        return new L$1.Control.Loading(options);
+    };
+    L$1.Map.addInitHook(function () {
+        if (this.options.loadingControl) {
+            this.loadingControl = new loadingControl();
+            this.addControl(this.loadingControl);
         }
-        if (L.Map) {
-            L.Map.addInitHook(function () {
-                if (this.options.loadingControl) {
-                    this.loadingControl = new loadingControl();
-                    this.addControl(this.loadingControl);
-                }
-            });
-        }
-    }
+    });
 
-    var measureControl = !L || !L.Control ? null : L.Control.extend({
+    var measureControl = L$1.Control.extend({
         options: {
             position: 'topleft'
         },
 
         onAdd: function onAdd(map) {
             var className = 'leaflet-control-zoom leaflet-bar leaflet-control',
-                container = L.DomUtil.create('div', className);
+                container = L$1.DomUtil.create('div', className);
 
             this._createButton('&#8674;', 'Measure', 'leaflet-control-measure leaflet-bar-part leaflet-bar-part-top-and-bottom', container, this._toggleMeasure, this);
 
@@ -264,12 +258,12 @@
         },
 
         _createButton: function _createButton(html, title, className, container, fn, context) {
-            var link = L.DomUtil.create('a', className, container);
+            var link = L$1.DomUtil.create('a', className, container);
             link.innerHTML = html;
             link.href = '#';
             link.title = title;
 
-            L.DomEvent.on(link, 'click', L.DomEvent.stopPropagation).on(link, 'click', L.DomEvent.preventDefault).on(link, 'click', fn, context).on(link, 'dblclick', L.DomEvent.stopPropagation);
+            L$1.DomEvent.on(link, 'click', L$1.DomEvent.stopPropagation).on(link, 'click', L$1.DomEvent.preventDefault).on(link, 'click', fn, context).on(link, 'dblclick', L$1.DomEvent.stopPropagation);
 
             return link;
         },
@@ -278,10 +272,10 @@
             this._measuring = !this._measuring;
 
             if (this._measuring) {
-                L.DomUtil.addClass(this._container, 'leaflet-control-measure-on');
+                L$1.DomUtil.addClass(this._container, 'leaflet-control-measure-on');
                 this._startMeasuring();
             } else {
-                L.DomUtil.removeClass(this._container, 'leaflet-control-measure-on');
+                L$1.DomUtil.removeClass(this._container, 'leaflet-control-measure-on');
                 this._stopMeasuring();
             }
         },
@@ -293,10 +287,10 @@
             this._doubleClickZoom = this._map.doubleClickZoom.enabled();
             this._map.doubleClickZoom.disable();
 
-            L.DomEvent.on(this._map, 'mousemove', this._mouseMove, this).on(this._map, 'click', this._mouseClick, this).on(this._map, 'dblclick', this._finishPath, this).on(document, 'keydown', this._onKeyDown, this);
+            L$1.DomEvent.on(this._map, 'mousemove', this._mouseMove, this).on(this._map, 'click', this._mouseClick, this).on(this._map, 'dblclick', this._finishPath, this).on(document, 'keydown', this._onKeyDown, this);
 
             if (!this._layerPaint) {
-                this._layerPaint = L.layerGroup().addTo(this._map);
+                this._layerPaint = L$1.layerGroup().addTo(this._map);
             }
 
             if (!this._points) {
@@ -307,7 +301,7 @@
         _stopMeasuring: function _stopMeasuring() {
             this._map._container.style.cursor = this._oldCursor;
 
-            L.DomEvent.off(document, 'keydown', this._onKeyDown, this).off(this._map, 'mousemove', this._mouseMove, this).off(this._map, 'click', this._mouseClick, this).off(this._map, 'dblclick', this._mouseClick, this);
+            L$1.DomEvent.off(document, 'keydown', this._onKeyDown, this).off(this._map, 'mousemove', this._mouseMove, this).off(this._map, 'click', this._mouseClick, this).off(this._map, 'dblclick', this._mouseClick, this);
 
             if (this._doubleClickZoom) {
                 this._map.doubleClickZoom.enable();
@@ -326,7 +320,7 @@
             }
 
             if (!this._layerPaintPathTemp) {
-                this._layerPaintPathTemp = L.polyline([this._lastPoint, e.latlng], {
+                this._layerPaintPathTemp = L$1.polyline([this._lastPoint, e.latlng], {
                     color: 'black',
                     weight: 1.5,
                     clickable: false,
@@ -371,7 +365,7 @@
 
             // If this is already the second click, add the location to the fix path (create one first if we don't have one)
             if (this._lastPoint && !this._layerPaintPath) {
-                this._layerPaintPath = L.polyline([this._lastPoint], {
+                this._layerPaintPath = L$1.polyline([this._lastPoint], {
                     color: 'black',
                     weight: 2,
                     clickable: false
@@ -387,7 +381,7 @@
                 this._layerPaint.removeLayer(this._lastCircle);
             }
 
-            this._lastCircle = new L.CircleMarker(e.latlng, {
+            this._lastCircle = new L$1.CircleMarker(e.latlng, {
                 color: 'black',
                 opacity: 1,
                 weight: 1,
@@ -431,11 +425,11 @@
         },
 
         _createTooltip: function _createTooltip(position) {
-            var icon = L.divIcon({
+            var icon = L$1.divIcon({
                 className: 'leaflet-measure-tooltip',
                 iconAnchor: [-5, -5]
             });
-            this._tooltip = L.marker(position, {
+            this._tooltip = L$1.marker(position, {
                 icon: icon,
                 clickable: false
             }).addTo(this._layerPaint);
@@ -473,82 +467,71 @@
         }
     });
 
-    if (L) {
-        if (L.Control) {
-            L.Control.Measure = measureControl;
-            L.control.measure = function (options) {
-                return new L.Control.Measure(options);
-            };
+    L$1.Control.Measure = measureControl;
+    L$1.control.measure = function (options) {
+        return new L$1.Control.Measure(options);
+    };
+
+    L$1.Map.mergeOptions({
+        measureControl: false
+    });
+
+    L$1.Map.addInitHook(function () {
+        if (this.options.measureControl) {
+            this.measureControl = new measureControl();
+            this.addControl(this.measureControl);
         }
-        if (L.Map) {
+    });
 
-            L.Map.mergeOptions({
-                measureControl: false
-            });
+    var positionControl = L$1.Control.extend({
+      options: {
+        position: 'bottomleft',
+        separator: ' : ',
+        emptyString: 'Unavailable',
+        lngFirst: false,
+        numDigits: 6,
+        lngFormatter: undefined,
+        latFormatter: undefined,
+        prefix: ""
+      },
 
-            L.Map.addInitHook(function () {
-                if (this.options.measureControl) {
-                    this.measureControl = new measureControl();
-                    this.addControl(this.measureControl);
-                }
-            });
-        }
-    }
+      onAdd: function onAdd(map) {
+        this._container = L$1.DomUtil.create('div', 'leaflet-control-mouseposition');
+        L$1.DomEvent.disableClickPropagation(this._container);
+        map.on('mousemove', this._onMouseMove, this);
+        this._container.innerHTML = this.options.emptyString;
+        return this._container;
+      },
 
-    var positionControl = !L || !L.Control ? null : L.Control.extend({
-        options: {
-            position: 'bottomleft',
-            separator: ' : ',
-            emptyString: 'Unavailable',
-            lngFirst: false,
-            numDigits: 6,
-            lngFormatter: undefined,
-            latFormatter: undefined,
-            prefix: ""
-        },
+      onRemove: function onRemove(map) {
+        map.off('mousemove', this._onMouseMove);
+      },
 
-        onAdd: function onAdd(map) {
-            this._container = L.DomUtil.create('div', 'leaflet-control-mouseposition');
-            L.DomEvent.disableClickPropagation(this._container);
-            map.on('mousemove', this._onMouseMove, this);
-            this._container.innerHTML = this.options.emptyString;
-            return this._container;
-        },
-
-        onRemove: function onRemove(map) {
-            map.off('mousemove', this._onMouseMove);
-        },
-
-        _onMouseMove: function _onMouseMove(e) {
-            var lng = this.options.lngFormatter ? this.options.lngFormatter(e.latlng.lng) : L.Util.formatNum(e.latlng.lng, this.options.numDigits);
-            var lat = this.options.latFormatter ? this.options.latFormatter(e.latlng.lat) : L.Util.formatNum(e.latlng.lat, this.options.numDigits);
-            var value = this.options.lngFirst ? lng + this.options.separator + lat : lat + this.options.separator + lng;
-            var prefixAndValue = this.options.prefix + ' ' + value;
-            this._container.innerHTML = prefixAndValue;
-        }
+      _onMouseMove: function _onMouseMove(e) {
+        var lng = this.options.lngFormatter ? this.options.lngFormatter(e.latlng.lng) : L$1.Util.formatNum(e.latlng.lng, this.options.numDigits);
+        var lat = this.options.latFormatter ? this.options.latFormatter(e.latlng.lat) : L$1.Util.formatNum(e.latlng.lat, this.options.numDigits);
+        var value = this.options.lngFirst ? lng + this.options.separator + lat : lat + this.options.separator + lng;
+        var prefixAndValue = this.options.prefix + ' ' + value;
+        this._container.innerHTML = prefixAndValue;
+      }
 
     });
 
-    if (L) {
-        if (L.Control) {
-            L.Control.MousePosition = positionControl;
-            L.control.mousePosition = function (options) {
-                return new L.Control.MousePosition(options);
-            };
-        }
-        if (L.Map) {
-            L.Map.mergeOptions({
-                positionControl: false
-            });
+    L$1.Control.MousePosition = positionControl;
+    L$1.control.mousePosition = function (options) {
+      return new L$1.Control.MousePosition(options);
+    };
 
-            L.Map.addInitHook(function () {
-                if (this.options.positionControl) {
-                    this.positionControl = new positionControl();
-                    this.addControl(this.positionControl);
-                }
-            });
-        }
-    }
+    L$1.Map.mergeOptions({
+      positionControl: false
+    });
+
+    L$1.Map.addInitHook(function () {
+      if (this.options.positionControl) {
+        this.positionControl = new positionControl();
+        this.addControl(this.positionControl);
+      }
+    });
 
     var QueryFactory = GeoPlatformClient__default.QueryFactory;
     var LayerService = GeoPlatformClient__default.LayerService;
@@ -718,7 +701,7 @@
       return call && (typeof call === "object" || typeof call === "function") ? call : self;
     };
 
-    function featurePopupTemplate$1(feature) {
+    function featurePopupTemplate(feature) {
 
         var props = Object.keys(feature.properties);
 
@@ -782,7 +765,7 @@
      * as adding visibility and opacity manipulation methods
      * @extends L.esri.FeatureLayer
      */
-    var FeatureLayer = !L || !L.esri ? null : L.esri.FeatureLayer.extend({
+    var FeatureLayer = L$1.esri.FeatureLayer.extend({
 
         _gpStyle: { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
 
@@ -811,13 +794,13 @@
             if (style.shape === 'image') {
                 var width = style.width || 16;
                 var height = style.height || 16;
-                var icon = L.icon({
+                var icon = icon({
                     iconUrl: style.content, //base64 encoded string
                     iconSize: [width, height],
                     iconAnchor: [width * 0.5, height * 0.5],
                     popupAnchor: [0, -11]
                 });
-                marker = L.marker(latlng, {
+                marker = marker(latlng, {
                     icon: icon,
                     pane: GeoPlatformClient.Config.leafletPane
                 });
@@ -829,10 +812,10 @@
                 style.fillOpacity = style.opacity || style['fill-opacity'] || 0.3;
                 style.fillColor = style.color || style.fill;
                 style.renderer = this.options.renderer; //important for pane!
-                marker = L.circleMarker(latlng, style);
+                marker = L$1.circleMarker(latlng, style);
             }
 
-            var popupTemplate = this.options.popupTemplate || featurePopupTemplate$1;
+            var popupTemplate = this.options.popupTemplate || featurePopupTemplate;
             marker.bindPopup(popupTemplate(feature));
             return marker;
         },
@@ -846,7 +829,7 @@
             if (!feature || !feature.geometry || feature.geometry.type === 'Point') {
                 return;
             }
-            layer.bindPopup(featurePopupTemplate$1(feature));
+            layer.bindPopup(featurePopupTemplate(feature));
         },
 
         initialize: function initialize(options) {
@@ -864,15 +847,15 @@
             // must specify renderer and set desired pane on that
             var svgOpts = {};
             if (GeoPlatformClient.Config.leafletPane) svgOpts.pane = GeoPlatformClient.Config.leafletPane;
-            var renderer = L.SVG && L.svg(svgOpts) || L.Canvas && L.canvas();
+            var renderer = L$1.SVG && L$1.svg(svgOpts) || L$1.Canvas && L$1.canvas();
             options.renderer = renderer;
 
-            options.pointToLayer = L.bind(this.pointToLayerFn, this);
-            options.onEachFeature = L.bind(this.eachFeatureFn, this);
+            options.pointToLayer = L$1.bind(this.pointToLayerFn, this);
+            options.onEachFeature = L$1.bind(this.eachFeatureFn, this);
 
             // options.fields = ['FID', 'type', 'title', 'geometry'];
 
-            L.esri.FeatureLayer.prototype.initialize.call(this, options);
+            FeatureLayer.prototype.initialize.call(this, options);
 
             this.on('load', function () {
                 if (typeof this.options.zIndex !== 'undefined') this.setZIndex(this.options.zIndex);
@@ -912,7 +895,7 @@
 
                     if (json && json.styles) {
 
-                        var styleFn = L.Util.bind(function (feature) {
+                        var styleFn = L$1.Util.bind(function (feature) {
 
                             var property = this.property || this.field1;
                             var v = feature[property] || (feature.properties ? feature.properties[property] : null);
@@ -968,7 +951,7 @@
 
     });
 
-    var FeatureLayer$1 = !L || !L.esri || !L.esri.Cluster ? null : L.esri.Cluster.FeatureManager.extend({
+    var FeatureLayer$1 = L$1.esri.FeatureManager.extend({
 
       statics: {
         EVENTS: 'click dblclick mouseover mouseout mousemove contextmenu popupopen popupclose',
@@ -980,14 +963,14 @@
        */
 
       initialize: function initialize(options) {
-        esriLeaflet.FeatureManager.prototype.initialize.call(this, options);
+        L$1.esri.FeatureManager.prototype.initialize.call(this, options);
 
-        options = L.setOptions(this, options);
+        options = L$1.setOptions(this, options);
 
         this._layers = {};
         this._leafletIds = {};
 
-        this.cluster = L.markerClusterGroup(options);
+        this.cluster = L$1.markerClusterGroup(options);
         this._key = 'c' + (Math.random() * 1e9).toString(36).replace('.', '_');
 
         this.cluster.addEventParent(this);
@@ -998,7 +981,7 @@
        */
 
       onAdd: function onAdd(map) {
-        esriLeaflet.FeatureManager.prototype.onAdd.call(this, map);
+        L$1.esri.FeatureManager.prototype.onAdd.call(this, map);
         this._map.addLayer(this.cluster);
 
         // NOTE !!!!!!!
@@ -1007,7 +990,7 @@
       },
 
       onRemove: function onRemove(map) {
-        esriLeaflet.FeatureManager.prototype.onRemove.call(this, map);
+        L$1.esri.FeatureManager.prototype.onRemove.call(this, map);
         this._map.removeLayer(this.cluster);
       },
 
@@ -1023,8 +1006,8 @@
           var layer = this._layers[geojson.id];
 
           if (!layer) {
-            var newLayer = L.GeoJSON.geometryToLayer(geojson, this.options);
-            newLayer.feature = L.GeoJSON.asFeature(geojson);
+            var newLayer = L$1.GeoJSON.geometryToLayer(geojson, this.options);
+            newLayer.feature = L$1.GeoJSON.asFeature(geojson);
             newLayer.defaultOptions = newLayer.options;
             newLayer._leaflet_id = this._key + '_' + geojson.id;
 
@@ -1164,7 +1147,7 @@
      * as adding visibility and opacity manipulation methods
      * @extends L.esri.ClusterFeatureLayer
      */
-    var ClusteredFeatureLayer = !L || !FeatureLayer$1 ? null : FeatureLayer$1.extend({
+    var ClusteredFeatureLayer = FeatureLayer$1.extend({
 
         _gpStyle: { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
 
@@ -1198,18 +1181,18 @@
             if (style.shape === 'image') {
                 var width = style.width || 16;
                 var height = style.height || 16;
-                var icon = L.icon({
+                var icon = icon({
                     iconUrl: style.content, //base64 encoded string
                     iconSize: [width, height],
                     iconAnchor: [width * 0.5, height * 0.5],
                     popupAnchor: [0, -11]
                 });
-                marker = L.marker(latlng, {
+                marker = marker(latlng, {
                     icon: icon,
                     pane: GeoPlatformClient.Config.leafletPane
                 });
             } else {
-                marker = L.circleMarker(latlng, style);
+                marker = L$1.circleMarker(latlng, style);
             }
 
             var popupTemplate = this.options.popupTemplate || featurePopupTemplate;
@@ -1237,8 +1220,8 @@
 
             if (GeoPlatformClient.Config.leafletPane) options.pane = GeoPlatformClient.Config.leafletPane;
 
-            options.pointToLayer = L.bind(this.pointToLayerFn, this);
-            options.onEachFeature = L.bind(this.eachFeatureFn, this);
+            options.pointToLayer = L$1.bind(this.pointToLayerFn, this);
+            options.onEachFeature = L$1.bind(this.eachFeatureFn, this);
             // options.fields = ['FID', 'type', 'title', 'geometry'];
 
             //Increase from 1 to increase the distance away from the center that spiderfied markers are placed.
@@ -1258,10 +1241,10 @@
             // must specify renderer and set desired pane on that
             var svgOpts = {};
             if (GeoPlatformClient.Config.leafletPane) svgOpts.pane = GeoPlatformClient.Config.leafletPane;
-            var renderer = L.SVG && L.svg(svgOpts) || L.Canvas && L.canvas();
+            var renderer = L$1.SVG && L$1.svg(svgOpts) || L$1.Canvas && L$1.canvas();
             options.renderer = renderer;
 
-            L.esri.Cluster.FeatureLayer.prototype.initialize.call(this, options);
+            FeatureLayer$1.prototype.initialize.call(this, options);
 
             this.on('load', function () {
                 if (typeof this.options.zIndex !== 'undefined') this.setZIndex(this.options.zIndex);
@@ -1269,7 +1252,7 @@
         },
 
         onAdd: function onAdd(map) {
-            L.esri.Cluster.FeatureLayer.prototype.onAdd.call(this, map);
+            FeatureLayer$1.prototype.onAdd.call(this, map);
 
             if (this.options.layerId) {
                 this.loadStyle(this.options.layerId);
@@ -1368,7 +1351,7 @@
 
                     if (json && json.styles) {
 
-                        var styleFn = L.Util.bind(function (feature) {
+                        var styleFn = L$1.Util.bind(function (feature) {
 
                             var property = this.property || this.field1;
                             var v = feature[property] || (feature.properties ? feature.properties[property] : null);
@@ -1488,7 +1471,7 @@
         });
     }
 
-    var WMS = !L || !L.TileLayer ? null : L.TileLayer.WMS.extend({
+    var WMS = L$1.TileLayer.WMS.extend({
 
         enableGetFeatureInfo: function enableGetFeatureInfo() {
             this._map.on('click', this.getFeatureInfo, this);
@@ -1511,13 +1494,13 @@
 
             // Triggered when the layer is removed from a map.
             //   Unregister a click listener, then do all the upstream WMS things
-            L.TileLayer.WMS.prototype.onRemove.call(this, map);
+            L$1.TileLayer.WMS.prototype.onRemove.call(this, map);
         },
 
         getFeatureInfo: function getFeatureInfo(evt) {
             // Make an AJAX request to the server and hope for the best
             var url = this.getFeatureInfoUrl(evt.latlng),
-                showResults = L.Util.bind(this.showGetFeatureInfo, this),
+                showResults = L$1.Util.bind(this.showGetFeatureInfo, this),
                 parseGetFeatureInfo = this.parseGetFeatureInfo;
             jQuery.ajax({
                 url: url,
@@ -1550,9 +1533,9 @@
                 j: point.y //1.3.0
             };
 
-            // return this._url + L.Util.getParamString(params, this._url, true);
+            // return this._url + Util.getParamString(params, this._url, true);
             var url = '/api/layers/' + this.wmsParams.wmvId + '/feature';
-            return GeoPlatformClient.Config.ualUrl + url + L.Util.getParamString(params, url, true);
+            return GeoPlatformClient.Config.ualUrl + url + L$1.Util.getParamString(params, url, true);
         },
 
         parseGetFeatureInfo: function parseGetFeatureInfo(content) {
@@ -1570,7 +1553,7 @@
             } // do nothing if there's an error
 
             // Otherwise show the content in a popup, or something.
-            L.popup({ maxWidth: 800 }).setLatLng(latlng).setContent(content).openOn(this._map);
+            L$1.popup({ maxWidth: 800 }).setLatLng(latlng).setContent(content).openOn(this._map);
         }
 
     });
@@ -1597,12 +1580,10 @@
         return new WMS(url, opts);
     }
 
-    if (L) {
-        L.TileLayer.WMS = WMS;
-        L.tileLayer.wms = wms;
-    }
+    L$1.TileLayer.WMS = WMS;
+    L$1.tileLayer.wms = wms;
 
-    var WMST = !L || !L.TimeDimension ? null : L.TimeDimension.Layer.WMS.extend({
+    var WMST = L$1.TimeDimension.Layer.WMS.extend({
 
         //override default parser to query all Layers (whether queryable or not)
         _parseTimeDimensionFromCapabilities: function _parseTimeDimensionFromCapabilities(xml) {
@@ -1660,7 +1641,7 @@
         };
         if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
 
-        var leafletLayer = new L.TileLayer.CustomWMS(url, opts);
+        var leafletLayer = new L$1.TileLayer.CustomWMS(url, opts);
 
         var proxyUrl = GeoPlatformClient.Config.ualUrl + '/api/services/' + service.id + '/proxy/capabilities';
 
@@ -1675,15 +1656,13 @@
         }
 
         return new WMST(leafletLayer, {
-            timeDimension: L.timeDimension(tdOpts),
+            timeDimension: L$1.timeDimension(tdOpts),
             proxy: proxyUrl
         });
     }
 
-    if (L) {
-        L.TileLayer.WMST = WMST;
-        L.tileLayer.wmst = wmst;
-    }
+    L$1.TileLayer.WMST = WMST;
+    L$1.tileLayer.wmst = wmst;
 
     if (typeof Object.assign != 'function') {
         // Must be writable: true, enumerable: false, configurable: true
@@ -1742,7 +1721,7 @@
     /*
      * inspired by and uses code from https://github.com/mylen/leaflet.TileLayer.WMTS
      */
-    var WMTS = !L || !L.TileLayer ? null : L.TileLayer.extend({
+    var WMTS = L$1.TileLayer.extend({
 
         defaultWmtsParams: {
 
@@ -1758,9 +1737,9 @@
         initialize: function initialize(url, options) {
             // (String, Object)
             this._url = url;
-            var wmtsParams = L.extend({}, this.defaultWmtsParams);
+            var wmtsParams = L$1.extend({}, this.defaultWmtsParams);
             var tileSize = options.tileSize || this.options.tileSize;
-            if (options.detectRetina && L.Browser.retina) {
+            if (options.detectRetina && L$1.Browser.retina) {
                 wmtsParams.width = wmtsParams.height = tileSize * 2;
             } else {
                 wmtsParams.width = wmtsParams.height = tileSize;
@@ -1773,12 +1752,12 @@
             }
             this.wmtsParams = wmtsParams;
             this.matrixIds = options.matrixIds || this.getDefaultMatrix();
-            L.setOptions(this, options);
+            L$1.setOptions(this, options);
         },
 
         onAdd: function onAdd(map) {
             this._crs = this.options.crs || map.options.crs;
-            L.TileLayer.prototype.onAdd.call(this, map);
+            L$1.TileLayer.prototype.onAdd.call(this, map);
         },
 
         getTileUrl: function getTileUrl(coords) {
@@ -1787,7 +1766,7 @@
             var nwPoint = coords.multiplyBy(tileSize);
             nwPoint.x += 1;
             nwPoint.y -= 1;
-            var sePoint = nwPoint.add(new L.Point(tileSize, tileSize));
+            var sePoint = nwPoint.add(new L$1.Point(tileSize, tileSize));
             var zoom = this._tileZoom;
             var nw = this._crs.project(this._map.unproject(nwPoint, zoom));
             var se = this._crs.project(this._map.unproject(sePoint, zoom));
@@ -1812,7 +1791,7 @@
             for (var k in o) {
                 o[k.toLowerCase()] = o[k];
             }
-            // url = L.Util.template(url.toLowerCase(), o);
+            // url = Util.template(url.toLowerCase(), o);
             url = template(url, o);
 
             var qsi = url.indexOf("?");
@@ -1822,7 +1801,7 @@
                 // then the URL must not be OGC WMTS, so no need for WMTS parameters
 
             } else {
-                url = url + L.Util.getParamString(this.wmtsParams, url);
+                url = url + L$1.Util.getParamString(this.wmtsParams, url);
                 if (isTileMatrixTemplated < 0) url += "&TileMatrix=" + ident; //tileMatrixSet
                 if (isTileRowTemplated < 0) url += "&TileRow=" + tilerow;
                 if (isTileColTemplated < 0) url += "&TileCol=" + tilecol;
@@ -1832,7 +1811,7 @@
         },
 
         setParams: function setParams(params, noRedraw) {
-            L.extend(this.wmtsParams, params);
+            L$1.extend(this.wmtsParams, params);
             if (!noRedraw) {
                 this.redraw();
             }
@@ -1848,7 +1827,7 @@
             for (var i = 0; i < 22; i++) {
                 matrixIds3857[i] = {
                     identifier: "" + i,
-                    topLeftCorner: new L.LatLng(20037508.3428, -20037508.3428)
+                    topLeftCorner: new L$1.LatLng(20037508.3428, -20037508.3428)
                 };
             }
             return matrixIds3857;
@@ -1888,12 +1867,10 @@
         return new WMTS(url, options);
     }
 
-    if (L) {
-        L.TileLayer.WMTS = WMTS;
-        L.tileLayer.wmts = wmts;
-    }
+    L$1.TileLayer.WMTS = WMTS;
+    L$1.tileLayer.wmts = wmts;
 
-    var esriTileLayer = !L || !L.TileLayer ? null : L.TileLayer.extend({
+    var esriTileLayer = L$1.TileLayer.extend({
 
         defaultESRIParams: {
             layers: '', //=show:0,1,2
@@ -1920,11 +1897,11 @@
             }
             this._url = url;
 
-            var esriParams = L.extend({}, this.defaultESRIParams),
+            var esriParams = L$1.extend({}, this.defaultESRIParams),
                 tileSize = options.tileSize || this.options.tileSize;
 
             var dim = void 0;
-            if (options.detectRetina && L.Browser.retina) {
+            if (options.detectRetina && L$1.Browser.retina) {
                 dim = esriParams.height = tileSize * 2;
             } else {
                 dim = esriParams.height = tileSize;
@@ -1943,13 +1920,13 @@
 
             this.esriParams = esriParams;
 
-            L.setOptions(this, options);
+            L$1.setOptions(this, options);
         },
 
         onAdd: function onAdd(map) {
             this._crs = this.options.crs || map.options.crs;
             this.esriParams.srs = this.esriParams.imagesr = this.esriParams.bboxsr = this._crs.code;
-            L.TileLayer.prototype.onAdd.call(this, map);
+            L$1.TileLayer.prototype.onAdd.call(this, map);
         },
 
         getTileUrl: function getTileUrl(tilePoint) {
@@ -1962,20 +1939,20 @@
                 nw = this._crs.project(map.unproject(nwPoint, tilePoint.z)),
                 se = this._crs.project(map.unproject(sePoint, tilePoint.z)),
                 bbox = [nw.x, se.y, se.x, nw.y].join(','),
-                url = L.Util.template(this._url, { s: this._getSubdomain(tilePoint) });
+                url = L$1.Util.template(this._url, { s: this._getSubdomain(tilePoint) });
 
-            var params = L.extend({}, this.esriParams);
+            var params = L$1.extend({}, this.esriParams);
             params.layers = "show:" + params.layers;
 
             //convert to esri-special SR for spherical mercator
             if (params.bboxsr === 'EPSG:3857') params.bboxsr = '102100';
             if (params.imagesr === 'EPSG:3857') params.imagesr = '102100';
 
-            return url + L.Util.getParamString(params, url, true) + '&BBOX=' + bbox;
+            return url + L$1.Util.getParamString(params, url, true) + '&BBOX=' + bbox;
         },
 
         setParams: function setParams(params, noRedraw) {
-            L.extend(this.esriParams, params);
+            L$1.extend(this.esriParams, params);
             if (!noRedraw) {
                 this.redraw();
             }
@@ -1983,12 +1960,10 @@
         }
     });
 
-    if (L && L.TileLayer) {
-        L.TileLayer.ESRI = esriTileLayer;
-        L.tileLayer.esri = function (url, options) {
-            return new L.TileLayer.ESRI(url, options);
-        };
-    }
+    L$1.TileLayer.ESRI = esriTileLayer;
+    L$1.tileLayer.esri = function (url, options) {
+        return new L$1.TileLayer.ESRI(url, options);
+    };
 
     /**
      * @param {Object} layer - GeoPlatform Layer
@@ -1996,9 +1971,7 @@
      */
     function OSMLayerFactory(layer) {
 
-        if (!L || !L.TileLayer) throw new Error("Leaflet is not available");
-
-        return new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        return new L$1.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             minZoom: 1, maxZoom: 19,
             attribution: 'Map data (c) <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
         });
@@ -2045,6 +2018,10 @@
             opts = { url: url, useCors: true };
             if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
             return L$1.esri.tiledMapLayer(opts);
+        } else if (types.ESRI_IMAGE_SERVER && types.ESRI_IMAGE_SERVER.uri === typeUri) {
+            opts = { url: url, useCors: true };
+            if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
+            return L$1.esri.imageMapLayer(opts);
         } else if (types.FEED && types.FEED.uri === typeUri) {
             return geoJsonFeed(layer);
         } else if (types.WMS && types.WMS.uri === typeUri) {
@@ -2155,7 +2132,7 @@
                     if (!L) {
                         throw new Error("Leaflet is not available");
                     }
-                    return L.circleMarker(latlng, style);
+                    return L$1.circleMarker(latlng, style);
                 }
             };
 
@@ -2618,6 +2595,11 @@
             value: function addLayers(layers) {
                 var _this4 = this;
 
+                if (!layers) return;
+                if (typeof layers.push === 'undefined') {
+                    layers = [layers];
+                }
+
                 layers.each(function (obj, index) {
 
                     var layer = null,
@@ -2948,13 +2930,13 @@
 
                 if (!this._featureLayer) {
 
-                    // _featureLayer = L.geoJson([], _geoJsonLayerOpts).addTo(_mapInstance);
-                    this._featureLayer = L.featureGroup().addTo(this._mapInstance);
+                    // _featureLayer = geoJson([], _geoJsonLayerOpts).addTo(_mapInstance);
+                    this._featureLayer = L$1.featureGroup().addTo(this._mapInstance);
                 }
 
                 // _featureLayer.addData(json);
                 var opts = jQuery.extend({}, this._geoJsonLayerOpts);
-                L.geoJson(json, opts).eachLayer(function (l) {
+                L$1.geoJson(json, opts).eachLayer(function (l) {
                     return _this6.addFeatureLayer(l);
                 });
 
@@ -3012,7 +2994,7 @@
                     this._featureLayer.removeLayer(layer);
 
                     //add replacement
-                    L.geoJson(featureJson, this._geoJsonLayerOpts).eachLayer(function (l) {
+                    L$1.geoJson(featureJson, this._geoJsonLayerOpts).eachLayer(function (l) {
                         return _this7.addFeatureLayer(l);
                     });
 
@@ -3140,7 +3122,7 @@
                 if (!L) {
                     throw new Error("Leaflet is not available");
                 }
-                if (!layer.feature && layer instanceof L.LayerGroup) {
+                if (!layer.feature && layer instanceof L$1.LayerGroup) {
                     layer.eachLayer(function (child) {
                         _this8._addFeatureLayer(child);
                     });
@@ -3487,7 +3469,7 @@
         MapInstance: MapInstance,
         MapFactory: MapFactory,
         ServiceTypes: types,
-        PopupTemplate: featurePopupTemplate$1,
+        PopupTemplate: featurePopupTemplate,
         StyleResolver: featureStyleResolver
     };
 

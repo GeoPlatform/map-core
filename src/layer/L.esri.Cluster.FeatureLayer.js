@@ -1,6 +1,7 @@
 
 /* jshint ignore:start */
-
+import { setOptions, markerClusterGroup, GeoJSON, esri } from 'leaflet';
+// import { Cluster } from 'esri-leaflet';
 
 /* esri-leaflet-cluster - v2.0.0 - Thu Aug 18 2016 17:12:43 GMT-0700 (PDT)
  * Copyright (c) 2016 Environmental Systems Research Institute, Inc.
@@ -8,8 +9,7 @@
 
 var version = "2.0.0";
 
-var FeatureLayer = !L || !L.esri || !L.esri.Cluster ? null : 
-    L.esri.Cluster.FeatureManager.extend({
+var FeatureLayer = esri.FeatureManager.extend({
 
   statics: {
     EVENTS: 'click dblclick mouseover mouseout mousemove contextmenu popupopen popupclose',
@@ -21,14 +21,14 @@ var FeatureLayer = !L || !L.esri || !L.esri.Cluster ? null :
    */
 
   initialize: function (options) {
-    esriLeaflet.FeatureManager.prototype.initialize.call(this, options);
+    esri.FeatureManager.prototype.initialize.call(this, options);
 
-    options = L.setOptions(this, options);
+    options = setOptions(this, options);
 
     this._layers = {};
     this._leafletIds = {};
 
-    this.cluster = L.markerClusterGroup(options);
+    this.cluster = markerClusterGroup(options);
     this._key = 'c' + (Math.random() * 1e9).toString(36).replace('.', '_');
 
     this.cluster.addEventParent(this);
@@ -39,7 +39,7 @@ var FeatureLayer = !L || !L.esri || !L.esri.Cluster ? null :
    */
 
   onAdd: function (map) {
-    esriLeaflet.FeatureManager.prototype.onAdd.call(this, map);
+    esri.FeatureManager.prototype.onAdd.call(this, map);
     this._map.addLayer(this.cluster);
 
     // NOTE !!!!!!!
@@ -48,7 +48,7 @@ var FeatureLayer = !L || !L.esri || !L.esri.Cluster ? null :
   },
 
   onRemove: function (map) {
-    esriLeaflet.FeatureManager.prototype.onRemove.call(this, map);
+    esri.FeatureManager.prototype.onRemove.call(this, map);
     this._map.removeLayer(this.cluster);
   },
 
@@ -64,8 +64,8 @@ var FeatureLayer = !L || !L.esri || !L.esri.Cluster ? null :
       var layer = this._layers[geojson.id];
 
       if (!layer) {
-        var newLayer = L.GeoJSON.geometryToLayer(geojson, this.options);
-        newLayer.feature = L.GeoJSON.asFeature(geojson);
+        var newLayer = GeoJSON.geometryToLayer(geojson, this.options);
+        newLayer.feature = GeoJSON.asFeature(geojson);
         newLayer.defaultOptions = newLayer.options;
         newLayer._leaflet_id = this._key + '_' + geojson.id;
 

@@ -3,8 +3,16 @@ import jQuery from "jquery";
 import Q from  "q";
 import { Config } from 'geoplatform.client';
 
+import {
+    icon, marker, circleMarker,
+    bind,
+    SVG, svg, Canvas, canvas,
+    Util
+} from 'leaflet';
+
 import { FeatureLayer as EsriClusterFeatureLayer } from './L.esri.Cluster.FeatureLayer';
 import featureStyleResolver from '../shared/style-resolver';
+import featurePopupTemplate from '../shared/popup-template';
 
 
 /**
@@ -13,8 +21,7 @@ import featureStyleResolver from '../shared/style-resolver';
  * as adding visibility and opacity manipulation methods
  * @extends L.esri.ClusterFeatureLayer
  */
-var ClusteredFeatureLayer = !L || !EsriClusterFeatureLayer ? null :
-EsriClusterFeatureLayer.extend({
+var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
 
     _gpStyle : { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
 
@@ -48,18 +55,18 @@ EsriClusterFeatureLayer.extend({
         if(style.shape === 'image') {
             let width = style.width || 16;
             let height = style.height || 16;
-            var icon = L.icon( {
+            var icon = icon( {
                 iconUrl: style.content, //base64 encoded string
                 iconSize: [width, height],
                 iconAnchor: [width*0.5, height*0.5],
                 popupAnchor: [0, -11],
             });
-            marker = L.marker( latlng, {
+            marker = marker( latlng, {
                 icon: icon,
                 pane: Config.leafletPane
             });
         } else {
-            marker = L.circleMarker(latlng, style);
+            marker = circleMarker(latlng, style);
         }
 
         let popupTemplate = this.options.popupTemplate || featurePopupTemplate;
@@ -91,8 +98,8 @@ EsriClusterFeatureLayer.extend({
         if(Config.leafletPane)
             options.pane = Config.leafletPane;
 
-        options.pointToLayer = L.bind(this.pointToLayerFn, this);
-        options.onEachFeature = L.bind(this.eachFeatureFn, this);
+        options.pointToLayer = bind(this.pointToLayerFn, this);
+        options.onEachFeature = bind(this.eachFeatureFn, this);
         // options.fields = ['FID', 'type', 'title', 'geometry'];
 
         //Increase from 1 to increase the distance away from the center that spiderfied markers are placed.
@@ -111,10 +118,10 @@ EsriClusterFeatureLayer.extend({
         let svgOpts = {};
         if(Config.leafletPane)
             svgOpts.pane = Config.leafletPane;
-        var renderer = (L.SVG && L.svg(svgOpts)) || (L.Canvas && L.canvas());
+        var renderer = (SVG && svg(svgOpts)) || (Canvas && canvas());
         options.renderer = renderer;
 
-        L.esri.Cluster.FeatureLayer.prototype.initialize.call(this, options);
+        EsriClusterFeatureLayer.prototype.initialize.call(this, options);
 
         this.on('load', function() {
             if(typeof this.options.zIndex !== 'undefined')
@@ -124,7 +131,7 @@ EsriClusterFeatureLayer.extend({
     },
 
     onAdd: function(map) {
-        L.esri.Cluster.FeatureLayer.prototype.onAdd.call(this, map);
+        EsriClusterFeatureLayer.prototype.onAdd.call(this, map);
 
         if(this.options.layerId) {
             this.loadStyle(this.options.layerId);
@@ -226,7 +233,7 @@ EsriClusterFeatureLayer.extend({
 
                 if(json && json.styles) {
 
-                    let styleFn = L.Util.bind(function(feature) {
+                    let styleFn = Util.bind(function(feature) {
 
                         let property = this.property || this.field1;
                         let v = feature[property] || (feature.properties ? feature.properties[property] : null);

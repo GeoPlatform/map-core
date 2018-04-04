@@ -2,10 +2,12 @@
 
 import jQuery from "jquery";
 import Q from "q";
+import { TileLayer, tileLayer, Browser, extend, setOptions, Util } from 'leaflet';
+
 import {Config} from 'geoplatform.client';
 
 
-var esriTileLayer = !L || !L.TileLayer ? null : L.TileLayer.extend({
+var esriTileLayer = TileLayer.extend({
 
     defaultESRIParams: {
         layers:       '', //=show:0,1,2
@@ -31,11 +33,11 @@ var esriTileLayer = !L || !L.TileLayer ? null : L.TileLayer.extend({
         }
         this._url = url;
 
-        let esriParams = L.extend({}, this.defaultESRIParams),
+        let esriParams = extend({}, this.defaultESRIParams),
             tileSize = options.tileSize || this.options.tileSize;
 
         let dim;
-        if (options.detectRetina && L.Browser.retina) {
+        if (options.detectRetina && Browser.retina) {
             dim = esriParams.height = tileSize * 2;
         } else {
             dim = esriParams.height = tileSize;
@@ -54,14 +56,14 @@ var esriTileLayer = !L || !L.TileLayer ? null : L.TileLayer.extend({
 
         this.esriParams = esriParams;
 
-        L.setOptions(this, options);
+        setOptions(this, options);
 
     },
 
     onAdd: function (map) {
         this._crs = this.options.crs || map.options.crs;
         this.esriParams.srs = this.esriParams.imagesr = this.esriParams.bboxsr = this._crs.code;
-        L.TileLayer.prototype.onAdd.call(this, map);
+        TileLayer.prototype.onAdd.call(this, map);
     },
 
     getTileUrl: function (tilePoint) { // (Point, Number) -> String
@@ -76,9 +78,9 @@ var esriTileLayer = !L || !L.TileLayer ? null : L.TileLayer.extend({
         se = this._crs.project(map.unproject(sePoint, tilePoint.z)),
         bbox = [nw.x, se.y, se.x, nw.y].join(','),
 
-        url = L.Util.template(this._url, {s: this._getSubdomain(tilePoint)});
+        url = Util.template(this._url, {s: this._getSubdomain(tilePoint)});
 
-        let params = L.extend({}, this.esriParams);
+        let params = extend({}, this.esriParams);
         params.layers = "show:" + params.layers;
 
         //convert to esri-special SR for spherical mercator
@@ -87,11 +89,11 @@ var esriTileLayer = !L || !L.TileLayer ? null : L.TileLayer.extend({
         if(params.imagesr === 'EPSG:3857')
             params.imagesr = '102100';
 
-        return url + L.Util.getParamString(params, url, true) + '&BBOX=' + bbox;
+        return url + Util.getParamString(params, url, true) + '&BBOX=' + bbox;
     },
 
     setParams: function (params, noRedraw) {
-        L.extend(this.esriParams, params);
+        extend(this.esriParams, params);
         if (!noRedraw) {
             this.redraw();
         }
@@ -99,12 +101,10 @@ var esriTileLayer = !L || !L.TileLayer ? null : L.TileLayer.extend({
     }
 });
 
-if(L && L.TileLayer) {
-    L.TileLayer.ESRI = esriTileLayer;
-    L.tileLayer.esri = function (url, options) {
-        return new L.TileLayer.ESRI(url, options);
-    };
-}
 
+TileLayer.ESRI = esriTileLayer;
+tileLayer.esri = function (url, options) {
+    return new TileLayer.ESRI(url, options);
+};
 
 export default esriTileLayer;

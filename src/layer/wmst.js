@@ -2,10 +2,12 @@
 
 import jQuery from "jquery";
 import Q from "q";
+import { TileLayer, tileLayer, TimeDimension, timeDimension } from 'leaflet';
+
 import {Config} from 'geoplatform.client';
 
 
-var WMST = !L || !L.TimeDimension ? null : L.TimeDimension.Layer.WMS.extend({
+var WMST = TimeDimension.Layer.WMS.extend({
 
     //override default parser to query all Layers (whether queryable or not)
     _parseTimeDimensionFromCapabilities: function(xml) {
@@ -67,7 +69,7 @@ function wmst(gpLayer) {
     if(Config.leafletPane)
         opts.pane = Config.leafletPane;
 
-    let leafletLayer = new L.TileLayer.CustomWMS( url, opts );
+    let leafletLayer = new TileLayer.CustomWMS( url, opts );
 
     let proxyUrl = Config.ualUrl + '/api/services/' +
         service.id + '/proxy/capabilities';
@@ -85,16 +87,14 @@ function wmst(gpLayer) {
     }
 
     return new WMST(leafletLayer, {
-        timeDimension: L.timeDimension(tdOpts),
+        timeDimension: timeDimension(tdOpts),
         proxy: proxyUrl
     });
 }
 
 
-if(L) {
-    L.TileLayer.WMST = WMST;
-    L.tileLayer.wmst = wmst;
-}
+TileLayer.WMST = WMST;
+tileLayer.wmst = wmst;
 
 export {
     WMST as default,

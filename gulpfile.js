@@ -38,6 +38,7 @@ gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
         input: './src/index.js',
         external: ['Q', 'q', 'jquery', 'jQuery', 'leaflet', 'Leaflet', 'L', 'geoplatform.client'],
         output: {
+            format: 'umd',
             globals: {
                 'q': 'Q',
                 'jquery': 'jQuery',

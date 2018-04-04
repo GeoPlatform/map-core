@@ -1,8 +1,15 @@
 
 import jQuery from "jquery";
 import Q from "q";
-import {Config} from "geoplatform.client";
+import {
+    icon, marker, circleMarker,
+    SVG, svg, Canvas, canvas,
+    bind, Util,
+    esri
+} from 'leaflet';
+// import { FeatureLayer as EsriFeatureLayer } from 'esri-leaflet';
 
+import {Config} from "geoplatform.client";
 import featurePopupTemplate from '../shared/popup-template';
 
 /**
@@ -11,7 +18,7 @@ import featurePopupTemplate from '../shared/popup-template';
  * as adding visibility and opacity manipulation methods
  * @extends L.esri.FeatureLayer
  */
-var FeatureLayer = !L || !L.esri ? null : L.esri.FeatureLayer.extend({
+var FeatureLayer = esri.FeatureLayer.extend({
 
     _gpStyle : { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
 
@@ -40,13 +47,13 @@ var FeatureLayer = !L || !L.esri ? null : L.esri.FeatureLayer.extend({
         if(style.shape === 'image') {
             let width = style.width || 16;
             let height = style.height || 16;
-            var icon = L.icon( {
+            var icon = icon( {
                 iconUrl: style.content, //base64 encoded string
                 iconSize: [width, height],
                 iconAnchor: [width*0.5, height*0.5],
                 popupAnchor: [0, -11],
             });
-            marker = L.marker( latlng, {
+            marker = marker( latlng, {
                 icon: icon,
                 pane: Config.leafletPane
             });
@@ -59,7 +66,7 @@ var FeatureLayer = !L || !L.esri ? null : L.esri.FeatureLayer.extend({
             style.fillOpacity = style.opacity || style['fill-opacity'] || 0.3;
             style.fillColor = style.color || style.fill;
             style.renderer = this.options.renderer;  //important for pane!
-            marker = L.circleMarker(latlng, style);
+            marker = circleMarker(latlng, style);
         }
 
         let popupTemplate = this.options.popupTemplate || featurePopupTemplate;
@@ -97,15 +104,15 @@ var FeatureLayer = !L || !L.esri ? null : L.esri.FeatureLayer.extend({
         let svgOpts = {};
         if(Config.leafletPane)
             svgOpts.pane = Config.leafletPane;
-        var renderer = (L.SVG && L.svg(svgOpts)) || (L.Canvas && L.canvas());
+        var renderer = (SVG && svg(svgOpts)) || (Canvas && canvas());
         options.renderer = renderer;
 
-        options.pointToLayer = L.bind(this.pointToLayerFn, this);
-        options.onEachFeature = L.bind(this.eachFeatureFn, this);
+        options.pointToLayer = bind(this.pointToLayerFn, this);
+        options.onEachFeature = bind(this.eachFeatureFn, this);
 
         // options.fields = ['FID', 'type', 'title', 'geometry'];
 
-        L.esri.FeatureLayer.prototype.initialize.call(this, options);
+        FeatureLayer.prototype.initialize.call(this, options);
 
         this.on('load', function() {
             if(typeof this.options.zIndex !== 'undefined')
@@ -149,7 +156,7 @@ var FeatureLayer = !L || !L.esri ? null : L.esri.FeatureLayer.extend({
 
                 if(json && json.styles) {
 
-                    let styleFn = L.Util.bind(function(feature) {
+                    let styleFn = Util.bind(function(feature) {
 
                         let property = this.property || this.field1;
                         let v = feature[property] || (feature.properties ? feature.properties[property] : null);

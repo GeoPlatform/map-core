@@ -1,11 +1,13 @@
 
 import jQuery from "jquery";
 import Q from "q";
+import { TileLayer, tileLayer, Util, popup } from 'leaflet';
+
 import {Config} from 'geoplatform.client';
 
 
 
-var WMS = !L || !L.TileLayer ? null : L.TileLayer.WMS.extend({
+var WMS = TileLayer.WMS.extend({
 
     enableGetFeatureInfo: function () {
         this._map.on('click', this.getFeatureInfo, this);
@@ -29,13 +31,13 @@ var WMS = !L || !L.TileLayer ? null : L.TileLayer.WMS.extend({
 
         // Triggered when the layer is removed from a map.
         //   Unregister a click listener, then do all the upstream WMS things
-        L.TileLayer.WMS.prototype.onRemove.call(this, map);
+        TileLayer.WMS.prototype.onRemove.call(this, map);
     },
 
     getFeatureInfo: function (evt) {
         // Make an AJAX request to the server and hope for the best
         var url = this.getFeatureInfoUrl(evt.latlng),
-        showResults = L.Util.bind(this.showGetFeatureInfo, this),
+        showResults = Util.bind(this.showGetFeatureInfo, this),
         parseGetFeatureInfo = this.parseGetFeatureInfo;
         jQuery.ajax({
             url: url,
@@ -70,9 +72,9 @@ var WMS = !L || !L.TileLayer ? null : L.TileLayer.WMS.extend({
             j: point.y  //1.3.0
         };
 
-        // return this._url + L.Util.getParamString(params, this._url, true);
+        // return this._url + Util.getParamString(params, this._url, true);
         var url = '/api/layers/' + this.wmsParams.wmvId + '/feature';
-        return Config.ualUrl + url + L.Util.getParamString(params, url, true);
+        return Config.ualUrl + url + Util.getParamString(params, url, true);
     },
 
     parseGetFeatureInfo: function(content) {
@@ -89,7 +91,7 @@ var WMS = !L || !L.TileLayer ? null : L.TileLayer.WMS.extend({
         if (err) { console.log(err); return; } // do nothing if there's an error
 
         // Otherwise show the content in a popup, or something.
-        L.popup({ maxWidth: 800})
+        popup({ maxWidth: 800})
         .setLatLng(latlng)
         .setContent(content)
         .openOn(this._map);
@@ -125,10 +127,8 @@ function wms(layer) {
 
 }
 
-if(L) {
-    L.TileLayer.WMS = WMS;
-    L.tileLayer.wms = wms;
-}
+TileLayer.WMS = WMS;
+tileLayer.wms = wms;
 
 export {
     WMS as default,

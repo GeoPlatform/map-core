@@ -1,12 +1,22 @@
 
-var measureControl = !L || !L.Control ? null : L.Control.extend({
+import {
+    Control, control,
+    Map,
+    setOptions,
+    DomUtil, DomEvent,
+    layerGroup,
+    polyline, CircleMarker, divIcon, marker
+} from 'leaflet';
+
+
+var measureControl = Control.extend({
     options: {
         position: 'topleft'
     },
 
     onAdd: function (map) {
         var className = 'leaflet-control-zoom leaflet-bar leaflet-control',
-            container = L.DomUtil.create('div', className);
+            container = DomUtil.create('div', className);
 
         this._createButton('&#8674;', 'Measure', 'leaflet-control-measure leaflet-bar-part leaflet-bar-part-top-and-bottom', container, this._toggleMeasure, this);
 
@@ -14,16 +24,16 @@ var measureControl = !L || !L.Control ? null : L.Control.extend({
     },
 
     _createButton: function (html, title, className, container, fn, context) {
-        var link = L.DomUtil.create('a', className, container);
+        var link = DomUtil.create('a', className, container);
         link.innerHTML = html;
         link.href = '#';
         link.title = title;
 
-        L.DomEvent
-            .on(link, 'click', L.DomEvent.stopPropagation)
-            .on(link, 'click', L.DomEvent.preventDefault)
+        DomEvent
+            .on(link, 'click', DomEvent.stopPropagation)
+            .on(link, 'click', DomEvent.preventDefault)
             .on(link, 'click', fn, context)
-            .on(link, 'dblclick', L.DomEvent.stopPropagation);
+            .on(link, 'dblclick', DomEvent.stopPropagation);
 
         return link;
     },
@@ -32,10 +42,10 @@ var measureControl = !L || !L.Control ? null : L.Control.extend({
         this._measuring = !this._measuring;
 
         if(this._measuring) {
-            L.DomUtil.addClass(this._container, 'leaflet-control-measure-on');
+            DomUtil.addClass(this._container, 'leaflet-control-measure-on');
             this._startMeasuring();
         } else {
-            L.DomUtil.removeClass(this._container, 'leaflet-control-measure-on');
+            DomUtil.removeClass(this._container, 'leaflet-control-measure-on');
             this._stopMeasuring();
         }
     },
@@ -47,14 +57,14 @@ var measureControl = !L || !L.Control ? null : L.Control.extend({
         this._doubleClickZoom = this._map.doubleClickZoom.enabled();
         this._map.doubleClickZoom.disable();
 
-        L.DomEvent
+        DomEvent
             .on(this._map, 'mousemove', this._mouseMove, this)
             .on(this._map, 'click', this._mouseClick, this)
             .on(this._map, 'dblclick', this._finishPath, this)
             .on(document, 'keydown', this._onKeyDown, this);
 
         if(!this._layerPaint) {
-            this._layerPaint = L.layerGroup().addTo(this._map);
+            this._layerPaint = layerGroup().addTo(this._map);
         }
 
         if(!this._points) {
@@ -65,7 +75,7 @@ var measureControl = !L || !L.Control ? null : L.Control.extend({
     _stopMeasuring: function() {
         this._map._container.style.cursor = this._oldCursor;
 
-        L.DomEvent
+        DomEvent
             .off(document, 'keydown', this._onKeyDown, this)
             .off(this._map, 'mousemove', this._mouseMove, this)
             .off(this._map, 'click', this._mouseClick, this)
@@ -88,7 +98,7 @@ var measureControl = !L || !L.Control ? null : L.Control.extend({
         }
 
         if(!this._layerPaintPathTemp) {
-            this._layerPaintPathTemp = L.polyline([this._lastPoint, e.latlng], {
+            this._layerPaintPathTemp = polyline([this._lastPoint, e.latlng], {
                 color: 'black',
                 weight: 1.5,
                 clickable: false,
@@ -134,7 +144,7 @@ var measureControl = !L || !L.Control ? null : L.Control.extend({
 
         // If this is already the second click, add the location to the fix path (create one first if we don't have one)
         if(this._lastPoint && !this._layerPaintPath) {
-            this._layerPaintPath = L.polyline([this._lastPoint], {
+            this._layerPaintPath = polyline([this._lastPoint], {
                 color: 'black',
                 weight: 2,
                 clickable: false
@@ -150,7 +160,7 @@ var measureControl = !L || !L.Control ? null : L.Control.extend({
             this._layerPaint.removeLayer(this._lastCircle);
         }
 
-        this._lastCircle = new L.CircleMarker(e.latlng, {
+        this._lastCircle = new CircleMarker(e.latlng, {
             color: 'black',
             opacity: 1,
             weight: 1,
@@ -192,11 +202,11 @@ var measureControl = !L || !L.Control ? null : L.Control.extend({
     },
 
     _createTooltip: function(position) {
-        var icon = L.divIcon({
+        var icon = divIcon({
             className: 'leaflet-measure-tooltip',
             iconAnchor: [-5, -5]
         });
-        this._tooltip = L.marker(position, {
+        this._tooltip = marker(position, {
             icon: icon,
             clickable: false
         }).addTo(this._layerPaint);
@@ -234,29 +244,21 @@ var measureControl = !L || !L.Control ? null : L.Control.extend({
     }
 });
 
-if(L) {
-    if(L.Control) {
-        L.Control.Measure = measureControl;
-        L.control.measure = function (options) {
-            return new L.Control.Measure(options);
-        };
+Control.Measure = measureControl;
+control.measure = function (options) {
+    return new Control.Measure(options);
+};
+
+Map.mergeOptions({
+    measureControl: false
+});
+
+Map.addInitHook(function () {
+    if (this.options.measureControl) {
+        this.measureControl = new measureControl();
+        this.addControl(this.measureControl);
     }
-    if(L.Map) {
-
-        L.Map.mergeOptions({
-            measureControl: false
-        });
-
-        L.Map.addInitHook(function () {
-            if (this.options.measureControl) {
-                this.measureControl = new measureControl();
-                this.addControl(this.measureControl);
-            }
-        });
-    }
-}
-
-
+});
 
 
 export default measureControl;

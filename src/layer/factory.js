@@ -9,6 +9,7 @@ import {
     clusteredFeatures,
     geoJsonFeed
 } from './cluster-feature';
+
 import {WMS, wms} from './wms';
 import {WMST, wmst} from './wmst';
 import {WMTS, wmts} from './wmts';
@@ -73,6 +74,13 @@ var LayerFactory = function(layer) {
         if(Config.leafletPane)
             opts.pane = Config.leafletPane;
         return L.esri.tiledMapLayer(opts);
+
+    } else if(ServiceTypes.ESRI_IMAGE_SERVER &&
+        ServiceTypes.ESRI_IMAGE_SERVER.uri === typeUri) {
+        opts = { url: url, useCors: true };
+        if(Config.leafletPane)
+            opts.pane = Config.leafletPane;
+        return L.esri.imageMapLayer(opts);
 
     } else if(ServiceTypes.FEED && ServiceTypes.FEED.uri === typeUri) {
         return geoJsonFeed(layer);

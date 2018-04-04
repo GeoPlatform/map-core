@@ -2,6 +2,8 @@
 
 import jQuery from "jquery";
 import Q from "q";
+import { circleMarker, geoJson, featureGroup, LayerGroup } from 'leaflet';
+
 import GeoPlatformClient from 'geoplatform.client';
 
 import LayerFactory from '../layer/factory';
@@ -131,7 +133,7 @@ class MapInstance extends Listener {
                 if(!L) {
                     throw new Error("Leaflet is not available");
                 }
-                return L.circleMarker(latlng, style);
+                return circleMarker(latlng, style);
             }
         };
 
@@ -528,6 +530,11 @@ class MapInstance extends Listener {
      */
     addLayers (layers) {
 
+        if(!layers) return;
+        if(typeof(layers.push) === 'undefined') {
+            layers = [layers];
+        }
+        
         layers.each( (obj,index) => {
 
             let layer = null, state = null;
@@ -832,14 +839,14 @@ class MapInstance extends Listener {
 
         if(!this._featureLayer) {
 
-            // _featureLayer = L.geoJson([], _geoJsonLayerOpts).addTo(_mapInstance);
-            this._featureLayer = L.featureGroup().addTo(this._mapInstance);
+            // _featureLayer = geoJson([], _geoJsonLayerOpts).addTo(_mapInstance);
+            this._featureLayer = featureGroup().addTo(this._mapInstance);
 
         }
 
         // _featureLayer.addData(json);
         var opts = jQuery.extend({}, this._geoJsonLayerOpts);
-        L.geoJson(json, opts).eachLayer((l)=>this.addFeatureLayer(l));
+        geoJson(json, opts).eachLayer((l)=>this.addFeatureLayer(l));
 
         if(typeof(fireEvent) === 'undefined' || fireEvent === true)
             this.touch('features:changed');
@@ -892,7 +899,7 @@ class MapInstance extends Listener {
             this._featureLayer.removeLayer(layer);
 
             //add replacement
-            L.geoJson(featureJson, this._geoJsonLayerOpts)
+            geoJson(featureJson, this._geoJsonLayerOpts)
                 .eachLayer((l)=>this.addFeatureLayer(l));
 
             this.touch("map:feature:changed");
@@ -995,7 +1002,7 @@ class MapInstance extends Listener {
         if(!L) {
             throw new Error("Leaflet is not available");
         }
-        if(!layer.feature && layer instanceof L.LayerGroup) {
+        if(!layer.feature && layer instanceof LayerGroup) {
             layer.eachLayer( (child) => {
                 this._addFeatureLayer(child);
             });

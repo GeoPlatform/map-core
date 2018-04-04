@@ -1,6 +1,7 @@
 
+import { Control, setOptions, DomUtil, Map } from 'leaflet';
 
-var loadingControl = !L || !L.Control ? null : L.Control.extend({
+var loadingControl = Control.extend({
     options: {
         position: 'topleft',
         separate: false,
@@ -17,7 +18,7 @@ var loadingControl = !L || !L.Control ? null : L.Control.extend({
     },
 
     initialize: function(options) {
-        L.setOptions(this, options);
+        setOptions(this, options);
         this._dataLoaders = {};
 
         // Try to set the zoom control this control is attached to from the
@@ -55,9 +56,9 @@ var loadingControl = !L || !L.Control ? null : L.Control.extend({
         }
         else {
             // Otherwise, create a container for the indicator
-            container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-bar');
+            container = DomUtil.create('div', 'leaflet-control-zoom leaflet-bar');
         }
-        this._indicator = L.DomUtil.create('a', classes, container);
+        this._indicator = DomUtil.create('a', classes, container);
         if (this.options.spinjs) {
           this._spinner = new Spinner(this.options.spin).spin();
           this._indicator.appendChild(this._spinner.el);
@@ -82,7 +83,7 @@ var loadingControl = !L || !L.Control ? null : L.Control.extend({
         else {
             // If this control is separate from the zoomControl, call the
             // parent method so we don't leave behind an empty container
-            return L.Control.prototype.removeFrom.call(this, map);
+            return Control.prototype.removeFrom.call(this, map);
         }
     },
 
@@ -119,30 +120,30 @@ var loadingControl = !L || !L.Control ? null : L.Control.extend({
 
     _showIndicator: function() {
         // Show loading indicator
-        L.DomUtil.addClass(this._indicator, 'is-loading');
+        DomUtil.addClass(this._indicator, 'is-loading');
 
         // If zoomControl exists, make the zoom-out button not last
         if (!this.options.separate) {
-            if (this.zoomControl instanceof L.Control.Zoom) {
-                L.DomUtil.removeClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
+            if (this.zoomControl instanceof Control.Zoom) {
+                DomUtil.removeClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
             }
-            else if (typeof L.Control.Zoomslider === 'function' && this.zoomControl instanceof L.Control.Zoomslider) {
-                L.DomUtil.removeClass(this.zoomControl._ui.zoomOut, 'leaflet-bar-part-bottom');
+            else if (typeof Control.Zoomslider === 'function' && this.zoomControl instanceof Control.Zoomslider) {
+                DomUtil.removeClass(this.zoomControl._ui.zoomOut, 'leaflet-bar-part-bottom');
             }
         }
     },
 
     _hideIndicator: function() {
         // Hide loading indicator
-        L.DomUtil.removeClass(this._indicator, 'is-loading');
+        DomUtil.removeClass(this._indicator, 'is-loading');
 
         // If zoomControl exists, make the zoom-out button last
         if (!this.options.separate) {
-            if (this.zoomControl instanceof L.Control.Zoom) {
-                L.DomUtil.addClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
+            if (this.zoomControl instanceof Control.Zoom) {
+                DomUtil.addClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
             }
-            else if (typeof L.Control.Zoomslider === 'function' && this.zoomControl instanceof L.Control.Zoomslider) {
-                L.DomUtil.addClass(this.zoomControl._ui.zoomOut, 'leaflet-bar-part-bottom');
+            else if (typeof Control.Zoomslider === 'function' && this.zoomControl instanceof Control.Zoomslider) {
+                DomUtil.addClass(this.zoomControl._ui.zoomOut, 'leaflet-bar-part-bottom');
             }
         }
     },
@@ -232,21 +233,15 @@ var loadingControl = !L || !L.Control ? null : L.Control.extend({
 
 
 
-if(L) {
-    if(L.Control) {
-        L.Control.Loading = loadingControl;
-        L.Control.loading = function(options) {
-            return new L.Control.Loading(options);
-        };
+Control.Loading = loadingControl;
+Control.loading = function(options) {
+    return new Control.Loading(options);
+};
+Map.addInitHook(function () {
+    if (this.options.loadingControl) {
+        this.loadingControl = new loadingControl();
+        this.addControl(this.loadingControl);
     }
-    if(L.Map) {
-        L.Map.addInitHook(function () {
-            if (this.options.loadingControl) {
-                this.loadingControl = new loadingControl();
-                this.addControl(this.loadingControl);
-            }
-        });
-    }
-}
+});
 
 export default loadingControl;
