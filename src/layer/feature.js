@@ -2,7 +2,7 @@
 import jQuery from "jquery";
 import Q from "q";
 import {
-    icon, marker, circleMarker,
+    icon as iconFn, marker as markerFn, circleMarker as circleMarkerFn,
     SVG, svg, Canvas, canvas,
     bind, Util,
     esri
@@ -47,16 +47,15 @@ var FeatureLayer = esri.FeatureLayer.extend({
         if(style.shape === 'image') {
             let width = style.width || 16;
             let height = style.height || 16;
-            var icon = icon( {
+            var icon = iconFn( {
                 iconUrl: style.content, //base64 encoded string
                 iconSize: [width, height],
                 iconAnchor: [width*0.5, height*0.5],
                 popupAnchor: [0, -11],
             });
-            marker = marker( latlng, {
-                icon: icon,
-                pane: Config.leafletPane
-            });
+            let mopts = { icon: icon };
+            if(Config.leafletPane) mopts.pane = Config.leafletPane;
+            marker = markerFn( latlng, mopts);
 
         } else {
             style.radius = style.radius || style['stroke-width'] || 4;
@@ -66,7 +65,7 @@ var FeatureLayer = esri.FeatureLayer.extend({
             style.fillOpacity = style.opacity || style['fill-opacity'] || 0.3;
             style.fillColor = style.color || style.fill;
             style.renderer = this.options.renderer;  //important for pane!
-            marker = circleMarker(latlng, style);
+            marker = circleMarkerFn(latlng, style);
         }
 
         let popupTemplate = this.options.popupTemplate || featurePopupTemplate;

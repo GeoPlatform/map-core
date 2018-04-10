@@ -479,7 +479,9 @@ class MapInstance extends Listener {
             //remember new base layer
             this._baseLayer = leafletLayer;
             this._baseLayerDef = layer;
+
             this.touch('baselayer:changed', layer);
+            this.notify('baselayer:changed', layer, leafletLayer);
 
         })
         .catch(e => {
@@ -534,7 +536,7 @@ class MapInstance extends Listener {
         if(typeof(layers.push) === 'undefined') {
             layers = [layers];
         }
-        
+
         layers.each( (obj,index) => {
 
             let layer = null, state = null;
@@ -607,6 +609,8 @@ class MapInstance extends Listener {
 
         this._layerStates.push(state);
 
+        this.notify('layer:added', layer, leafletLayer);
+        
 
         // if layer is initially "off" or...
         // if layer is initially not 100% opaque

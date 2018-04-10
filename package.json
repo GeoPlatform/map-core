@@ -20,7 +20,9 @@
     },
     "devDependencies": {
         "babel": "^6.5.2",
-        "babel-preset-es2015": "^6.16.0",
+        "babel-plugin-add-module-exports": "0.2.1",
+        "babel-preset-es2015": "6.18.0",
+        "babel-preset-stage-2": "6.18.0",
         "geoplatform.client": "git+https://github.com/GeoPlatform/client-api.git#rollup",
         "gulp": "^3.9.1",
         "gulp-babel": "^6.1.2",
@@ -39,6 +41,8 @@
         "matchdep": "^0.3.0",
         "pre-commit": "^1.2.2",
 
+        "q": "1.1.2",
+        "jquery": "^3.3.1",
         "leaflet": "1.0.3",
         "leaflet-draw": "0.4.9",
         "esri-leaflet": "2.1.2",
@@ -53,6 +57,7 @@
     ],
     "dependencies": {
         "babel-plugin-external-helpers": "^6.22.0",
+        "babel-preset-es2015-rollup": "^3.0.0",
         "rollup": "^0.57.1",
         "rollup-plugin-babel": "^3.0.3",
         "rollup-plugin-commonjs": "^9.1.0",

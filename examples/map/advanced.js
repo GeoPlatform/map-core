@@ -41,12 +41,14 @@ GeoPlatformMapCore.OSM.get().then(osm => {
 
     let http = new GeoPlatformClient.JQueryHttpClient();
     let lyrSvc = new GeoPlatformClient.LayerService('https://sit-ual.geoplatform.us', http);
-    
+
+
     //Fetch Image layer
     lyrSvc.get('2647e1ae5acfe155dccb26def8ef2e38')
     .then(layer => mapInstance.addLayers(layer) )
     .then(e => { console.log("Unable to add Image layer: " + e.message); });
 
+    //Fetch WMS layer
     lyrSvc.get('af9b4077549fe6c3367c8faca29cc165')
     .then(layer=> mapInstance.addLayers(layer))
     .catch(e => { console.log("Unable to add raster layer: " + e.message); });

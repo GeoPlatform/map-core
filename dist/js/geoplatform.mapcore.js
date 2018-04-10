@@ -794,16 +794,15 @@
             if (style.shape === 'image') {
                 var width = style.width || 16;
                 var height = style.height || 16;
-                var icon = icon({
+                var icon = L$1.icon({
                     iconUrl: style.content, //base64 encoded string
                     iconSize: [width, height],
                     iconAnchor: [width * 0.5, height * 0.5],
                     popupAnchor: [0, -11]
                 });
-                marker = marker(latlng, {
-                    icon: icon,
-                    pane: GeoPlatformClient.Config.leafletPane
-                });
+                var mopts = { icon: icon };
+                if (GeoPlatformClient.Config.leafletPane) mopts.pane = GeoPlatformClient.Config.leafletPane;
+                marker = L$1.marker(latlng, mopts);
             } else {
                 style.radius = style.radius || style['stroke-width'] || 4;
                 style.weight = style.weight || style['stroke-width'] || 2;
@@ -1181,16 +1180,15 @@
             if (style.shape === 'image') {
                 var width = style.width || 16;
                 var height = style.height || 16;
-                var icon = icon({
+                var icon = L$1.icon({
                     iconUrl: style.content, //base64 encoded string
                     iconSize: [width, height],
                     iconAnchor: [width * 0.5, height * 0.5],
                     popupAnchor: [0, -11]
                 });
-                marker = marker(latlng, {
-                    icon: icon,
-                    pane: GeoPlatformClient.Config.leafletPane
-                });
+                var mopts = { icon: icon };
+                if (GeoPlatformClient.Config.leafletPane) mopts.pane = GeoPlatformClient.Config.leafletPane;
+                marker = L$1.marker(latlng, mopts);
             } else {
                 marker = L$1.circleMarker(latlng, style);
             }
@@ -1421,12 +1419,13 @@
         var url = service.href,
             format = layer.supportedFormats ? layer.supportedFormats[0] : null;
 
-        return new ClusteredFeatureLayer({
+        var opts = {
             url: url + '/' + layer.layerName,
             styleLoader: featureStyleResolver,
-            layerId: layer.id,
-            pane: GeoPlatformClient.Config.leafletPane
-        });
+            layerId: layer.id
+        };
+        if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
+        return new ClusteredFeatureLayer(opts);
     }
 
     function geoJsonFeed(layer) {
@@ -1462,13 +1461,14 @@
             };
         };
 
-        return new ClusteredFeatureLayer({
+        var opts = {
             url: layerUrl,
             isModern: true, //force to use GeoJSON
             layerId: layer.id, //used by style loader
-            styleLoader: styleLoaderFactory(styleUrl),
-            pane: GeoPlatformClient.Config.leafletPane
-        });
+            styleLoader: styleLoaderFactory(styleUrl)
+        };
+        if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
+        return new ClusteredFeatureLayer(opts);
     }
 
     var WMS = L$1.TileLayer.WMS.extend({
@@ -2528,7 +2528,9 @@
                     //remember new base layer
                     _this3._baseLayer = leafletLayer;
                     _this3._baseLayerDef = layer;
+
                     _this3.touch('baselayer:changed', layer);
+                    _this3.notify('baselayer:changed', layer, leafletLayer);
                 }).catch(function (e) {
                     console.log("MapInstance.setBaseLayer() - Error getting base layer for map : " + e.message);
                     _this3._layerErrors.push({ id: layer.id, message: e.message });
@@ -2672,6 +2674,8 @@
                 if (!isNaN(state.zIndex) && leafletLayer.setZIndex) leafletLayer.setZIndex(state.zIndex);
 
                 this._layerStates.push(state);
+
+                this.notify('layer:added', layer, leafletLayer);
 
                 // if layer is initially "off" or...
                 // if layer is initially not 100% opaque

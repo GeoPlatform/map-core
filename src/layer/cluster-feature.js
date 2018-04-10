@@ -4,7 +4,10 @@ import Q from  "q";
 import { Config } from 'geoplatform.client';
 
 import {
-    icon, marker, circleMarker,
+    Control,
+    icon as iconFn,
+    marker as markerFn,
+    circleMarker as circleMarkerFn,
     bind,
     SVG, svg, Canvas, canvas,
     Util
@@ -55,18 +58,17 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
         if(style.shape === 'image') {
             let width = style.width || 16;
             let height = style.height || 16;
-            var icon = icon( {
+            var icon = iconFn( {
                 iconUrl: style.content, //base64 encoded string
                 iconSize: [width, height],
                 iconAnchor: [width*0.5, height*0.5],
                 popupAnchor: [0, -11],
             });
-            marker = marker( latlng, {
-                icon: icon,
-                pane: Config.leafletPane
-            });
+            let mopts = { icon: icon };
+            if(Config.leafletPane) mopts.pane = Config.leafletPane;
+            marker = markerFn( latlng, mopts);
         } else {
-            marker = circleMarker(latlng, style);
+            marker = circleMarkerFn(latlng, style);
         }
 
         let popupTemplate = this.options.popupTemplate || featurePopupTemplate;
@@ -308,12 +310,14 @@ function clusteredFeatures(layer) {
     let url     = service.href,
         format  = layer.supportedFormats ? layer.supportedFormats[0] : null;
 
-    return new ClusteredFeatureLayer({
+    let opts = {
         url: url + '/' + layer.layerName,
         styleLoader: featureStyleResolver,
-        layerId: layer.id,
-        pane: Config.leafletPane
-    });
+        layerId: layer.id
+    };
+    if(Config.leafletPane)
+        opts.pane = Config.leafletPane;
+    return new ClusteredFeatureLayer(opts);
 }
 
 
@@ -356,13 +360,15 @@ function geoJsonFeed(layer) {
         };
     };
 
-    return new ClusteredFeatureLayer({
+    let opts = {
         url: layerUrl,
         isModern: true,         //force to use GeoJSON
         layerId: layer.id,    //used by style loader
-        styleLoader: styleLoaderFactory(styleUrl),
-        pane: Config.leafletPane
-    });
+        styleLoader: styleLoaderFactory(styleUrl)
+    };
+    if(Config.leafletPane)
+        opts.pane = Config.leafletPane;
+    return new ClusteredFeatureLayer(opts);
 
 }
 
