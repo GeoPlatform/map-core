@@ -647,59 +647,7 @@
         }
     }
 
-    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-      return typeof obj;
-    } : function (obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-
-    var classCallCheck = function (instance, Constructor) {
-      if (!(instance instanceof Constructor)) {
-        throw new TypeError("Cannot call a class as a function");
-      }
-    };
-
-    var createClass = function () {
-      function defineProperties(target, props) {
-        for (var i = 0; i < props.length; i++) {
-          var descriptor = props[i];
-          descriptor.enumerable = descriptor.enumerable || false;
-          descriptor.configurable = true;
-          if ("value" in descriptor) descriptor.writable = true;
-          Object.defineProperty(target, descriptor.key, descriptor);
-        }
-      }
-
-      return function (Constructor, protoProps, staticProps) {
-        if (protoProps) defineProperties(Constructor.prototype, protoProps);
-        if (staticProps) defineProperties(Constructor, staticProps);
-        return Constructor;
-      };
-    }();
-
-    var inherits = function (subClass, superClass) {
-      if (typeof superClass !== "function" && superClass !== null) {
-        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-      }
-
-      subClass.prototype = Object.create(superClass && superClass.prototype, {
-        constructor: {
-          value: subClass,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        }
-      });
-      if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-    };
-
-    var possibleConstructorReturn = function (self, call) {
-      if (!self) {
-        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-      }
-
-      return call && (typeof call === "object" || typeof call === "function") ? call : self;
-    };
+    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
     function featurePopupTemplate(feature) {
 
@@ -2036,6 +1984,14 @@
         }
     };
 
+    var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+    function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+    function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
     var ItemTypes = GeoPlatformClient__default.ItemTypes;
     var ServiceFactory = GeoPlatformClient__default.ServiceFactory;
     var HttpClient$3 = GeoPlatformClient__default.JQueryHttpClient;
@@ -2043,13 +1999,13 @@
 
     var Listener = function () {
         function Listener() {
-            classCallCheck(this, Listener);
+            _classCallCheck(this, Listener);
 
             //listeners to be unregistered upon destroy
             this._listeners = {};
         }
 
-        createClass(Listener, [{
+        _createClass(Listener, [{
             key: "on",
             value: function on(type, listener) {
                 if (!this._listeners[type]) this._listeners[type] = [];
@@ -2075,16 +2031,17 @@
                 });
             }
         }]);
+
         return Listener;
     }();
 
     var MapInstance = function (_Listener) {
-        inherits(MapInstance, _Listener);
+        _inherits(MapInstance, _Listener);
 
         function MapInstance(key) {
-            classCallCheck(this, MapInstance);
+            _classCallCheck(this, MapInstance);
 
-            var _this = possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
+            var _this = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
 
             _this.setHttpClient(new HttpClient$3());
             _this.setServiceFactory(ServiceFactory);
@@ -2139,7 +2096,7 @@
             return _this;
         }
 
-        createClass(MapInstance, [{
+        _createClass(MapInstance, [{
             key: "dispose",
             value: function dispose() {
                 this.destroyMap();
@@ -3413,6 +3370,7 @@
             /* ---------------------------- */
 
         }]);
+
         return MapInstance;
     }(Listener);
 
