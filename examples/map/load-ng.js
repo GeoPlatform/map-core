@@ -4,8 +4,11 @@ GeoPlatformClient.Config.configure({
     env: 'development' //to prevent bumping map's numViews
 });
 
-//refresh list of service types after configuring API endpoint above
-GeoPlatformMapCore.ServiceTypes.refresh();
+/*
+ * Optionally, refresh list of service types after configuring API endpoint above
+ * or continue to use default list provided in library
+ */
+//GeoPlatformMapCore.ServiceTypes.refresh();
 
 //define the application's angular module and make sure to include the $httpProvider
 // in the config function

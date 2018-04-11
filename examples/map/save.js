@@ -3,8 +3,11 @@ GeoPlatformClient.Config.configure({
     ualUrl : 'https://ual.geoplatform.gov'
 });
 
-//refresh list of service types after configuring API endpoint above
-GeoPlatformMapCore.ServiceTypes.refresh();
+/*
+ * Optionally, refresh list of service types after configuring API endpoint above
+ * or continue to use default list provided in library
+ */
+//GeoPlatformMapCore.ServiceTypes.refresh();
 
 let elem = document.getElementById('map');
 let mapOptions = {

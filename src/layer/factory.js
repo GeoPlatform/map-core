@@ -46,11 +46,16 @@ var LayerFactory = function(layer) {
 
     let service = layer.services[0],
         url     = service.href,
-        typeUri = service.serviceType.uri,
+        typeUri = service.serviceType ? service.serviceType.uri : null,
         srs     = layer.supportedCRS ? layer.supportedCRS[0] : null,
         format  = layer.supportedFormats ? layer.supportedFormats[0] : null,
         opts = {};
 
+    if(typeUri === null) {
+        console.log("LayerFactory() - Could not create Leaflet layer for " +
+            "GeoPlatform Layer with Service of unspecified service type");
+        return null;
+    }
 
     if(ServiceTypes.ESRI_MAP_SERVER &&
         ServiceTypes.ESRI_MAP_SERVER.uri === typeUri) {
