@@ -50,7 +50,7 @@
         "leaflet-timedimension": "~1.1.0"
     },
     "peerDependencies": {
-        "geoplatform.client": "rollup"
+        "geoplatform.client": "0.1.0"
     },
     "pre-commit": [
         "distro"
