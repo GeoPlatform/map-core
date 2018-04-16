@@ -2586,8 +2586,9 @@
                     _this3._baseLayer = leafletLayer;
                     _this3._baseLayerDef = layer;
 
-                    _this3.touch('baselayer:changed', layer);
-                    _this3.notify('baselayer:changed', layer, leafletLayer);
+                    //will notify listeners
+                    _this3.touch('baselayer:changed', layer, leafletLayer);
+                    // this.notify('baselayer:changed', layer, leafletLayer);
                 }).catch(function (e) {
                     console.log("MapInstance.setBaseLayer() - Error getting base layer for map : " + e.message);
                     _this3._layerErrors.push({ id: layer.id, message: e.message });
