@@ -127,8 +127,8 @@ function wms(layer) {
 
 }
 
-TileLayer.WMS = WMS;
-tileLayer.wms = wms;
+// TileLayer.WMS = WMS;
+// tileLayer.wms = wms;
 
 export {
     WMS as default,

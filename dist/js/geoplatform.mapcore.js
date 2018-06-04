@@ -1623,9 +1623,6 @@
         return new WMS(url, opts);
     }
 
-    L$1.TileLayer.WMS = WMS;
-    L$1.tileLayer.wms = wms;
-
     var WMST = L$1.TimeDimension.Layer.WMS.extend({
 
         //override default parser to query all Layers (whether queryable or not)
