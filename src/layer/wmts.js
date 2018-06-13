@@ -200,7 +200,8 @@ function wmts(layer) {
         options.pane = Config.leafletPane;
 
     let distro = (layer.distributions || []).find( dist => {
-        return dist.href && ( dist.mediaType==='image/png' || dist.mediaType==='image/jpeg' );
+        //ensure dist isn't 'null'
+        return dist && dist.href && ( dist.mediaType==='image/png' || dist.mediaType==='image/jpeg' );
     });
     if(distro) {
         url = distro.href;
@@ -213,10 +214,12 @@ function wmts(layer) {
                 url = url.replace('{' + param.name + '}', value);
             }
         });
-
+    } else {
+        throw new Error("WTMS Layer - layer " + layer.id +
+            " has no distribution(s) usable to make WMTS requests");
     }
 
-    if(!url) throw new Error("Unable to get URL for layer " + layer.id);
+    if(!url) throw new Error("WTMS Layer - unable to determine WMTS URL for layer " + layer.id);
 
     return new WMTS( url, options );
 

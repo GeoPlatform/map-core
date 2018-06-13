@@ -112,7 +112,8 @@ function wms(layer) {
     }
 
     let url = service.href;
-    let format  = layer.supportedFormats ? layer.supportedFormats[0] : "image/png";
+    let formats = layer.supportedFormats || [];
+    let format  = formats.length ? formats[0] : "image/png";
 
     let opts = {
         layers: layer.layerName,

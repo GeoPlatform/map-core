@@ -153,10 +153,12 @@
         },
 
         _handleLoading: function _handleLoading(e) {
+            console.log("Loading.handleLoading()");
             this.addLoader(this.getEventId(e));
         },
 
         _handleLoad: function _handleLoad(e) {
+            console.log("Loading.handleLoad()");
             this.removeLoader(this.getEventId(e));
         },
 
@@ -238,6 +240,7 @@
     };
     L$1.Map.addInitHook(function () {
         if (this.options.loadingControl) {
+            console.log("Adding loading control");
             this.loadingControl = new loadingControl();
             this.addControl(this.loadingControl);
         }
@@ -1610,7 +1613,8 @@
         }
 
         var url = service.href;
-        var format = layer.supportedFormats ? layer.supportedFormats[0] : "image/png";
+        var formats = layer.supportedFormats || [];
+        var format = formats.length ? formats[0] : "image/png";
 
         var opts = {
             layers: layer.layerName,
@@ -1887,7 +1891,8 @@
         if (GeoPlatformClient.Config.leafletPane) options.pane = GeoPlatformClient.Config.leafletPane;
 
         var distro = (layer.distributions || []).find(function (dist) {
-            return dist.href && (dist.mediaType === 'image/png' || dist.mediaType === 'image/jpeg');
+            //ensure dist isn't 'null'
+            return dist && dist.href && (dist.mediaType === 'image/png' || dist.mediaType === 'image/jpeg');
         });
         if (distro) {
             url = distro.href;
@@ -1900,9 +1905,11 @@
                     url = url.replace('{' + param.name + '}', value);
                 }
             });
+        } else {
+            throw new Error("WTMS Layer - layer " + layer.id + " has no distribution(s) usable to make WMTS requests");
         }
 
-        if (!url) throw new Error("Unable to get URL for layer " + layer.id);
+        if (!url) throw new Error("WTMS Layer - unable to determine WMTS URL for layer " + layer.id);
 
         return new WMTS(url, options);
     }
@@ -2147,7 +2154,12 @@
             _this._key = key || Math.ceil(Math.random() * 9999);
 
             //registry id of current map if available
-            _this._mapId = null, _this._mapDef = _this.initializeMapDefinition(), _this._mapInstance = null, _this._defaultExtent = null, _this._baseLayerDef = null, _this._baseLayer = null, _this._layerStates = [], _this._layerCache = {}, _this._layerErrors = [], _this._featureLayer = null, _this._featureLayerVisible = true, _this._tools = [], _this.state = { dirty: false }; // jshint ignore:line
+            _this._mapId = null, _this._mapDef = _this.initializeMapDefinition(), _this._mapInstance = null, _this._defaultExtent = null, _this._baseLayerDef = null, _this._baseLayer = null, _this._layerStates = [], _this._layerCache = {}, _this._layerErrors = [], _this._layerErrorHandler = function (e) {
+                console.log("MapInstance.defaultLayerErrorHandler() - " + e.id + " : " + e.message);
+            };
+
+            //layer used to store features on map
+            _this._featureLayer = null, _this._featureLayerVisible = true, _this._tools = [], _this.state = { dirty: false }; // jshint ignore:line
 
 
             _this._geoJsonLayerOpts = {
@@ -2268,6 +2280,16 @@
                 return this.svcCache[type];
             }
 
+            /**
+             * @param {Function} fn - callback when an error is encountered
+             */
+
+        }, {
+            key: "setErrorHandler",
+            value: function setErrorHandler(fn) {
+                this._layerErrorHandler = fn;
+            }
+
             //-----------------
 
         }, {
@@ -2366,6 +2388,8 @@
         }, {
             key: "handleLayerError",
             value: function handleLayerError(error) {
+                // console.log("MapInstance.handleLayerError() - " +
+                //     "Layer's tile failed to load: " + error.tile.src);
                 var layer = error.target;
                 for (var id in this._layerCache) {
                     if (this._layerCache[id] === layer) {
@@ -2392,12 +2416,7 @@
 
                 if (!this._layerErrors.find(finder)) {
 
-                    // console.log("Logging error for layer "  + id);
-                    var obj = {
-                        id: id,
-                        message: "Layer failed to completely load. " + "It may be inaccessible or misconfigured."
-                    };
-                    this._layerErrors.push(obj);
+                    this.logLayerError(id, "Layer failed to completely load. " + "It may be inaccessible or misconfigured.");
 
                     var url = error.tile.src;
                     var params = { id: id };
@@ -2411,6 +2430,23 @@
                         obj.message = "Layer '" + def.label + "' failed to completely load. " + "It may be inaccessible or misconfigured. Reported cause: " + e.message;
                         _this2.notify('layer:error', obj);
                     });
+                }
+            }
+
+            /**
+             * @param {string} layerId - identifier of layer generating the error
+             * @param {string} errorMsg - message of the error
+             */
+
+        }, {
+            key: "logLayerError",
+            value: function logLayerError(layerId, errorMsg) {
+                // console.log("MapInstance.logLayerError() - layer "  + id +
+                //     " generated error '" + errorMsg + "'");
+                var err = { id: layerId, message: errorMsg };
+                this._layerErrors.push(err);
+                if (this._layerErrorHandler) {
+                    this._layerErrorHandler(err);
                 }
             }
 
@@ -2588,7 +2624,7 @@
                     // this.notify('baselayer:changed', layer, leafletLayer);
                 }).catch(function (e) {
                     console.log("MapInstance.setBaseLayer() - Error getting base layer for map : " + e.message);
-                    _this3._layerErrors.push({ id: layer.id, message: e.message });
+                    _this3.logLayerError(layer.id, e.message);
                 });
             }
 
@@ -2711,10 +2747,7 @@
 
                     if (!leafletLayer) throw new Error("Layer factory returned nothing");
                 } catch (e) {
-                    this._layerErrors.push({
-                        id: layer.id,
-                        message: 'MapInstance.addLayerWithState() - ' + 'Could not create a Leaflet layer: ' + e.message
-                    });
+                    this.logLayerError(layer.id, 'MapInstance.addLayerWithState() - ' + 'Could not create Leaflet layer because ' + e.message);
                 }
 
                 if (!leafletLayer) return;
@@ -2787,7 +2820,8 @@
 
                     //remove layer from tracked defs array
                     var index = this.getLayerStateIndex(id);
-                    this._layerStates.splice(index, 1);
+                    console.log("MapInstance.removeLayer(" + id + ")");
+                    if (index >= 0 && index < this._layerStates.length) this._layerStates.splice(index, 1);
 
                     //stop listening for errors
                     layerInstance.off("layer:error");
@@ -2847,7 +2881,9 @@
                 } else if (layerInstance._container) {
                     //otherwise, using jquery on dom directly
                     var el = jQuery(layerInstance._container);
-                    if (visible) el.removeClass("invisible");else el.addClass('invisible');
+                    // if(visible) el.removeClass("invisible");
+                    // else el.addClass('invisible');
+                    el.css({ 'display': visible ? '' : 'none' });
                 }
 
                 this.touch('map:layer:changed');
@@ -3340,6 +3376,7 @@
             value: function loadMapFromObj(map) {
                 var _this12 = this;
 
+                console.log("Loading Map Object");
                 // console.log(map);
 
                 this._mapId = map.id;
@@ -3396,6 +3433,7 @@
         }, {
             key: "destroyMap",
             value: function destroyMap() {
+                console.log("Destroying Map");
                 this._mapInstance = null;
                 this._layerCache = null;
                 this._layerStates = null;
