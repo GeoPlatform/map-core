@@ -153,12 +153,10 @@
         },
 
         _handleLoading: function _handleLoading(e) {
-            console.log("Loading.handleLoading()");
             this.addLoader(this.getEventId(e));
         },
 
         _handleLoad: function _handleLoad(e) {
-            console.log("Loading.handleLoad()");
             this.removeLoader(this.getEventId(e));
         },
 
@@ -240,7 +238,6 @@
     };
     L$1.Map.addInitHook(function () {
         if (this.options.loadingControl) {
-            console.log("Adding loading control");
             this.loadingControl = new loadingControl();
             this.addControl(this.loadingControl);
         }
