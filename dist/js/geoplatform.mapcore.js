@@ -2153,10 +2153,7 @@
             //registry id of current map if available
             _this._mapId = null, _this._mapDef = _this.initializeMapDefinition(), _this._mapInstance = null, _this._defaultExtent = null, _this._baseLayerDef = null, _this._baseLayer = null, _this._layerStates = [], _this._layerCache = {}, _this._layerErrors = [], _this._layerErrorHandler = function (e) {
                 console.log("MapInstance.defaultLayerErrorHandler() - " + e.id + " : " + e.message);
-            };
-
-            //layer used to store features on map
-            _this._featureLayer = null, _this._featureLayerVisible = true, _this._tools = [], _this.state = { dirty: false }; // jshint ignore:line
+            }, _this._featureLayer = null, _this._featureLayerVisible = true, _this._tools = [], _this.state = { dirty: false }; // jshint ignore:line
 
 
             _this._geoJsonLayerOpts = {

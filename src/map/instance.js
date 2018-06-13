@@ -86,7 +86,7 @@ class MapInstance extends Listener {
         this._layerErrors= [],
         this._layerErrorHandler = function(e) {
             console.log(`MapInstance.defaultLayerErrorHandler() - ${e.id} : ${e.message}`);
-        };
+        },
 
         //layer used to store features on map
         this._featureLayer = null,
