@@ -2687,12 +2687,12 @@
                     layers = [layers];
                 }
 
-                layers.each(function (obj, index) {
+                layers.forEach(function (obj, index) {
 
                     var layer = null,
                         state = null;
 
-                    if (obj.id) {
+                    if (obj.type && obj.type === ItemTypes.LAYER) {
                         //is a layer
                         layer = obj;
                     } else if (obj.layer) {
@@ -2701,17 +2701,27 @@
                         state = obj;
                     }
 
-                    if (!layer) return; //layer info is missing, skip it
+                    if (!layer) {
+                        console.log("Warning: MapInstance.addLayers() - layer (" + index + ") is not a Layer or a Layer state. Ignoring...");
+                        return; //layer info is missing, skip it
+                    }
 
                     //DT-442 prevent adding layer that already exists on map
                     if (_this4._layerCache[layer.id]) return;
 
                     if (!state) {
-                        state = {
-                            opacity: 1,
-                            visibility: true,
-                            layer: JSON.parse(JSON.stringify(layer))
-                        };
+                        try {
+                            //wrapped in try{}catch because layer may contain circular reference
+                            // which will cause error when used by JSON methods
+                            var layerCopy = JSON.parse(JSON.stringify(layer));
+                            state = {
+                                opacity: 1,
+                                visibility: true,
+                                layer: layerCopy
+                            };
+                        } catch (e) {
+                            throw new Error("Unable to add layer to map because of " + e.message);
+                        }
                     }
 
                     var z = layers.length - index;

@@ -35,7 +35,9 @@ if(typeof(Array.prototype.each) === 'undefined') {
         for(let i=0; i<len; ++i) {
             try {
                 fn(arr[i]);
-            } catch(e) { }
+            } catch(e) {
+                throw e;
+            }
         }
     };
 }
