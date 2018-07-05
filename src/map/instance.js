@@ -1187,26 +1187,36 @@ class MapInstance extends Listener {
      */
     loadMapFromObj (map) {
 
-        console.log("Loading Map Object");
+        // console.log("Loading Map Object");
         // console.log(map);
 
         this._mapId = map.id;
         this._mapDef = map;
 
+        map.extent = map.extent || {};
+        let west =  isNaN(map.extent.minx) ? -179.0 : map.extent.minx*1.0;
+        let east =  isNaN(map.extent.maxx) ?  179.0 : map.extent.maxx*1.0;
+        let south = isNaN(map.extent.miny) ?  -89.0 : map.extent.miny*1.0;
+        let north = isNaN(map.extent.maxy) ?   89.0 : map.extent.maxy*1.0;
+
         //ensure x,y is ordered correctly
-        var t;
-        t = Math.min(map.extent.minx, map.extent.maxx);
-            map.extent.maxx = Math.max(map.extent.minx, map.extent.maxx);
-            map.extent.minx = t;
-        t = Math.min(map.extent.miny, map.extent.maxy);
-            map.extent.maxy = Math.max(map.extent.miny, map.extent.maxy);
-            map.extent.miny = t;
+        let t;
+        if(west > east) {
+            t = Math.min(west, east);
+            east = map.extent.maxx = Math.max(west, east);
+            west = map.extent.minx = t;
+        }
+        if(south > north) {
+            t = Math.min(south, north);
+            north = map.extent.maxy = Math.max(south, north);
+            south = map.extent.miny = t;
+        }
 
         //prevent out-of-bounds extents
-        if(map.extent.minx < -180.0) map.extent.minx = -179.0;
-        if(map.extent.maxx > 180.0) map.extent.maxx = 179.0;
-        if(map.extent.miny < -90.0) map.extent.miny = -89.0;
-        if(map.extent.maxy > 90.0) map.extent.maxy = 89.0;
+        if(west < -180.0) west = -179.0;
+        if(east > 180.0)  east =  179.0;
+        if(south < -90.0) south = -89.0;
+        if(north > 90.0)  north =  89.0;
 
         //set extent from loaded map
         this._defaultExtent = map.extent;
@@ -1249,7 +1259,7 @@ class MapInstance extends Listener {
      *
      */
     destroyMap () {
-        console.log("Destroying Map");
+        // console.log("Destroying Map");
         this._mapInstance = null;
         this._layerCache = null;
         this._layerStates = null;
