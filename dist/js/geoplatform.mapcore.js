@@ -2778,7 +2778,10 @@
                         _this5.setLayerVisibility(layer, state.visibility);
                         _this5.setLayerOpacity(layer, state.opacity);
                         //TODO notify of change
-                    }, 500, leafletLayer, state);
+
+                        //DT-2102 timeout needs to be large enough or else
+                        // feature layers won't get opacity updated on map load
+                    }, 2000, leafletLayer, state);
                 }
             }
 
