@@ -1897,6 +1897,13 @@
 
             var params = distro.parameters || [];
             params.each(function (param) {
+
+                //ignore wmts specific parameters, WMTS layer will populate those values
+                // based upon map state.
+                var plc = param.name.toLowerCase();
+                if ("tilematrix" === plc || "tilerow" === plc || "tilecol" === plc) return;
+
+                //for all other parameters, try to fill in default or initial values
                 var value = param.defaultValue || param.values && param.values.length && param.values[0];
                 if (value !== null && value !== undefined) {
                     url = url.replace('{' + param.name + '}', value);
