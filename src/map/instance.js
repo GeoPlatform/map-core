@@ -315,7 +315,7 @@ class MapInstance extends Listener {
      */
     processLayerError(error, id) {
 
-        var finder = (l) => { return l.id === id || l.layer.id === id; };
+        var finder = (l) => { return l.id === id || (l.layer && l.layer.id === id); };
 
         if(!this._layerErrors.find(finder)) {
 

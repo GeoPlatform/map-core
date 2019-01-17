@@ -2421,7 +2421,7 @@
                 var _this2 = this;
 
                 var finder = function finder(l) {
-                    return l.id === id || l.layer.id === id;
+                    return l.id === id || l.layer && l.layer.id === id;
                 };
 
                 if (!this._layerErrors.find(finder)) {
