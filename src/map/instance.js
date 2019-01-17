@@ -315,11 +315,11 @@ class MapInstance extends Listener {
      */
     processLayerError(error, id) {
 
-        var finder = function(l){return l.id === id;};
+        var finder = (l) => { return l.id === id || l.layer.id === id; };
 
         if(!this._layerErrors.find(finder)) {
 
-            this.logLayerError(id, "Layer failed to completely load. " +
+            let obj = this.logLayerError(id, "Layer failed to completely load. " +
                 "It may be inaccessible or misconfigured.");
 
             var url = error.tile.src;
@@ -329,13 +329,18 @@ class MapInstance extends Listener {
                 params[p[0]] = p[1];
             });
 
-            this.layerService.validate(id, params)
-            .catch(e => {
-                var def = this._layerStates.find(finder);
-                obj.message = "Layer '" + def.label + "' failed to completely load. " +
-                        "It may be inaccessible or misconfigured. Reported cause: " + e.message;
-                this.notify('layer:error', obj);
-            });
+            let layerService = this.getService(ItemTypes.LAYER);
+            if(layerService) {
+                layerService.validate(id, params)
+                .catch(e => {
+                    var def = this._layerStates.find(finder);
+                    if(def) {
+                        obj.message = "Layer '" + def.layer.label + "' failed to completely load. " +
+                                "Reported cause: " + e.message;
+                    }
+                    this.notify('layer:error', obj);
+                });
+            }
         }
     }
 
@@ -351,6 +356,7 @@ class MapInstance extends Listener {
         if(this._layerErrorHandler) {
             this._layerErrorHandler(err);
         }
+        return err;
     }
 
     /* -- State Management of internal model -- */
@@ -625,11 +631,13 @@ class MapInstance extends Listener {
 
         if(!leafletLayer) return;
 
+        //cache leaflet object first
+        this._layerCache[layer.id] = leafletLayer;
+
         //listen for layer errors so we can inform the user
         // that a layer hasn't been loaded in a useful way
-        leafletLayer.on('tileerror', this.handleLayerError);
+        leafletLayer.on('tileerror', (e) => { this.handleLayerError(e); });
 
-        this._layerCache[layer.id] = leafletLayer;
         this._mapInstance.addLayer(leafletLayer);
 
         if( !isNaN(state.zIndex) && leafletLayer.setZIndex )

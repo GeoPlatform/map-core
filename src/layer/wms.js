@@ -115,11 +115,18 @@ function wms(layer) {
     let formats = layer.supportedFormats || [];
     let format  = formats.length ? formats[0] : "image/png";
 
+    let version = '1.1.1';
+    if(service.api && service.api.length) {
+        let is130 = service.api.filter(api => api.accessURL.indexOf('wms/1.3.0')>0 ).length > 0;
+        if(is130) version = '1.3.0';
+    }
+
     let opts = {
         layers: layer.layerName,
         transparent: true,
         format: format,
-        wmvId: layer.id
+        wmvId: layer.id,
+        version: version
     };
     if(Config.leafletPane)
         opts.pane = Config.leafletPane;

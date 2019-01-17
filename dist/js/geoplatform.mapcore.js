@@ -1613,11 +1613,20 @@
         var formats = layer.supportedFormats || [];
         var format = formats.length ? formats[0] : "image/png";
 
+        var version = '1.1.1';
+        if (service.api && service.api.length) {
+            var is130 = service.api.filter(function (api) {
+                return api.accessURL.indexOf('wms/1.3.0') > 0;
+            }).length > 0;
+            if (is130) version = '1.3.0';
+        }
+
         var opts = {
             layers: layer.layerName,
             transparent: true,
             format: format,
-            wmvId: layer.id
+            wmvId: layer.id,
+            version: version
         };
         if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
 
@@ -2412,12 +2421,12 @@
                 var _this2 = this;
 
                 var finder = function finder(l) {
-                    return l.id === id;
+                    return l.id === id || l.layer.id === id;
                 };
 
                 if (!this._layerErrors.find(finder)) {
 
-                    this.logLayerError(id, "Layer failed to completely load. " + "It may be inaccessible or misconfigured.");
+                    var obj = this.logLayerError(id, "Layer failed to completely load. " + "It may be inaccessible or misconfigured.");
 
                     var url = error.tile.src;
                     var params = { id: id };
@@ -2426,11 +2435,16 @@
                         params[p[0]] = p[1];
                     });
 
-                    this.layerService.validate(id, params).catch(function (e) {
-                        var def = _this2._layerStates.find(finder);
-                        obj.message = "Layer '" + def.label + "' failed to completely load. " + "It may be inaccessible or misconfigured. Reported cause: " + e.message;
-                        _this2.notify('layer:error', obj);
-                    });
+                    var layerService = this.getService(ItemTypes.LAYER);
+                    if (layerService) {
+                        layerService.validate(id, params).catch(function (e) {
+                            var def = _this2._layerStates.find(finder);
+                            if (def) {
+                                obj.message = "Layer '" + def.layer.label + "' failed to completely load. " + "Reported cause: " + e.message;
+                            }
+                            _this2.notify('layer:error', obj);
+                        });
+                    }
                 }
             }
 
@@ -2449,6 +2463,7 @@
                 if (this._layerErrorHandler) {
                     this._layerErrorHandler(err);
                 }
+                return err;
             }
 
             /* -- State Management of internal model -- */
@@ -2763,11 +2778,15 @@
 
                 if (!leafletLayer) return;
 
+                //cache leaflet object first
+                this._layerCache[layer.id] = leafletLayer;
+
                 //listen for layer errors so we can inform the user
                 // that a layer hasn't been loaded in a useful way
-                leafletLayer.on('tileerror', this.handleLayerError);
+                leafletLayer.on('tileerror', function (e) {
+                    _this5.handleLayerError(e);
+                });
 
-                this._layerCache[layer.id] = leafletLayer;
                 this._mapInstance.addLayer(leafletLayer);
 
                 if (!isNaN(state.zIndex) && leafletLayer.setZIndex) leafletLayer.setZIndex(state.zIndex);
