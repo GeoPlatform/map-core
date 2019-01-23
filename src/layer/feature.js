@@ -1,13 +1,14 @@
 
 import jQuery from "jquery";
 import Q from "q";
+
 import {
     icon as iconFn, marker as markerFn, circleMarker as circleMarkerFn,
     SVG, svg, Canvas, canvas,
-    bind, Util,
-    esri
+    bind, Util
 } from 'leaflet';
-// import { FeatureLayer as EsriFeatureLayer } from 'esri-leaflet';
+
+import * as esri from "esri-leaflet";
 
 import {Config} from "geoplatform.client";
 import featurePopupTemplate from '../shared/popup-template';

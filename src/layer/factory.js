@@ -1,6 +1,7 @@
 
 import Q from "q";
 import * as L from "leaflet";
+import * as esri from "esri-leaflet";
 import ServiceTypes from "../service/types";
 import OSM from "./osm";
 import FeatureLayer from './feature';
@@ -78,14 +79,14 @@ var LayerFactory = function(layer) {
         opts = { url: url, useCors: true };
         if(Config.leafletPane)
             opts.pane = Config.leafletPane;
-        return L.esri.tiledMapLayer(opts);
+        return esri.tiledMapLayer(opts);
 
     } else if(ServiceTypes.ESRI_IMAGE_SERVER &&
         ServiceTypes.ESRI_IMAGE_SERVER.uri === typeUri) {
         opts = { url: url, useCors: true };
         if(Config.leafletPane)
             opts.pane = Config.leafletPane;
-        return L.esri.imageMapLayer(opts);
+        return esri.imageMapLayer(opts);
 
     } else if(ServiceTypes.FEED && ServiceTypes.FEED.uri === typeUri) {
         return geoJsonFeed(layer);

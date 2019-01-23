@@ -1,9 +1,9 @@
 /* This software has been approved for release by the U.S. Department of the Interior. Although the software has been subjected to rigorous review, the DOI reserves the right to update the software as needed pursuant to further analysis and review. No warranty, expressed or implied, is made by the DOI or the U.S. Government as to the functionality of the software and related material nor shall the fact of release constitute any such warranty. Furthermore, the software is released on condition that neither the DOI nor the U.S. Government shall be held liable for any damages resulting from its authorized or unauthorized use. */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('leaflet'), require('q'), require('geoplatform.client'), require('jquery')) :
-    typeof define === 'function' && define.amd ? define(['leaflet', 'q', 'geoplatform.client', 'jquery'], factory) :
-    (global.GeoPlatformMapCore = factory(global.L,global.Q,global.GeoPlatformClient,global.jQuery));
-}(this, (function (L$1,Q,GeoPlatformClient,jQuery) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('leaflet'), require('q'), require('geoplatform.client'), require('jquery'), require('esri-leaflet'), require('leaflet.markercluster')) :
+    typeof define === 'function' && define.amd ? define(['leaflet', 'q', 'geoplatform.client', 'jquery', 'esri-leaflet', 'leaflet.markercluster'], factory) :
+    (global.GeoPlatformMapCore = factory(global.L,global.Q,global.GeoPlatformClient,global.jQuery,global.L.esri,global.L.markerCluster));
+}(this, (function (L$1,Q,GeoPlatformClient,jQuery,esri,leaflet_markercluster) { 'use strict';
 
     Q = Q && Q.hasOwnProperty('default') ? Q['default'] : Q;
     var GeoPlatformClient__default = 'default' in GeoPlatformClient ? GeoPlatformClient['default'] : GeoPlatformClient;
@@ -808,7 +808,7 @@
      * as adding visibility and opacity manipulation methods
      * @extends L.esri.FeatureLayer
      */
-    var FeatureLayer = L$1.esri.FeatureLayer.extend({
+    var FeatureLayer = esri.FeatureLayer.extend({
 
         _gpStyle: { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
 
@@ -993,7 +993,7 @@
 
     });
 
-    var FeatureLayer$1 = L$1.esri.FeatureManager.extend({
+    var FeatureLayer$1 = esri.FeatureManager.extend({
 
       statics: {
         EVENTS: 'click dblclick mouseover mouseout mousemove contextmenu popupopen popupclose',
@@ -1005,14 +1005,14 @@
        */
 
       initialize: function initialize(options) {
-        L$1.esri.FeatureManager.prototype.initialize.call(this, options);
+        esri.FeatureManager.prototype.initialize.call(this, options);
 
         options = L$1.setOptions(this, options);
 
         this._layers = {};
         this._leafletIds = {};
 
-        this.cluster = L$1.markerClusterGroup(options);
+        this.cluster = new L.markerClusterGroup(options);
         this._key = 'c' + (Math.random() * 1e9).toString(36).replace('.', '_');
 
         this.cluster.addEventParent(this);
@@ -1023,7 +1023,7 @@
        */
 
       onAdd: function onAdd(map) {
-        L$1.esri.FeatureManager.prototype.onAdd.call(this, map);
+        esri.FeatureManager.prototype.onAdd.call(this, map);
         this._map.addLayer(this.cluster);
 
         // NOTE !!!!!!!
@@ -1032,7 +1032,7 @@
       },
 
       onRemove: function onRemove(map) {
-        L$1.esri.FeatureManager.prototype.onRemove.call(this, map);
+        esri.FeatureManager.prototype.onRemove.call(this, map);
         this._map.removeLayer(this.cluster);
       },
 
@@ -1633,7 +1633,14 @@
         return new WMS(url, opts);
     }
 
-    var WMST = L$1.TimeDimension.Layer.WMS.extend({
+    function tdPolyFill(options) {
+        return new WMST(options);
+    }
+
+    var TimeDimension = L$1.TimeDimension;
+    var timeDimension = L$1.timeDimension || tdPolyFill;
+
+    var WMST = (TimeDimension && TimeDimension.Layer || L$1.TileLayer).WMS.extend({
 
         //override default parser to query all Layers (whether queryable or not)
         _parseTimeDimensionFromCapabilities: function _parseTimeDimensionFromCapabilities(xml) {
@@ -1706,7 +1713,7 @@
         }
 
         return new WMST(leafletLayer, {
-            timeDimension: L$1.timeDimension(tdOpts),
+            timeDimension: timeDimension(tdOpts),
             proxy: proxyUrl
         });
     }
@@ -2082,11 +2089,11 @@
         } else if (types.ESRI_TILE_SERVER && types.ESRI_TILE_SERVER.uri === typeUri) {
             opts = { url: url, useCors: true };
             if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
-            return L$1.esri.tiledMapLayer(opts);
+            return esri.tiledMapLayer(opts);
         } else if (types.ESRI_IMAGE_SERVER && types.ESRI_IMAGE_SERVER.uri === typeUri) {
             opts = { url: url, useCors: true };
             if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
-            return L$1.esri.imageMapLayer(opts);
+            return esri.imageMapLayer(opts);
         } else if (types.FEED && types.FEED.uri === typeUri) {
             return geoJsonFeed(layer);
         } else if (types.WMS && types.WMS.uri === typeUri) {

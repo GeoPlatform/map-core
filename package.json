@@ -54,7 +54,7 @@
         "distro"
     ],
     "dependencies": {
-        "esri-leaflet": "2.1.2",
+        "esri-leaflet": "2.2.3",
         "geoplatform.client": "git+https://github.com/GeoPlatform/client-api.git#develop",
         "jquery": "^3.3.1",
         "leaflet": "1.0.3",

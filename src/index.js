@@ -1,4 +1,9 @@
 
+import * as L from "leaflet";
+import * as esri from "esri-leaflet";
+// import { TimeDimension } from "./libs/L.TimeDimension";
+
+
 import LoadingControl from './control/L.Control.Loading';
 import MeasureControl from './control/L.Control.MeasureControl';
 import MousePositionControl from './control/L.Control.MousePosition';

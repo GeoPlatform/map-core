@@ -23,6 +23,6 @@ function featureStyleResolver(id) {
        }
     });
     return deferred.promise;
-};
+}
 
 export default featureStyleResolver;
