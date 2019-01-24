@@ -142,8 +142,19 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
 
     setZIndex : function (index) {
         this.options.zIndex = index;
-        for(var id in this._layers)
-            this._layers[id].setZIndex(index);
+        for(var id in this._layers) {
+
+            let lyr = this._layers[id];
+            if(lyr.setZIndex)
+                lyr.setZIndex(index);
+            else if(lyr._updateZIndex)
+                lyr._updateZIndex(index);
+            else if(lyr._renderer && lyr._renderer._container){
+                lyr._renderer._container.style.zIndex = index;
+            } else {
+                // console.log("Clustered feature layer child " + id + " does not support ordering using z-index");
+            }
+        }
     },
 
     toggleVisibility: function() {

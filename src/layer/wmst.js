@@ -5,17 +5,18 @@ import Q from "q";
 
 import * as L from 'leaflet';
 import { TileLayer, tileLayer } from 'leaflet';
+import * as TimeDimension from 'leaflet-timedimension/dist/leaflet.timedimension.min';
 // import { TimeDimension, timeDimension } from "../libs/L.TimeDimension";
 
 import {Config} from 'geoplatform.client';
 
 
-function tdPolyFill(options) {
-    return new WMST(options);
-}
-
-var TimeDimension = L.TimeDimension;
-var timeDimension = L.timeDimension || tdPolyFill;
+// function tdPolyFill(options) {
+//     return new WMST(options);
+// }
+//
+// var TimeDimension = L.TimeDimension;
+// var timeDimension = L.timeDimension || tdPolyFill;
 
 var WMST = (TimeDimension && TimeDimension.Layer || TileLayer).WMS.extend({
 

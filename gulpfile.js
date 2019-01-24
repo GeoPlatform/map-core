@@ -51,7 +51,8 @@ gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
                 'q': 'Q',
                 'jquery': 'jQuery',
                 'leaflet': 'L',
-                "esri-leaflet": "L.esri",
+                'esri-leaflet': 'L.esri',
+                'leaflet-timedimension': 'L.TimeDimension',
                 'leaflet.markercluster': 'L.markerCluster',
                 'geoplatform.client': 'GeoPlatformClient'
             }
@@ -76,7 +77,8 @@ gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
               'q': 'Q',
               'jquery': 'jQuery',
               'leaflet': 'L',
-              "esri-leaflet": "L.esri",
+              'esri-leaflet': 'L.esri',
+              'leaflet-timedimension': 'L.TimeDimension',
               'leaflet.markercluster': 'L.markerCluster',
               'geoplatform.client': 'GeoPlatformClient'
           },

@@ -1,7 +1,6 @@
 
 import * as L from "leaflet";
 import * as esri from "esri-leaflet";
-// import { TimeDimension } from "./libs/L.TimeDimension";
 
 
 import LoadingControl from './control/L.Control.Loading';
@@ -52,6 +51,14 @@ if(typeof(Array.prototype.each) === 'undefined') {
 
 
 export default {
+
+    //export Leaflet bound inside this plugin to ensure the correct instance
+    // of leaflet is being referenced by other plugins (ie, Marker Cluster)
+    // the "isLatLngBounds" method issue where a different instance of Leaflet
+    // was being compared and resulted in a false equivalence, breaking the
+    // clustering layer code
+    L,
+
     LoadingControl,
     MeasureControl,
     MousePositionControl,
