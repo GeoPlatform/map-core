@@ -38,11 +38,8 @@ var LayerFactory = function(layer) {
     }
 
     if(!layer.services || !layer.services.length) {
-        throw new Error(`
-            L.GeoPlatform.LayerFactory() -
-            Cannot create Leaflet layer for GP Layer ${layer.id},
-            layer has no services defined!
-        `);
+        console.log("MapCore LayerFactory() - cannot create layer for " + layer.id + " because it has no services");
+        throw new Error(`GeoPlatform Layer resource ('${layer.id}') has no Services defined`);
     }
 
     let service = layer.services[0],
@@ -53,9 +50,10 @@ var LayerFactory = function(layer) {
         opts = {};
 
     if(typeUri === null) {
-        console.log("LayerFactory() - Could not create Leaflet layer for " +
-            "GeoPlatform Layer with Service of unspecified service type");
-        return null;
+        console.log("MapCore LayerFactory() - cannot create layer for " + layer.id +
+            "; it has a Service of an unspecified service type");
+        throw new Error(`GeoPlatform Layer resource ('${layer.id}') has a Service of an unspecified service type`);
+        // return null;
     }
 
     if(ServiceTypes.ESRI_MAP_SERVER &&
@@ -101,9 +99,11 @@ var LayerFactory = function(layer) {
         return wmts(layer);
 
     } else {
-        console.log("LayerFactory() - Could not create Leaflet layer for " +
-            "GeoPlatform Layer with service type: " + typeUri);
-        return null;
+        console.log("MapCore LayerFactory() - Could not create layer for " + layer.id +
+            "because of unsupported service type: " + typeUri);
+        throw new Error("GeoPlatform Layer resource ('" + layer.id +
+            "') has a Service with an unsupported service type: " + typeUri);
+        // return null;
     }
 };
 

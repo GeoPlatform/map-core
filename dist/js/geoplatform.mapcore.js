@@ -2088,7 +2088,8 @@
         }
 
         if (!layer.services || !layer.services.length) {
-            throw new Error("\n            L.GeoPlatform.LayerFactory() -\n            Cannot create Leaflet layer for GP Layer " + layer.id + ",\n            layer has no services defined!\n        ");
+            console.log("MapCore LayerFactory() - cannot create layer for " + layer.id + " because it has no services");
+            throw new Error("GeoPlatform Layer resource ('" + layer.id + "') has no Services defined");
         }
 
         var service = layer.services[0],
@@ -2099,8 +2100,9 @@
             opts = {};
 
         if (typeUri === null) {
-            console.log("LayerFactory() - Could not create Leaflet layer for " + "GeoPlatform Layer with Service of unspecified service type");
-            return null;
+            console.log("MapCore LayerFactory() - cannot create layer for " + layer.id + "; it has a Service of an unspecified service type");
+            throw new Error("GeoPlatform Layer resource ('" + layer.id + "') has a Service of an unspecified service type");
+            // return null;
         }
 
         if (types.ESRI_MAP_SERVER && types.ESRI_MAP_SERVER.uri === typeUri) {
@@ -2131,8 +2133,9 @@
         } else if (types.WMTS && types.WMTS.uri === typeUri) {
             return wmts(layer);
         } else {
-            console.log("LayerFactory() - Could not create Leaflet layer for " + "GeoPlatform Layer with service type: " + typeUri);
-            return null;
+            console.log("MapCore LayerFactory() - Could not create layer for " + layer.id + "because of unsupported service type: " + typeUri);
+            throw new Error("GeoPlatform Layer resource ('" + layer.id + "') has a Service with an unsupported service type: " + typeUri);
+            // return null;
         }
     };
 
@@ -2461,7 +2464,7 @@
 
                 if (!this._layerErrors.find(finder)) {
 
-                    var obj = this.logLayerError(id, "Layer failed to completely load. " + "It may be inaccessible or misconfigured.");
+                    var obj = this.logLayerError(id, "Layer ('" + id + "') failed to completely load. " + "It may be inaccessible or misconfigured.");
 
                     var url = error.tile.src;
                     var params = { id: id };
@@ -2650,7 +2653,7 @@
 
                 var promise = null;
                 if (!layer) {
-                    promise = OSM.get();
+                    promise = OSM.get(this.getService(ItemTypes.LAYER));
                 } else promise = Q.resolve(layer);
 
                 promise.then(function (layer) {
@@ -2675,7 +2678,7 @@
                     // this.notify('baselayer:changed', layer, leafletLayer);
                 }).catch(function (e) {
                     console.log("MapInstance.setBaseLayer() - Error getting base layer for map : " + e.message);
-                    _this3.logLayerError(layer.id, e.message);
+                    _this3.logLayerError(layer.id, "Error setting baselayer on map " + "because of the following error(s): " + e.message);
                 });
             }
 
@@ -2759,7 +2762,7 @@
                     }
 
                     if (!layer) {
-                        console.log("Warning: MapInstance.addLayers() - layer (" + index + ") is not a Layer or a Layer state. Ignoring...");
+                        console.log("MapInstance.addLayers() - layer (" + index + ") is not a Layer or a Layer state. Ignoring...");
                         return; //layer info is missing, skip it
                     }
 
@@ -2808,7 +2811,7 @@
 
                     if (!leafletLayer) throw new Error("Layer factory returned nothing");
                 } catch (e) {
-                    this.logLayerError(layer.id, 'MapInstance.addLayerWithState() - ' + 'Could not create Leaflet layer because ' + e.message);
+                    this.logLayerError(layer.id, "Layer '" + layer.label + "' could not be added to the " + "map instance; " + e.message);
                 }
 
                 if (!leafletLayer) return;
@@ -2888,7 +2891,7 @@
 
                     //remove layer from tracked defs array
                     var index = this.getLayerStateIndex(id);
-                    console.log("MapInstance.removeLayer(" + id + ")");
+                    // console.log("MapInstance.removeLayer(" + id + ")");
                     if (index >= 0 && index < this._layerStates.length) this._layerStates.splice(index, 1);
 
                     //stop listening for errors
@@ -3365,7 +3368,8 @@
                     _this10.clean();
                     return result;
                 }).catch(function (err) {
-                    var e = new Error("MapInstance.saveMap() - " + "The requested map could not be saved because: " + err.message);
+                    console.log("MapCore MapInstance.saveMap() - " + "The requested map could not be saved because: " + err.message);
+                    var e = new Error("The requested map could not be saved because of the following error(s): " + err.message);
                     return Q.reject(e);
                 });
             }
@@ -3399,11 +3403,11 @@
                 return this.fetchMap(mapId).then(function (map) {
 
                     if (!map) {
-                        throw new Error("The requested map came back null");
+                        throw new Error("The requested map ('" + mapId + "') came back null");
                     } else if (typeof map === 'string') {
-                        throw new Error("The requested map came back as a string");
+                        throw new Error("The requested map ('" + mapId + "') came back as a string");
                     } else if (map.message) {
-                        throw new Error("There was an error loading the requested map: " + map.message);
+                        throw new Error("There was an error loading the requested map ('" + mapId + "'): " + map.message);
                     }
 
                     //loading a map by its ID, so we need to increment it's view count
@@ -3418,7 +3422,7 @@
                             .then(function (updated) {
                                 map.statistics = updated.statistics;
                             }).catch(function (e) {
-                                console.log("Error updating view count for map: " + e);
+                                console.log("MapInstance.saveMap() - Error updating view " + "count for map ('" + mapId + "'): " + e);
                             });
                         }, 1000, map);
                     }
@@ -3428,7 +3432,8 @@
 
                     return map;
                 }).catch(function (err) {
-                    var e = new Error("MapInstance.loadMap() - " + "The requested map could not be loaded because " + err.message);
+                    console.log("MapInstance.loadMap() - " + "The requested map could not be loaded because " + err.message);
+                    var e = new Error("The requested map ('" + mapId + "') could not be loaded because of the following error(s): " + err.message);
                     return Q.reject(e);
                 });
             }
