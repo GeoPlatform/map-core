@@ -17,7 +17,7 @@ new LayerService(Config.ualUrl, new NodeHttpClient()).get(<LAYER_ID>)
     //also works, but not recommended
     // because it prevents MapInstance from tracking
     // the map's state properly
-    let leafletLayer = LayerFactory(layer);
+    let leafletLayer = LayerFactory.create(layer);
     if(leafletLayer) {
         leafletLayer.addTo(map);
     }
@@ -42,7 +42,7 @@ let wmsLayer = ... //GP Layer Object with WMS Service associated
 //...
 
 //create leaflet layer by passing GP Layer object to LayerFactory
-let a = LayerFactory(wmsLayer);
+let a = LayerFactory.create(wmsLayer);
 //create leaflet layer directly using WMS class
 let b = new WMS(url, wmsOpts);
 //create leaflet layer by passing GP Layer object to convenience function
@@ -59,7 +59,7 @@ let wmtsLayer = ... //GP Layer Object with WMTS Service associated
 //...
 
 //create leaflet layer by passing GP Layer object to LayerFactory
-let a = LayerFactory(wmtsLayer);
+let a = LayerFactory.create(wmtsLayer);
 //create leaflet layer directly using WMS class
 let b = new WMTS(url, wmtsOpts);
 //create leaflet layer by passing GP Layer object to convenience function
@@ -76,7 +76,7 @@ let wmstLayer = ... //GP Layer Object with WMST Service associated
 //...
 
 //create leaflet layer by passing GP Layer object to LayerFactory
-let a = LayerFactory(wmstLayer);
+let a = LayerFactory.create(wmstLayer);
 //create leaflet layer directly using WMS class
 let b = new WMST(url, wmstOpts);
 //create leaflet layer by passing GP Layer object to convenience function
@@ -93,7 +93,7 @@ let featureLayer = ... //GP Layer Object with Esri FeatureServer Service associa
 //...
 
 //create leaflet layer by passing GP Layer object to LayerFactory
-let a = LayerFactory(featureLayer);
+let a = LayerFactory.create(featureLayer);
 //create leaflet layer directly using WMS class
 let b = new FeatureLayer(url, opts);
 ```
@@ -111,7 +111,7 @@ import featureLayer = ... // GP Layer object with Esri FeatureServer Service ass
 //...
 
 //create leaflet layer by passing GP Layer object to LayerFactory
-let a = LayerFactory(featureLayer);
+let a = LayerFactory.create(featureLayer);
 //create leaflet layer by passing GP Layer object to convenience function
 let b = clusteredFeatures(featureLayer);
 ```
@@ -127,7 +127,7 @@ import feedLayer = ... // GP Layer object with GeoJSON Feed Service associated
 //...
 
 //create leaflet layer by passing GP Layer object to LayerFactory
-let a = LayerFactory(feedLayer);
+let a = LayerFactory.create(feedLayer);
 //create leaflet layer by passing GP Layer object to convenience function
 let b = geoJsonFeed(feedLayer);
 ```
@@ -143,8 +143,27 @@ import { LayerFactory, EsriTileLayer } from 'geoplatform.mapcore';
 
 //create leaflet layer by passing GP Layer object to LayerFactory
 import layer = ... // GP Layer object with Esri MapServer Service associated
-let a = LayerFactory(layer);
+let a = LayerFactory.create(layer);
 
 //create leaflet layer by passing GP Layer object to convenience function
 let b = new EsriTileLayer(url, opts);
+```
+
+
+## Registering Additional Layer Support
+
+```js
+import { LayerFactory } from 'geoplatform.mapcore';
+function customFactoryFn(gpLayer) {
+    let result = null;
+    let isSupported = false;
+    //TODO implement rules to verify this layer object is supported
+    // by this factory
+    // isSupported = ...
+    if(isSupported) {
+        //result = leaflet layer instance
+    }
+    return result;
+}
+LayerFactory.register( customFactoryFn );
 ```

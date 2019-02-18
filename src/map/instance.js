@@ -490,8 +490,12 @@ class MapInstance extends Listener {
 
         promise.then( layer => {
 
-            let leafletLayer = LayerFactory(layer);
-            if(!leafletLayer) return;
+            let leafletLayer = LayerFactory.create(layer);
+            if(!leafletLayer) {
+                console.log("Warning: MapInstance could not create base " +
+                    "layer for '" + layer.id + "'");
+                return;
+            }
 
             this._mapInstance.addLayer(leafletLayer);
             leafletLayer.setZIndex(0);  //set at bottom
@@ -620,10 +624,11 @@ class MapInstance extends Listener {
             if(!layer || !state)
                 throw new Error("Invalid argument, missing layer and or state");
 
-            leafletLayer = LayerFactory(layer);
-
-            if(!leafletLayer)
-                throw new Error("Layer factory returned nothing");
+            leafletLayer = LayerFactory.create(layer);
+            if(!leafletLayer) {
+                throw new Error("Could not create leaflet layer for GP Layer '" +
+                    layer.id + "'");
+            }
 
         } catch(e) {
             this.logLayerError( layer.id,

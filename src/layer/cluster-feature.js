@@ -307,7 +307,13 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
 
 
 
-function clusteredFeatures(layer) {
+
+/**
+ * @param {object} layer - GeoPlatform Layer object
+ * @param {object} options - optional properties
+ * @return {L.Layer} leaflet layer instance or null
+ */
+function clusteredFeatures(layer, options) {
 
     let service = layer.services && layer.services.length ?
         layer.services[0] : null;
@@ -321,18 +327,29 @@ function clusteredFeatures(layer) {
     let url     = service.href,
         format  = layer.supportedFormats ? layer.supportedFormats[0] : null;
 
+    let styleResolver = options && options.styleResolver ?
+        options.styleResolver : featureStyleResolver;
+
     let opts = {
         url: url + '/' + layer.layerName,
-        styleLoader: featureStyleResolver,
+        styleLoader: styleResolver,
         layerId: layer.id
     };
-    if(Config.leafletPane)
-        opts.pane = Config.leafletPane;
+
+    if(Config.leafletPane) opts.pane = Config.leafletPane;
+    if(options && options.leafletPane) opts.pane = options.leafletPane;
+
     return new ClusteredFeatureLayer(opts);
 }
 
 
-function geoJsonFeed(layer) {
+
+/**
+ * @param {object} layer - GeoPlatform Layer object
+ * @param {object} options - optional properties
+ * @return {L.Layer} leaflet layer instance or null
+ */
+function geoJsonFeed(layer, options) {
 
     let service = layer.services && layer.services.length ?
         layer.services[0] : null;
@@ -355,6 +372,10 @@ function geoJsonFeed(layer) {
     let styleLoaderFactory = function(url) {
         return function (layerId) {
             let deferred = Q.defer();
+            if(!jQuery) {
+                deferred.reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
+                return deferred.promise;
+            }
             jQuery.ajax(url, {
                 dataType:'json',
                 success: function(data) {
@@ -377,8 +398,10 @@ function geoJsonFeed(layer) {
         layerId: layer.id,    //used by style loader
         styleLoader: styleLoaderFactory(styleUrl)
     };
-    if(Config.leafletPane)
-        opts.pane = Config.leafletPane;
+
+    if(Config.leafletPane) opts.pane = Config.leafletPane;
+    if(options && options.leafletPane) opts.pane = options.leafletPane;
+
     return new ClusteredFeatureLayer(opts);
 
 }

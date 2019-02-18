@@ -124,14 +124,14 @@ The list of supported map service types can be accessed using `GeoPlatform.Servi
 
 ```javascript
 let gpLayer = { type: "Layer", services: [{...}], ... };
-let leafletLayer = GeoPlatformMapCore.LayerFactory(gpLayer);
+let leafletLayer = GeoPlatformMapCore.LayerFactory.create(gpLayer);
 ```
 
 ### Adding new layers to a map instance
 ```javascript
 let layers = [];
 let geoplatformLayer = { ... }; //layer from GP API
-layers.push(GeoPlatformMapCore.LayerFactory(geoplatformLayer));
+layers.push(GeoPlatformMapCore.LayerFactory.create(geoplatformLayer));
 mapInstance.addLayers(layers);
 ```
 

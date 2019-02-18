@@ -1,7 +1,7 @@
 
 import jQuery from 'jquery';
 import Q from "q";
-import {Config} from 'geoplatform.client';
+import { Config } from 'geoplatform.client';
 
 /**
  * Fetches style information from GeoPlatform UAL
@@ -9,6 +9,10 @@ import {Config} from 'geoplatform.client';
  */
 function featureStyleResolver(id) {
     let deferred = Q.defer();
+    if(!jQuery) {
+        deferred.reject(new Error("Unable to load feature layer style, jQuery is not installed"));
+        return deferred.promise;
+    }
     jQuery.ajax({
        url: Config.ualUrl + '/api/layers/' + id + '/style',
        dataType: 'json',

@@ -584,11 +584,6 @@
         });
     }
 
-    var ItemService = GeoPlatformClient__default.ItemService;
-    var HttpClient$2 = GeoPlatformClient__default.JQueryHttpClient;
-    var QueryFactory$1 = GeoPlatformClient__default.QueryFactory;
-    var Config$1 = GeoPlatformClient__default.Config;
-
     var ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
     var esriExpr = /Esri REST ([A-Za-z]+) Service/;
     var keyFn = function keyFn(expr, str) {
@@ -699,16 +694,25 @@
         refresh: updateList
     };
 
-    function updateList() {
+    function updateList(service) {
 
-        var url = Config$1.ualUrl;
+        var url = GeoPlatformClient.Config.ualUrl;
         if (!url) {
             console.log("WARN : ServiceTypes - no GeoPlatform API URL configured, unable to load service types");
         } else {
 
-            var query = QueryFactory$1().types('dct:Standard').resourceTypes('ServiceType').pageSize(50);
+            var query = GeoPlatformClient.QueryFactory().types('dct:Standard').resourceTypes('ServiceType').pageSize(50);
 
-            new ItemService(url, new HttpClient$2()).search(query).then(function (data) {
+            var svc = null;
+            //if a service was provided to be used, use it
+            if (service && typeof service.search !== 'undefined') {
+                svc = service;
+            } else {
+                // otherwise, use defaults
+                svc = new GeoPlatformClient.ItemService(url, new GeoPlatformClient.JQueryHttpClient());
+            }
+
+            svc.search(query).then(function (data) {
 
                 for (var i = 0; i < data.results.length; ++i) {
 
@@ -1168,6 +1172,10 @@
      */
     function featureStyleResolver(id) {
         var deferred = Q.defer();
+        if (!jQuery) {
+            deferred.reject(new Error("Unable to load feature layer style, jQuery is not installed"));
+            return deferred.promise;
+        }
         jQuery.ajax({
             url: GeoPlatformClient.Config.ualUrl + '/api/layers/' + id + '/style',
             dataType: 'json',
@@ -1457,7 +1465,12 @@
         }
     });
 
-    function clusteredFeatures(layer) {
+    /**
+     * @param {object} layer - GeoPlatform Layer object
+     * @param {object} options - optional properties
+     * @return {L.Layer} leaflet layer instance or null
+     */
+    function clusteredFeatures(layer, options) {
 
         var service = layer.services && layer.services.length ? layer.services[0] : null;
         if (!service) {
@@ -1468,16 +1481,26 @@
         var url = service.href,
             format = layer.supportedFormats ? layer.supportedFormats[0] : null;
 
+        var styleResolver = options && options.styleResolver ? options.styleResolver : featureStyleResolver;
+
         var opts = {
             url: url + '/' + layer.layerName,
-            styleLoader: featureStyleResolver,
+            styleLoader: styleResolver,
             layerId: layer.id
         };
+
         if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
+        if (options && options.leafletPane) opts.pane = options.leafletPane;
+
         return new ClusteredFeatureLayer(opts);
     }
 
-    function geoJsonFeed(layer) {
+    /**
+     * @param {object} layer - GeoPlatform Layer object
+     * @param {object} options - optional properties
+     * @return {L.Layer} leaflet layer instance or null
+     */
+    function geoJsonFeed(layer, options) {
 
         var service = layer.services && layer.services.length ? layer.services[0] : null;
         if (!service) {
@@ -1495,6 +1518,10 @@
         var styleLoaderFactory = function styleLoaderFactory(url) {
             return function (layerId) {
                 var deferred = Q.defer();
+                if (!jQuery) {
+                    deferred.reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
+                    return deferred.promise;
+                }
                 jQuery.ajax(url, {
                     dataType: 'json',
                     success: function success(data) {
@@ -1516,7 +1543,10 @@
             layerId: layer.id, //used by style loader
             styleLoader: styleLoaderFactory(styleUrl)
         };
+
         if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
+        if (options && options.leafletPane) opts.pane = options.leafletPane;
+
         return new ClusteredFeatureLayer(opts);
     }
 
@@ -2072,95 +2102,268 @@
         });
     }
 
-    /**
-     * @param {Object} layer - GeoPlatform Layer object
-     * @return {L.Layer} Leaflet layer instance
-     */
-    var LayerFactory = function LayerFactory(layer) {
-
-        if (!layer) {
-            throw new Error("\n            L.GeoPlatform.LayerFactory() -\n            Invalid argument: must provide a layer object\n        ");
-        }
-
-        //OSM layers have no "services" so we have to treat them differently
-        if (OSM.test(layer)) {
-            return OSMLayerFactory();
-        }
-
-        if (!layer.services || !layer.services.length) {
-            console.log("MapCore LayerFactory() - cannot create layer for " + layer.id + " because it has no services");
-            throw new Error("GeoPlatform Layer resource ('" + layer.id + "') has no Services defined");
-        }
-
-        var service = layer.services[0],
-            url = service.href,
-            typeUri = service.serviceType ? service.serviceType.uri : null,
-            srs = layer.supportedCRS ? layer.supportedCRS[0] : null,
-            format = layer.supportedFormats ? layer.supportedFormats[0] : null,
-            opts = {};
-
-        if (typeUri === null) {
-            console.log("MapCore LayerFactory() - cannot create layer for " + layer.id + "; it has a Service of an unspecified service type");
-            throw new Error("GeoPlatform Layer resource ('" + layer.id + "') has a Service of an unspecified service type");
-            // return null;
-        }
-
-        if (types.ESRI_MAP_SERVER && types.ESRI_MAP_SERVER.uri === typeUri) {
-            opts = {
-                layers: layer.layerName,
-                transparent: true,
-                format: format || "png32"
-            };
-            if (srs) opts.srs = srs;
-            if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
-            return new esriTileLayer(url, opts);
-        } else if (types.ESRI_FEATURE_SERVER && types.ESRI_FEATURE_SERVER.uri === typeUri) {
-            return clusteredFeatures(layer);
-        } else if (types.ESRI_TILE_SERVER && types.ESRI_TILE_SERVER.uri === typeUri) {
-            opts = { url: url, useCors: true };
-            if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
-            return esri.tiledMapLayer(opts);
-        } else if (types.ESRI_IMAGE_SERVER && types.ESRI_IMAGE_SERVER.uri === typeUri) {
-            opts = { url: url, useCors: true };
-            if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
-            return esri.imageMapLayer(opts);
-        } else if (types.FEED && types.FEED.uri === typeUri) {
-            return geoJsonFeed(layer);
-        } else if (types.WMS && types.WMS.uri === typeUri) {
-            return wms(layer);
-        } else if (types.WMST && types.WMST.uri === typeUri) {
-            return wmst(layer);
-        } else if (types.WMTS && types.WMTS.uri === typeUri) {
-            return wmts(layer);
-        } else {
-            console.log("MapCore LayerFactory() - Could not create layer for " + layer.id + "because of unsupported service type: " + typeUri);
-            throw new Error("GeoPlatform Layer resource ('" + layer.id + "') has a Service with an unsupported service type: " + typeUri);
-            // return null;
-        }
-    };
-
     var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+    /**
+     * Fetches style information from GeoPlatform UAL
+     * @param {string} id - identifier of layer to resolve style for
+     */
+    function styleResolverFactory(service) {
+
+        if (!service || typeof service.style !== 'function') {
+            throw new Error("Must provide a LayerService instance");
+        }
+
+        return function featureStyleResolver(id) {
+            return service.style(id).catch(function (e) {
+                var msg = "Error loading style information for layer " + id + " : " + e.message;
+                return Q.reject(new Error(msg));
+            });
+        };
+    }
+
+    var LayerFactory = function () {
+        function LayerFactory() {
+            _classCallCheck(this, LayerFactory);
+
+            this.factories = []; // A list of configured factory functors to instantiate layers
+            this.init();
+        }
+
+        _createClass(LayerFactory, [{
+            key: "register",
+            value: function register(fn) {
+                if (typeof fn === 'function') {
+                    this.factories.push(fn);
+                }
+            }
+
+            /**
+             * @return {function}
+             */
+
+        }, {
+            key: "getStyleResolver",
+            value: function getStyleResolver() {
+                if (!this.service) {
+                    this.service = new GeoPlatformClient.LayerService(GeoPlatformClient.Config.ualUrl, new GeoPlatformClient.JQueryHttpClient());
+                }
+                return styleResolverFactory(this.service);
+            }
+
+            /**
+             * @param {object} layer - GP Layer object
+             * @return {L.Layer} leaflet layer instance or null
+             */
+
+        }, {
+            key: "create",
+            value: function create(layer) {
+                if (!layer) {
+                    throw new Error("LayerFactory expects a layer object");
+                }
+                for (var i = 0; i < this.factories.length; ++i) {
+                    var fn = this.factories[i];
+                    var result = fn && typeof fn === 'function' && fn(layer);
+                    if (result) return result;
+                }
+                return null;
+            }
+        }, {
+            key: "init",
+            value: function init() {
+                var _this = this;
+
+                //OSM factory
+                this.register(function (layer) {
+                    if (layer && layer.resourceTypes && layer.resourceTypes.length && ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer")) {
+                        return OSMLayerFactory();
+                    }
+                });
+
+                // ESRI factory
+                this.register(function (layer) {
+                    if (!layer || !layer.services || !layer.services.length) return null;
+                    var service = layer.services[0],
+                        url = service.href,
+                        typeUri = service.serviceType ? service.serviceType.uri : null,
+                        srs = layer.supportedCRS ? layer.supportedCRS[0] : null,
+                        format = layer.supportedFormats ? layer.supportedFormats[0] : null,
+                        opts = {};
+
+                    if (types.ESRI_MAP_SERVER && types.ESRI_MAP_SERVER.uri === typeUri) {
+                        opts = {
+                            layers: layer.layerName,
+                            transparent: true,
+                            format: format || "png32"
+                        };
+                        if (srs) opts.srs = srs;
+                        if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
+                        return new esriTileLayer(url, opts);
+                    } else if (types.ESRI_FEATURE_SERVER && types.ESRI_FEATURE_SERVER.uri === typeUri) {
+                        return clusteredFeatures(layer, {
+                            styleResolver: _this.getStyleResolver()
+                        });
+                    } else if (types.ESRI_TILE_SERVER && types.ESRI_TILE_SERVER.uri === typeUri) {
+                        opts = { url: url, useCors: true };
+                        if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
+                        return esri.tiledMapLayer(opts);
+                    } else if (types.ESRI_IMAGE_SERVER && types.ESRI_IMAGE_SERVER.uri === typeUri) {
+                        opts = { url: url, useCors: true };
+                        if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
+                        return esri.imageMapLayer(opts);
+                    }
+                    return null;
+                });
+
+                // OGC factory
+                this.register(function (layer) {
+                    if (!layer || !layer.services || !layer.services.length) return null;
+                    var service = layer.services[0],
+                        typeUri = service.serviceType ? service.serviceType.uri : null;
+                    if (types.WMS && types.WMS.uri === typeUri) {
+                        return wms(layer);
+                    } else if (types.WMST && types.WMST.uri === typeUri) {
+                        return wmst(layer);
+                    } else if (types.WMTS && types.WMTS.uri === typeUri) {
+                        return wmts(layer);
+                    }
+                    return null;
+                });
+
+                this.register(function (layer) {
+                    if (!layer || !layer.services || !layer.services.length) return null;
+                    var service = layer.services[0],
+                        typeUri = service.serviceType ? service.serviceType.uri : null;
+                    if (types.FEED && types.FEED.uri === typeUri) {
+                        return geoJsonFeed(layer, {
+                            styleResolver: _this.getStyleResolver()
+                        });
+                    }
+                    return null;
+                });
+            }
+        }]);
+
+        return LayerFactory;
+    }();
+
+    var LayerFactory$1 = new LayerFactory();
+
+    // /**
+    //  * @param {Object} layer - GeoPlatform Layer object
+    //  * @return {L.Layer} Leaflet layer instance
+    //  */
+    // var LayerFactory = function(layer) {
+    //
+    //     if(!layer) {
+    //         throw new Error(`
+    //             L.GeoPlatform.LayerFactory() -
+    //             Invalid argument: must provide a layer object
+    //         `);
+    //     }
+    //
+    //     //OSM layers have no "services" so we have to treat them differently
+    //     if(OSM.test(layer)) {
+    //         return OSMLayerFactory();
+    //     }
+    //
+    //     if(!layer.services || !layer.services.length) {
+    //         console.log("MapCore LayerFactory() - cannot create layer for " + layer.id + " because it has no services");
+    //         throw new Error(`GeoPlatform Layer resource ('${layer.id}') has no Services defined`);
+    //     }
+    //
+    //     let service = layer.services[0],
+    //         url     = service.href,
+    //         typeUri = service.serviceType ? service.serviceType.uri : null,
+    //         srs     = layer.supportedCRS ? layer.supportedCRS[0] : null,
+    //         format  = layer.supportedFormats ? layer.supportedFormats[0] : null,
+    //         opts = {};
+    //
+    //     if(typeUri === null) {
+    //         console.log("MapCore LayerFactory() - cannot create layer for " + layer.id +
+    //             "; it has a Service of an unspecified service type");
+    //         throw new Error(`GeoPlatform Layer resource ('${layer.id}') has a Service of an unspecified service type`);
+    //         // return null;
+    //     }
+    //
+    //     if(ServiceTypes.ESRI_MAP_SERVER &&
+    //         ServiceTypes.ESRI_MAP_SERVER.uri === typeUri) {
+    //         opts = {
+    //             layers: layer.layerName,
+    //             transparent: true,
+    //             format: format || "png32"
+    //         };
+    //         if(srs) opts.srs = srs;
+    //         if(Config.leafletPane)
+    //             opts.pane = Config.leafletPane;
+    //         return new ESRITileLayer(url, opts);
+    //
+    //     } else if(ServiceTypes.ESRI_FEATURE_SERVER &&
+    //         ServiceTypes.ESRI_FEATURE_SERVER.uri === typeUri) {
+    //         return clusteredFeatures(layer);
+    //
+    //     } else if(ServiceTypes.ESRI_TILE_SERVER &&
+    //         ServiceTypes.ESRI_TILE_SERVER.uri === typeUri) {
+    //         opts = { url: url, useCors: true };
+    //         if(Config.leafletPane)
+    //             opts.pane = Config.leafletPane;
+    //         return esri.tiledMapLayer(opts);
+    //
+    //     } else if(ServiceTypes.ESRI_IMAGE_SERVER &&
+    //         ServiceTypes.ESRI_IMAGE_SERVER.uri === typeUri) {
+    //         opts = { url: url, useCors: true };
+    //         if(Config.leafletPane)
+    //             opts.pane = Config.leafletPane;
+    //         return esri.imageMapLayer(opts);
+    //
+    //     } else if(ServiceTypes.FEED && ServiceTypes.FEED.uri === typeUri) {
+    //         return geoJsonFeed(layer);
+    //
+    //     } else if(ServiceTypes.WMS && ServiceTypes.WMS.uri === typeUri) {
+    //         return wms(layer);
+    //
+    //     } else if(ServiceTypes.WMST && ServiceTypes.WMST.uri === typeUri) {
+    //         return wmst(layer);
+    //
+    //     } else if(ServiceTypes.WMTS && ServiceTypes.WMTS.uri === typeUri) {
+    //         return wmts(layer);
+    //
+    //     } else {
+    //         console.log("MapCore LayerFactory() - Could not create layer for " + layer.id +
+    //             "because of unsupported service type: " + typeUri);
+    //         throw new Error("GeoPlatform Layer resource ('" + layer.id +
+    //             "') has a Service with an unsupported service type: " + typeUri);
+    //         // return null;
+    //     }
+    // };
+    //
+    // export default LayerFactory;
+
+    var _createClass$1 = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
     function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
     function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+    function _classCallCheck$1(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
     var ItemTypes = GeoPlatformClient__default.ItemTypes;
     var ServiceFactory = GeoPlatformClient__default.ServiceFactory;
-    var HttpClient$3 = GeoPlatformClient__default.JQueryHttpClient;
-    var Config$2 = GeoPlatformClient__default.Config;
+    var HttpClient$2 = GeoPlatformClient__default.JQueryHttpClient;
+    var Config$1 = GeoPlatformClient__default.Config;
 
     var Listener = function () {
         function Listener() {
-            _classCallCheck(this, Listener);
+            _classCallCheck$1(this, Listener);
 
             //listeners to be unregistered upon destroy
             this._listeners = {};
         }
 
-        _createClass(Listener, [{
+        _createClass$1(Listener, [{
             key: "on",
             value: function on(type, listener) {
                 if (!this._listeners[type]) this._listeners[type] = [];
@@ -2194,11 +2397,11 @@
         _inherits(MapInstance, _Listener);
 
         function MapInstance(key) {
-            _classCallCheck(this, MapInstance);
+            _classCallCheck$1(this, MapInstance);
 
             var _this = _possibleConstructorReturn(this, (MapInstance.__proto__ || Object.getPrototypeOf(MapInstance)).call(this));
 
-            _this.setHttpClient(new HttpClient$3());
+            _this.setHttpClient(new HttpClient$2());
             _this.setServiceFactory(ServiceFactory);
 
             //generate random key (see factory below)
@@ -2253,7 +2456,7 @@
             return _this;
         }
 
-        _createClass(MapInstance, [{
+        _createClass$1(MapInstance, [{
             key: "dispose",
             value: function dispose() {
                 this.destroyMap();
@@ -2324,7 +2527,7 @@
         }, {
             key: "getService",
             value: function getService(type) {
-                if (!this.svcCache[type]) this.svcCache[type] = this.serviceFactory(type, Config$2.ualUrl, this.httpClient);
+                if (!this.svcCache[type]) this.svcCache[type] = this.serviceFactory(type, Config$1.ualUrl, this.httpClient);
                 return this.svcCache[type];
             }
 
@@ -2658,8 +2861,11 @@
 
                 promise.then(function (layer) {
 
-                    var leafletLayer = LayerFactory(layer);
-                    if (!leafletLayer) return;
+                    var leafletLayer = LayerFactory$1.create(layer);
+                    if (!leafletLayer) {
+                        console.log("Warning: MapInstance could not create base " + "layer for '" + layer.id + "'");
+                        return;
+                    }
 
                     _this3._mapInstance.addLayer(leafletLayer);
                     leafletLayer.setZIndex(0); //set at bottom
@@ -2807,9 +3013,10 @@
                 try {
                     if (!layer || !state) throw new Error("Invalid argument, missing layer and or state");
 
-                    leafletLayer = LayerFactory(layer);
-
-                    if (!leafletLayer) throw new Error("Layer factory returned nothing");
+                    leafletLayer = LayerFactory$1.create(layer);
+                    if (!leafletLayer) {
+                        throw new Error("Could not create leaflet layer for GP Layer '" + layer.id + "'");
+                    }
                 } catch (e) {
                     this.logLayerError(layer.id, "Layer '" + layer.label + "' could not be added to the " + "map instance; " + e.message);
                 }
@@ -3411,7 +3618,7 @@
                     }
 
                     //loading a map by its ID, so we need to increment it's view count
-                    if ('development' !== Config$2.env) {
+                    if ('development' !== Config$1.env) {
 
                         setTimeout(function (map) {
                             //update view count
@@ -3642,7 +3849,7 @@
         MeasureControl: measureControl,
         MousePositionControl: positionControl,
         DefaultBaseLayer: DefaultBaseLayer,
-        LayerFactory: LayerFactory,
+        LayerFactory: LayerFactory$1,
         OSMLayerFactory: OSMLayerFactory,
         ESRIClusterFeatureLayer: featureLayer,
         ClusteredFeatureLayer: ClusteredFeatureLayer,
