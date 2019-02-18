@@ -17,7 +17,7 @@ import {WMST, wmst} from './wmst';
 import {WMTS, wmts} from './wmts';
 import ESRITileLayer from './L.TileLayer.ESRI';
 import OSMLayerFactory from './osm-factory';
-import { Config, LayerService, JQueryHttpClient } from 'geoplatform.client';
+import { Config, ItemTypes, LayerService, JQueryHttpClient } from 'geoplatform.client';
 
 
 
@@ -61,11 +61,15 @@ class LayerFactory {
         }
     }
 
+    setLayerService(service) {
+        this.service = service;
+    }
+
     /**
      * @return {function}
      */
     getStyleResolver() {
-        if(!this.service) {
+        if(!this.service || typeof(this.service.style) === 'undefined') {
             this.service = new LayerService(Config.ualUrl, new JQueryHttpClient());
         }
         return styleResolverFactory(this.service);

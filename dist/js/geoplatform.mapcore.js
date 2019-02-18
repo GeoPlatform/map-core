@@ -2139,6 +2139,11 @@
                     this.factories.push(fn);
                 }
             }
+        }, {
+            key: "setLayerService",
+            value: function setLayerService(service) {
+                this.service = service;
+            }
 
             /**
              * @return {function}
@@ -2147,7 +2152,7 @@
         }, {
             key: "getStyleResolver",
             value: function getStyleResolver() {
-                if (!this.service) {
+                if (!this.service || typeof this.service.style === 'undefined') {
                     this.service = new GeoPlatformClient.LayerService(GeoPlatformClient.Config.ualUrl, new GeoPlatformClient.JQueryHttpClient());
                 }
                 return styleResolverFactory(this.service);
