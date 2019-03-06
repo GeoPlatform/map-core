@@ -2400,6 +2400,10 @@
             value: function handleLayerError(error) {
                 // console.log("MapInstance.handleLayerError() - " +
                 //     "Layer's tile failed to load: " + error.tile.src);
+                if (!this._layerCache) {
+                    console.log("Unable to find layer in layer cache. Layer error is " + error);
+                    return;
+                }
                 var layer = error.target;
                 for (var id in this._layerCache) {
                     if (this._layerCache[id] === layer) {
@@ -2680,6 +2684,7 @@
         }, {
             key: "clearOverlays",
             value: function clearOverlays() {
+                if (!this._layerCache) return;
                 for (var i = this._layerStates.length - 1; i >= 0; --i) {
                     var state = this._layerStates[i];
                     var layerInstance = this._layerCache[state.layer.id];
@@ -2703,6 +2708,11 @@
             key: "addLayers",
             value: function addLayers(layers) {
                 var _this4 = this;
+
+                if (!this._layerCache) {
+                    console.log("WARN: attempting to add layers to an empty cache");
+                    return;
+                }
 
                 if (!layers) return;
                 if (typeof layers.push === 'undefined') {
@@ -2779,7 +2789,7 @@
                 if (!leafletLayer) return;
 
                 //cache leaflet object first
-                this._layerCache[layer.id] = leafletLayer;
+                if (this._layerCache) this._layerCache[layer.id] = leafletLayer;
 
                 //listen for layer errors so we can inform the user
                 // that a layer hasn't been loaded in a useful way
@@ -2819,6 +2829,7 @@
         }, {
             key: "moveLayer",
             value: function moveLayer(from, to) {
+                if (!this._layerCache) return;
 
                 if (isNaN(from)) return;
 
@@ -2848,6 +2859,7 @@
             key: "removeLayer",
             value: function removeLayer(id) {
 
+                if (!this._layerCache) return;
                 var layerInstance = this._layerCache[id];
                 if (layerInstance) {
 
@@ -2875,6 +2887,7 @@
         }, {
             key: "toggleLayerVisibility",
             value: function toggleLayerVisibility(id) {
+                if (!this._layerCache) return;
                 var layerInstance = this._layerCache[id];
                 if (layerInstance) {
                     var _state = this.getLayerState(id);
@@ -2930,6 +2943,7 @@
             key: "updateLayerOpacity",
             value: function updateLayerOpacity(id, opacity) {
 
+                if (!this._layerCache) return;
                 var layerInstance = this._layerCache[id];
 
                 //if layer id is for base layer...
@@ -2974,6 +2988,7 @@
         }, {
             key: "getLeafletLayerFor",
             value: function getLeafletLayerFor(gpLayer) {
+                if (!this._layerCache) return null;
                 if (!gpLayer) return null;
                 var leafletLayer = this._layerCache[gpLayer.id];
                 return leafletLayer || null;
@@ -2986,6 +3001,7 @@
         }, {
             key: "toggleGetFeatureInfo",
             value: function toggleGetFeatureInfo(layerId) {
+                if (!this._layerCache) return;
                 var layerInstance = this._layerCache[layerId];
                 if (layerInstance) {
                     if (typeof layerInstance.enableGetFeatureInfo !== 'undefined') {
