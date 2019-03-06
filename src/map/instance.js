@@ -299,6 +299,9 @@ class MapInstance extends Listener {
     handleLayerError(error) {
         // console.log("MapInstance.handleLayerError() - " +
         //     "Layer's tile failed to load: " + error.tile.src);
+        if(!this._layerCache) {
+            console.log("Unable to find layer in empty cache. Layer error is " + error);
+        }
         var layer = error.target;
         for(var id in this._layerCache) {
             if(this._layerCache[id] === layer) {
@@ -543,6 +546,7 @@ class MapInstance extends Listener {
     }
 
     clearOverlays () {
+        if(!this._layerCache) return;
         for(var i=this._layerStates.length-1; i>=0; --i) {
             var state = this._layerStates[i];
             var layerInstance = this._layerCache[state.layer.id];
@@ -562,6 +566,11 @@ class MapInstance extends Listener {
      * @param {array[object]} layers - list of layers (NOTE: not wrapped by layer states, this method applies that)
      */
     addLayers (layers) {
+
+        if(!this._layerCache) {
+            console.log("WARN: Attempting to add layers to a map with no layer cache");
+            return;
+        }
 
         if(!layers) return;
         if(typeof(layers.push) === 'undefined') {
@@ -639,7 +648,7 @@ class MapInstance extends Listener {
         if(!leafletLayer) return;
 
         //cache leaflet object first
-        this._layerCache[layer.id] = leafletLayer;
+        if(this._layerCache) this._layerCache[layer.id] = leafletLayer;
 
         //listen for layer errors so we can inform the user
         // that a layer hasn't been loaded in a useful way
@@ -677,6 +686,8 @@ class MapInstance extends Listener {
      */
     moveLayer (from, to) {
 
+        if(!this._layerCache) return;
+
         if(isNaN(from)) return;
 
         //end of list
@@ -701,7 +712,7 @@ class MapInstance extends Listener {
      *
      */
     removeLayer (id) {
-
+        if(!this._layerCache) return;
         var layerInstance = this._layerCache[id];
         if(layerInstance) {
 
@@ -727,6 +738,7 @@ class MapInstance extends Listener {
      *
      */
     toggleLayerVisibility (id) {
+        if(!this._layerCache) return;
         var layerInstance = this._layerCache[id];
         if(layerInstance) {
             let state = this.getLayerState(id);
@@ -777,6 +789,7 @@ class MapInstance extends Listener {
      */
     updateLayerOpacity (id, opacity) {
 
+        if(!this._layerCache) return;
         var layerInstance = this._layerCache[id];
 
         //if layer id is for base layer...
@@ -816,7 +829,7 @@ class MapInstance extends Listener {
      * @return {L.Layer} Leaflet layer instance representing that layer or null
      */
     getLeafletLayerFor (gpLayer) {
-        if(!gpLayer) return null;
+        if(!gpLayer || !this._layerCache) return null;
         let leafletLayer = this._layerCache[gpLayer.id];
         return leafletLayer || null;
     }
@@ -825,6 +838,7 @@ class MapInstance extends Listener {
      *
      */
     toggleGetFeatureInfo (layerId) {
+        if(!this._layerCache) return;
         var layerInstance = this._layerCache[layerId];
         if(layerInstance) {
             if(typeof(layerInstance.enableGetFeatureInfo) !== 'undefined') {
