@@ -1199,6 +1199,9 @@
      */
     var ClusteredFeatureLayer = FeatureLayer$1.extend({
 
+        currentVisibility: true,
+        currentOpacity: 1.0,
+
         _gpStyle: { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
 
         /**
@@ -1308,6 +1311,16 @@
             }
         },
 
+        /** override super class' method to set viz/opac after sub layers created */
+        createLayers: function createLayers(features) {
+            FeatureLayer$1.prototype.createLayers.call(this, features);
+            this.setVisibility(this.currentVisibility);
+            this.setOpacity(this.currentOpacity);
+        },
+
+        /**
+         * @param {integer} index
+         */
         setZIndex: function setZIndex(index) {
             this.options.zIndex = index;
             for (var id in this._layers) {
@@ -1321,27 +1334,35 @@
             }
         },
 
+        /** */
         toggleVisibility: function toggleVisibility() {
 
-            //clustered features
-            if (this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
-                for (var id in this.cluster._featureGroup._layers) {
-                    var layer = this.cluster._featureGroup._layers[id];
-                    if (layer._icon) {
-                        jQuery(layer._icon).toggleClass('invisible');
-                    }
-                }
-            }
+            this.currentVisibility = !this.currentVisibility;
+            this.setVisibility(this.currentVisibility);
 
-            //non-clustered features
-            if (this._layers) {
-                for (var _id in this._layers) {
-                    this._layers[_id].toggleVisibility();
-                }
-            }
+            // //clustered features
+            // if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
+            //     for(let id in this.cluster._featureGroup._layers) {
+            //         let layer = this.cluster._featureGroup._layers[id];
+            //         if(layer._icon) {
+            //             jQuery(layer._icon).toggleClass('invisible');
+            //         }
+            //     }
+            // }
+            //
+            // //non-clustered features
+            // if(this._layers) {
+            //     for(let id in this._layers)
+            //         this._layers[id].toggleVisibility();
+            // }
         },
 
+        /**
+         * @param {boolean} bool - flag
+         */
         setVisibility: function setVisibility(bool) {
+
+            this.currentVisibility = !!bool;
 
             //clustered features
             if (this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
@@ -1360,14 +1381,19 @@
 
             //non-clustered features
             if (this._layers) {
-                for (var _id2 in this._layers) {
-                    var _layer = this._layers[_id2];
+                for (var _id in this._layers) {
+                    var _layer = this._layers[_id];
                     if (_layer.setVisibility) _layer.setVisibility(bool);else if (_layer.setStyle) _layer.setStyle({ display: bool ? '' : 'none' });
                 }
             }
         },
 
+        /**
+         * @param {number} opacity
+         */
         setOpacity: function setOpacity(opacity) {
+
+            this.currentOpacity = isNaN(opacity) ? 1.0 : opacity * 1;
 
             //clustered features
             if (this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
@@ -1381,8 +1407,8 @@
 
             //non-clustered features
             if (this._layers) {
-                for (var _id3 in this._layers) {
-                    var _layer2 = this._layers[_id3];
+                for (var _id2 in this._layers) {
+                    var _layer2 = this._layers[_id2];
                     if (_layer2.setOpacity) _layer2.setOpacity(opacity);
                 }
             }
@@ -1649,6 +1675,10 @@
         var formats = layer.supportedFormats || [];
         var format = formats.length ? formats[0] : "image/png";
 
+        if (!url) {
+            throw new Error("WMS layer's service does not defined a service url");
+        }
+
         var version = '1.1.1';
         if (service.api && service.api.length) {
             var is130 = service.api.filter(function (api) {
@@ -1747,6 +1777,10 @@
 
         var service = gpLayer.services[0];
         var url = service.href;
+
+        if (!url) {
+            throw new Error("WMST Layer's service does not defined a service url");
+        }
 
         var opts = {
             layers: gpLayer.layerName,
@@ -1987,7 +2021,7 @@
             throw new Error("WTMS Layer - layer " + layer.id + " has no distribution(s) usable to make WMTS requests");
         }
 
-        if (!url) throw new Error("WTMS Layer - unable to determine WMTS URL for layer " + layer.id);
+        if (!url) throw new Error("Unable to determine WMTS URL for layer " + layer.id + ". Please make sure it is defined by either the service or a distribution on the layer itself.");
 
         return new WMTS(url, options);
     }
@@ -2011,6 +2045,8 @@
 
         initialize: function initialize(url, options) {
             // (String, Object)
+
+            if (!url) throw new Error("Layer was not configured with a URL");
 
             if (url.indexOf("/export") < 0) {
                 var qidx = url.indexOf("?");
@@ -2198,7 +2234,12 @@
                         format = layer.supportedFormats ? layer.supportedFormats[0] : null,
                         opts = {};
 
+                    function checkUrl(url) {
+                        if (!url) throw new Error("Layer's service does not define a service url");
+                    }
+
                     if (types.ESRI_MAP_SERVER && types.ESRI_MAP_SERVER.uri === typeUri) {
+                        checkUrl(url);
                         opts = {
                             layers: layer.layerName,
                             transparent: true,
@@ -2208,10 +2249,12 @@
                         if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
                         return new esriTileLayer(url, opts);
                     } else if (types.ESRI_FEATURE_SERVER && types.ESRI_FEATURE_SERVER.uri === typeUri) {
+                        checkUrl(url);
                         return clusteredFeatures(layer, {
                             styleResolver: _this.getStyleResolver()
                         });
                     } else if (types.ESRI_TILE_SERVER && types.ESRI_TILE_SERVER.uri === typeUri) {
+                        checkUrl(url);
                         opts = { url: url, useCors: true };
                         if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
                         return esri.tiledMapLayer(opts);

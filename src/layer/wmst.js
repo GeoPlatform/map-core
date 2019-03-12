@@ -71,6 +71,10 @@ function wmst(gpLayer) {
     let service = gpLayer.services[0];
     let url = service.href;
 
+    if(!url) {
+        throw new Error("WMST Layer's service does not defined a service url");
+    }
+
     let opts = {
         layers: gpLayer.layerName,
         transparent: true,

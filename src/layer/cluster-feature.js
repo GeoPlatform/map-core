@@ -26,6 +26,9 @@ import featurePopupTemplate from '../shared/popup-template';
  */
 var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
 
+    currentVisibility: true,
+    currentOpacity: 1.0,
+
     _gpStyle : { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
 
     /**
@@ -140,6 +143,16 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
         }
     },
 
+    /** override super class' method to set viz/opac after sub layers created */
+    createLayers: function (features) {
+        EsriClusterFeatureLayer.prototype.createLayers.call(this, features);
+        this.setVisibility(this.currentVisibility);
+        this.setOpacity(this.currentOpacity);
+    },
+
+    /**
+     * @param {integer} index
+     */
     setZIndex : function (index) {
         this.options.zIndex = index;
         for(var id in this._layers) {
@@ -157,26 +170,35 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
         }
     },
 
+    /** */
     toggleVisibility: function() {
 
-        //clustered features
-        if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
-            for(let id in this.cluster._featureGroup._layers) {
-                let layer = this.cluster._featureGroup._layers[id];
-                if(layer._icon) {
-                    jQuery(layer._icon).toggleClass('invisible');
-                }
-            }
-        }
+        this.currentVisibility = !this.currentVisibility;
+        this.setVisibility(this.currentVisibility);
 
-        //non-clustered features
-        if(this._layers) {
-            for(let id in this._layers)
-                this._layers[id].toggleVisibility();
-        }
+        // //clustered features
+        // if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
+        //     for(let id in this.cluster._featureGroup._layers) {
+        //         let layer = this.cluster._featureGroup._layers[id];
+        //         if(layer._icon) {
+        //             jQuery(layer._icon).toggleClass('invisible');
+        //         }
+        //     }
+        // }
+        //
+        // //non-clustered features
+        // if(this._layers) {
+        //     for(let id in this._layers)
+        //         this._layers[id].toggleVisibility();
+        // }
     },
 
+    /**
+     * @param {boolean} bool - flag
+     */
     setVisibility: function(bool) {
+
+        this.currentVisibility = !!bool;
 
         //clustered features
         if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
@@ -206,7 +228,12 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
         }
     },
 
+    /**
+     * @param {number} opacity
+     */
     setOpacity: function(opacity) {
+
+        this.currentOpacity = isNaN(opacity) ? 1.0 : opacity*1;
 
         //clustered features
         if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {

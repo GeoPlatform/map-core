@@ -227,7 +227,8 @@ function wmts(layer) {
             " has no distribution(s) usable to make WMTS requests");
     }
 
-    if(!url) throw new Error("WTMS Layer - unable to determine WMTS URL for layer " + layer.id);
+    if(!url) throw new Error("Unable to determine WMTS URL for layer " + layer.id +
+        ". Please make sure it is defined by either the service or a distribution on the layer itself.");
 
     return new WMTS( url, options );
 

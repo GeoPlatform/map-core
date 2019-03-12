@@ -113,8 +113,13 @@ class LayerFactory {
                 format  = layer.supportedFormats ? layer.supportedFormats[0] : null,
                 opts = {};
 
+            function checkUrl(url) {
+                if(!url) throw new Error("Layer's service does not define a service url");
+            }
+
             if(ServiceTypes.ESRI_MAP_SERVER &&
                 ServiceTypes.ESRI_MAP_SERVER.uri === typeUri) {
+                checkUrl(url);
                 opts = {
                     layers: layer.layerName,
                     transparent: true,
@@ -127,12 +132,14 @@ class LayerFactory {
 
             } else if(ServiceTypes.ESRI_FEATURE_SERVER &&
                 ServiceTypes.ESRI_FEATURE_SERVER.uri === typeUri) {
+                checkUrl(url);
                 return clusteredFeatures(layer, {
                     styleResolver: this.getStyleResolver()
                 });
 
             } else if(ServiceTypes.ESRI_TILE_SERVER &&
                 ServiceTypes.ESRI_TILE_SERVER.uri === typeUri) {
+                checkUrl(url);
                 opts = { url: url, useCors: true };
                 if(Config.leafletPane)
                     opts.pane = Config.leafletPane;
