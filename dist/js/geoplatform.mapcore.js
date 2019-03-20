@@ -564,25 +564,32 @@
 
     };
 
-    var url = GeoPlatformClient__default.Config.ualUrl;
-    var baseLayerId = GeoPlatformClient__default.Config.defaultBaseLayerId;
+    var GP_URL = GeoPlatformClient__default.Config.ualUrl;
     var LayerService$1 = GeoPlatformClient__default.LayerService;
     var HttpClient$1 = GeoPlatformClient__default.JQueryHttpClient;
 
-    /**
-     * If a default base layer is defined using the 'defaultBaseLayer'
-     * environment value, fetch it. Otherwise, fetch the OpenStreet Map layer.
-     * @param {LayerService} layerService - GeoPlatform Layer service to use to fetch the layer
-     * @return {Promise} resolving GeoPlatform Layer object
-     */
-    function DefaultBaseLayer (layerService) {
-        if (!GeoPlatformClient__default.Config.defaultBaseLayerId) return OSM.get();
+    var WORLD_STREET_LAYER = '54332da33818de0ca72cd210f3e68832';
 
-        if (!layerService) layerService = new LayerService$1(url, new HttpClient$1());
-        return layerService.get(baseLayerId).catch(function (e) {
-            return Q.resolve(OSM.get());
-        });
-    }
+    var DefaultBaseLayer = {
+
+        get: function get(layerService) {
+            if (!layerService) {
+                layerService = new LayerService$1(GP_URL, new HttpClient$1());
+            }
+            var baseLayerId = GeoPlatformClient__default.Config.defaultBaseLayerId || WORLD_STREET_LAYER;
+            return layerService.get(baseLayerId).catch(function (e) {
+                return Q.resolve(OSM.get());
+            });
+        },
+
+        set: function set(layer) {
+            var id = null;
+            if (layer && layer.id) id = layer.id;else if (layer && typeof layer === 'string') id = layer;
+            if (id) {
+                GeoPlatformClient__default.Config.configure({ 'defaultBaseLayerId': layer.id });
+            }
+        }
+    };
 
     var ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
     var esriExpr = /Esri REST ([A-Za-z]+) Service/;
@@ -2907,7 +2914,7 @@
 
                 var promise = null;
                 if (!layer) {
-                    promise = OSM.get(this.getService(ItemTypes.LAYER));
+                    promise = DefaultBaseLayer.get(this.getService(ItemTypes.LAYER));
                 } else promise = Q.resolve(layer);
 
                 promise.then(function (layer) {

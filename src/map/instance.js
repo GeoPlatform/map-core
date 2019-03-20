@@ -8,6 +8,7 @@ import GeoPlatformClient from 'geoplatform.client';
 
 import LayerFactory from '../layer/factory';
 import OSM from "../layer/osm";
+import DefaultBaseLayer from '../layer/baselayer-default';
 
 const ItemTypes = GeoPlatformClient.ItemTypes;
 const ServiceFactory = GeoPlatformClient.ServiceFactory;
@@ -487,7 +488,7 @@ class MapInstance extends Listener {
 
         let promise = null;
         if(!layer) {
-            promise = OSM.get(this.getService(ItemTypes.LAYER));
+            promise = DefaultBaseLayer.get(this.getService(ItemTypes.LAYER));
         } else
             promise = Q.resolve(layer);
 
