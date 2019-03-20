@@ -3,7 +3,6 @@ import Q from 'q';
 import OSM from './osm';
 import GeoPlatformClient from 'geoplatform.client';
 
-const GP_URL = GeoPlatformClient.Config.ualUrl;
 const LayerService = GeoPlatformClient.LayerService;
 const HttpClient = GeoPlatformClient.JQueryHttpClient;
 
@@ -13,7 +12,7 @@ var DefaultBaseLayer = {
 
     get: function(layerService) {
         if(!layerService) {
-            layerService = new LayerService(GP_URL, new HttpClient());
+            layerService = new LayerService(GeoPlatformClient.Config.ualUrl, new HttpClient());
         }
         let baseLayerId = GeoPlatformClient.Config.defaultBaseLayerId || WORLD_STREET_LAYER;
         return layerService.get(baseLayerId).catch(e => Q.resolve( OSM.get() ));

@@ -564,7 +564,6 @@
 
     };
 
-    var GP_URL = GeoPlatformClient__default.Config.ualUrl;
     var LayerService$1 = GeoPlatformClient__default.LayerService;
     var HttpClient$1 = GeoPlatformClient__default.JQueryHttpClient;
 
@@ -574,7 +573,7 @@
 
         get: function get(layerService) {
             if (!layerService) {
-                layerService = new LayerService$1(GP_URL, new HttpClient$1());
+                layerService = new LayerService$1(GeoPlatformClient__default.Config.ualUrl, new HttpClient$1());
             }
             var baseLayerId = GeoPlatformClient__default.Config.defaultBaseLayerId || WORLD_STREET_LAYER;
             return layerService.get(baseLayerId).catch(function (e) {
