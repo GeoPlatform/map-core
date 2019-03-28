@@ -567,7 +567,7 @@
     var LayerService$1 = GeoPlatformClient__default.LayerService;
     var HttpClient$1 = GeoPlatformClient__default.JQueryHttpClient;
 
-    var WORLD_STREET_LAYER = '54332da33818de0ca72cd210f3e68832';
+    var WORLD_STREET_LAYER = '86a8babde086689e21248669ba4ed579';
 
     var DefaultBaseLayer = {
 
