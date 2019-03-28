@@ -3890,7 +3890,7 @@
 
         dispose: function dispose(key) {
             if (key) {
-                cache[key].destroyMap();
+                cache[key].dispose();
                 delete cache[key];
             } else {
                 cache = null;
