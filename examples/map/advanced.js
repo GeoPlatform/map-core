@@ -52,23 +52,23 @@ GeoPlatformMapCore.OSM.get().then(osm => {
     let promises = [
 
         //Fetch Image layer
-        lyrSvc.get('2647e1ae5acfe155dccb26def8ef2e38')
+        lyrSvc.get('2e738952d5cf2b50c2f4ebd63cf06416')
         .catch(e => { console.log("Unable to add Image layer: " + e.message); return null; }),
 
         //Fetch WMS layer
-        lyrSvc.get('af9b4077549fe6c3367c8faca29cc165')
+        lyrSvc.get('6f43f89ea70529a0e4ae918564e502e8')
         .catch(e => { console.log("Unable to add raster layer: " + e.message); return null; }),
 
         //Fetch WMTS layer
-        lyrSvc.get('1be39433cc19b15838f85b06ed043122')
+        lyrSvc.get('203224548affc2da4ba4a372066da614')
         .catch(e => {console.log("Unable to add wmts layer: " + e.message); return null; }),
 
         //Fetch Feature Layer
-        lyrSvc.get('dab1ff07221cb500a3ed46fddbdbdcff')
+        lyrSvc.get('de7c39d1195dde556e5f0748f2f1efb9')
         .catch(e=> { console.log("Unable to add feature layer: " + e.message); return null; }),
 
         //Fetch GeoJSON feed layer
-        lyrSvc.get('92b85301f9da68b83cb3897f42129b87')
+        lyrSvc.get('241771f5dd0082286d6fef45541203fe')
         .catch(e => { console.log("Unable to add geojson layer: " + e.message); return null; })
 
     ];

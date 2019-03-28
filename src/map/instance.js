@@ -324,7 +324,7 @@ class MapInstance extends Listener {
 
         if(!this._layerErrors.find(finder)) {
 
-            let obj = this.logLayerError(id, "Layer failed to completely load. " +
+            let obj = this.logLayerError(id, "Layer ('" + id + "') failed to completely load. " +
                 "It may be inaccessible or misconfigured.");
 
             var url = error.tile.src;
@@ -489,14 +489,18 @@ class MapInstance extends Listener {
 
         let promise = null;
         if(!layer) {
-            promise = DefaultBaseLayer.get();
+            promise = DefaultBaseLayer.get(this.getService(ItemTypes.LAYER));
         } else
             promise = Q.resolve(layer);
 
         promise.then( layer => {
 
-            let leafletLayer = LayerFactory(layer);
-            if(!leafletLayer) return;
+            let leafletLayer = LayerFactory.create(layer);
+            if(!leafletLayer) {
+                console.log("Warning: MapInstance could not create base " +
+                    "layer for '" + layer.id + "'");
+                return;
+            }
 
             this._mapInstance.addLayer(leafletLayer);
             leafletLayer.setZIndex(0);  //set at bottom
@@ -517,7 +521,8 @@ class MapInstance extends Listener {
         })
         .catch(e => {
             console.log(`MapInstance.setBaseLayer() - Error getting base layer for map : ${e.message}`);
-            this.logLayerError( layer.id, e.message );
+            this.logLayerError( layer.id, "Error setting baselayer on map " +
+                "because of the following error(s): " + e.message );
         });
     }
 
@@ -568,6 +573,11 @@ class MapInstance extends Listener {
             return;
         }
 
+        if(!this._layerCache) {
+            console.log("WARN: Attempting to add layers to a map with no layer cache");
+            return;
+        }
+
         if(!layers) return;
         if(typeof(layers.push) === 'undefined') {
             layers = [layers];
@@ -585,7 +595,7 @@ class MapInstance extends Listener {
             }
 
             if(!layer) {
-                console.log("Warning: MapInstance.addLayers() - layer (" + index +
+                console.log("MapInstance.addLayers() - layer (" + index +
                     ") is not a Layer or a Layer state. Ignoring...");
                 return;  //layer info is missing, skip it
             }
@@ -629,21 +639,22 @@ class MapInstance extends Listener {
             if(!layer || !state)
                 throw new Error("Invalid argument, missing layer and or state");
 
-            leafletLayer = LayerFactory(layer);
-
-            if(!leafletLayer)
-                throw new Error("Layer factory returned nothing");
+            leafletLayer = LayerFactory.create(layer);
+            if(!leafletLayer) {
+                throw new Error("Could not create leaflet layer for GP Layer '" +
+                    layer.id + "'");
+            }
 
         } catch(e) {
-            this.logLayerError( layer.id, 'MapInstance.addLayerWithState() - ' +
-                'Could not create Leaflet layer because ' + e.message);
+            this.logLayerError( layer.id,
+                "Layer '" + layer.label + "' could not be added to the " +
+                "map instance; " + e.message);
         }
 
         if(!leafletLayer) return;
 
         //cache leaflet object first
-        if(this._layerCache)
-            this._layerCache[layer.id] = leafletLayer;
+        if(this._layerCache) this._layerCache[layer.id] = leafletLayer;
 
         //listen for layer errors so we can inform the user
         // that a layer hasn't been loaded in a useful way
@@ -682,6 +693,8 @@ class MapInstance extends Listener {
     moveLayer (from, to) {
         if(!this._layerCache) return;
 
+        if(!this._layerCache) return;
+
         if(isNaN(from)) return;
 
         //end of list
@@ -713,7 +726,7 @@ class MapInstance extends Listener {
 
             //remove layer from tracked defs array
             let index = this.getLayerStateIndex(id);
-            console.log("MapInstance.removeLayer(" + id + ")");
+            // console.log("MapInstance.removeLayer(" + id + ")");
             if(index >= 0 && index < this._layerStates.length)
                 this._layerStates.splice(index, 1);
 
@@ -824,8 +837,7 @@ class MapInstance extends Listener {
      * @return {L.Layer} Leaflet layer instance representing that layer or null
      */
     getLeafletLayerFor (gpLayer) {
-        if(!this._layerCache) return null;
-        if(!gpLayer) return null;
+        if(!gpLayer || !this._layerCache) return null;
         let leafletLayer = this._layerCache[gpLayer.id];
         return leafletLayer || null;
     }
@@ -1142,8 +1154,9 @@ class MapInstance extends Listener {
             return result;
         })
         .catch(err=>{
-            let e = new Error("MapInstance.saveMap() - " +
-                "The requested map could not be saved because: " +
+            console.log("MapCore MapInstance.saveMap() - " +
+                "The requested map could not be saved because: " + err.message);
+            let e = new Error("The requested map could not be saved because of the following error(s): " +
                 err.message);
             return Q.reject(e);
         });
@@ -1172,13 +1185,16 @@ class MapInstance extends Listener {
         return this.fetchMap(mapId).then(map => {
 
             if(!map) {
-                throw new Error("The requested map came back null");
+                throw new Error("The requested map ('" + mapId +
+                    "') came back null");
 
             } else if(typeof(map) === 'string') {
-                throw new Error("The requested map came back as a string");
+                throw new Error("The requested map ('" + mapId +
+                    "') came back as a string");
 
             } else if(map.message) {
-                throw new Error("There was an error loading the requested map: " + map.message);
+                throw new Error("There was an error loading the requested map ('" +
+                    mapId + "'): " + map.message);
             }
 
 
@@ -1192,7 +1208,10 @@ class MapInstance extends Listener {
                     this.getService(ItemTypes.MAP).patch(map.id, patch)
                     // this.mapService.patch(map.id, patch)
                     .then( updated => { map.statistics = updated.statistics; })
-                    .catch( e => { console.log("Error updating view count for map: " + e); });
+                    .catch( e => {
+                        console.log("MapInstance.saveMap() - Error updating view " +
+                            "count for map ('" + mapId + "'): " + e);
+                    });
                 }, 1000, map);
 
             }
@@ -1203,8 +1222,11 @@ class MapInstance extends Listener {
             return map;
         })
         .catch( err => {
-            let e = new Error("MapInstance.loadMap() - " +
+            console.log("MapInstance.loadMap() - " +
                 "The requested map could not be loaded because " + err.message);
+            let e = new Error("The requested map ('" + mapId +
+                "') could not be loaded because of the following error(s): " +
+                err.message);
             return Q.reject(e);
         });
     }

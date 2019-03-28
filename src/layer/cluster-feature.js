@@ -26,6 +26,9 @@ import featurePopupTemplate from '../shared/popup-template';
  */
 var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
 
+    currentVisibility: true,
+    currentOpacity: 1.0,
+
     _gpStyle : { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
 
     /**
@@ -140,32 +143,62 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
         }
     },
 
+    /** override super class' method to set viz/opac after sub layers created */
+    createLayers: function (features) {
+        EsriClusterFeatureLayer.prototype.createLayers.call(this, features);
+        this.setVisibility(this.currentVisibility);
+        this.setOpacity(this.currentOpacity);
+    },
+
+    /**
+     * @param {integer} index
+     */
     setZIndex : function (index) {
         this.options.zIndex = index;
-        for(var id in this._layers)
-            this._layers[id].setZIndex(index);
-    },
+        for(var id in this._layers) {
 
-    toggleVisibility: function() {
-
-        //clustered features
-        if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
-            for(let id in this.cluster._featureGroup._layers) {
-                let layer = this.cluster._featureGroup._layers[id];
-                if(layer._icon) {
-                    jQuery(layer._icon).toggleClass('invisible');
-                }
+            let lyr = this._layers[id];
+            if(lyr.setZIndex)
+                lyr.setZIndex(index);
+            else if(lyr._updateZIndex)
+                lyr._updateZIndex(index);
+            else if(lyr._renderer && lyr._renderer._container){
+                lyr._renderer._container.style.zIndex = index;
+            } else {
+                // console.log("Clustered feature layer child " + id + " does not support ordering using z-index");
             }
         }
-
-        //non-clustered features
-        if(this._layers) {
-            for(let id in this._layers)
-                this._layers[id].toggleVisibility();
-        }
     },
 
+    /** */
+    toggleVisibility: function() {
+
+        this.currentVisibility = !this.currentVisibility;
+        this.setVisibility(this.currentVisibility);
+
+        // //clustered features
+        // if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
+        //     for(let id in this.cluster._featureGroup._layers) {
+        //         let layer = this.cluster._featureGroup._layers[id];
+        //         if(layer._icon) {
+        //             jQuery(layer._icon).toggleClass('invisible');
+        //         }
+        //     }
+        // }
+        //
+        // //non-clustered features
+        // if(this._layers) {
+        //     for(let id in this._layers)
+        //         this._layers[id].toggleVisibility();
+        // }
+    },
+
+    /**
+     * @param {boolean} bool - flag
+     */
     setVisibility: function(bool) {
+
+        this.currentVisibility = !!bool;
 
         //clustered features
         if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
@@ -195,7 +228,12 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
         }
     },
 
+    /**
+     * @param {number} opacity
+     */
     setOpacity: function(opacity) {
+
+        this.currentOpacity = isNaN(opacity) ? 1.0 : opacity*1;
 
         //clustered features
         if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
@@ -296,7 +334,13 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
 
 
 
-function clusteredFeatures(layer) {
+
+/**
+ * @param {object} layer - GeoPlatform Layer object
+ * @param {object} options - optional properties
+ * @return {L.Layer} leaflet layer instance or null
+ */
+function clusteredFeatures(layer, options) {
 
     let service = layer.services && layer.services.length ?
         layer.services[0] : null;
@@ -310,18 +354,29 @@ function clusteredFeatures(layer) {
     let url     = service.href,
         format  = layer.supportedFormats ? layer.supportedFormats[0] : null;
 
+    let styleResolver = options && options.styleResolver ?
+        options.styleResolver : featureStyleResolver;
+
     let opts = {
         url: url + '/' + layer.layerName,
-        styleLoader: featureStyleResolver,
+        styleLoader: styleResolver,
         layerId: layer.id
     };
-    if(Config.leafletPane)
-        opts.pane = Config.leafletPane;
+
+    if(Config.leafletPane) opts.pane = Config.leafletPane;
+    if(options && options.leafletPane) opts.pane = options.leafletPane;
+
     return new ClusteredFeatureLayer(opts);
 }
 
 
-function geoJsonFeed(layer) {
+
+/**
+ * @param {object} layer - GeoPlatform Layer object
+ * @param {object} options - optional properties
+ * @return {L.Layer} leaflet layer instance or null
+ */
+function geoJsonFeed(layer, options) {
 
     let service = layer.services && layer.services.length ?
         layer.services[0] : null;
@@ -344,6 +399,10 @@ function geoJsonFeed(layer) {
     let styleLoaderFactory = function(url) {
         return function (layerId) {
             let deferred = Q.defer();
+            if(!jQuery) {
+                deferred.reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
+                return deferred.promise;
+            }
             jQuery.ajax(url, {
                 dataType:'json',
                 success: function(data) {
@@ -366,8 +425,10 @@ function geoJsonFeed(layer) {
         layerId: layer.id,    //used by style loader
         styleLoader: styleLoaderFactory(styleUrl)
     };
-    if(Config.leafletPane)
-        opts.pane = Config.leafletPane;
+
+    if(Config.leafletPane) opts.pane = Config.leafletPane;
+    if(options && options.leafletPane) opts.pane = options.leafletPane;
+
     return new ClusteredFeatureLayer(opts);
 
 }

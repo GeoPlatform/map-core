@@ -1,13 +1,10 @@
 
 import jQuery from "jquery";
 import Q from "q";
-import GeoPlatformClient from 'geoplatform.client';
+import {
+    ItemService, JQueryHttpClient, QueryFactory, Config
+} from 'geoplatform.client';
 
-
-const ItemService = GeoPlatformClient.ItemService;
-const HttpClient = GeoPlatformClient.JQueryHttpClient;
-const QueryFactory = GeoPlatformClient.QueryFactory;
-const Config = GeoPlatformClient.Config;
 
 
 const ogcExpr = /OGC.+\(([A-Z\-]+)\)/;
@@ -120,7 +117,7 @@ var types = {
     refresh: updateList
 };
 
-function updateList() {
+function updateList(service) {
 
     let url = Config.ualUrl;
     if(!url) {
@@ -132,8 +129,16 @@ function updateList() {
             .resourceTypes('ServiceType')
             .pageSize(50);
 
-        new ItemService(url, new HttpClient()).search(query)
-        .then( data => {
+
+        let svc = null;
+        //if a service was provided to be used, use it
+        if(service && typeof(service.search) !== 'undefined') {
+            svc = service;
+        } else { // otherwise, use defaults
+            svc = new ItemService(url, new JQueryHttpClient());
+        }
+
+        svc.search(query).then( data => {
 
             for(let i=0; i<data.results.length; ++i) {
 

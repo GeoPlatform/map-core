@@ -38,7 +38,10 @@ L.control.scale().addTo(leafletMap);
 let mapInstance = GeoPlatformMapCore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
-//load OpenStreet Map layer using API and set as base layer
-GeoPlatformMapCore.OSM.get().then(osm => {
-    mapInstance.setBaseLayer(osm);
-}).catch(e => { console.log("Unable to get OSM base layer"); });
+// //load OpenStreet Map layer using API and set as base layer
+// GeoPlatformMapCore.OSM.get().then(baseLayer => {
+GeoPlatformMapCore.DefaultBaseLayer.get().then(baseLayer => {
+    mapInstance.setBaseLayer(baseLayer);
+}).catch(e => { console.log("Unable to get base layer"); });
+
+// mapInstance.setBaseLayer(null); //should force setting default base layer

@@ -77,6 +77,6 @@ function featurePopupTemplate(feature) {
     }
     result += '</div>';
     return result;
-};
+}
 
 export default featurePopupTemplate;

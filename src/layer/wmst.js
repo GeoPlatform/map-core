@@ -2,12 +2,23 @@
 
 import jQuery from "jquery";
 import Q from "q";
-import { TileLayer, tileLayer, TimeDimension, timeDimension } from 'leaflet';
+
+import * as L from 'leaflet';
+import { TileLayer, tileLayer } from 'leaflet';
+import * as TimeDimension from 'leaflet-timedimension/dist/leaflet.timedimension.min';
+// import { TimeDimension, timeDimension } from "../libs/L.TimeDimension";
 
 import {Config} from 'geoplatform.client';
 
 
-var WMST = TimeDimension.Layer.WMS.extend({
+// function tdPolyFill(options) {
+//     return new WMST(options);
+// }
+//
+// var TimeDimension = L.TimeDimension;
+// var timeDimension = L.timeDimension || tdPolyFill;
+
+var WMST = (TimeDimension && TimeDimension.Layer || TileLayer).WMS.extend({
 
     //override default parser to query all Layers (whether queryable or not)
     _parseTimeDimensionFromCapabilities: function(xml) {
@@ -59,6 +70,10 @@ function wmst(gpLayer) {
 
     let service = gpLayer.services[0];
     let url = service.href;
+
+    if(!url) {
+        throw new Error("WMST Layer's service does not defined a service url");
+    }
 
     let opts = {
         layers: gpLayer.layerName,

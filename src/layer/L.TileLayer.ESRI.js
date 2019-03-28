@@ -23,6 +23,8 @@ var esriTileLayer = TileLayer.extend({
 
     initialize: function (url, options) { // (String, Object)
 
+        if(!url) throw new Error("Layer was not configured with a URL");
+        
         if(url.indexOf("/export") < 0) {
             let qidx = url.indexOf("?");
             if(qidx > 0) {

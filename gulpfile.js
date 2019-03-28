@@ -7,7 +7,8 @@ var pkg         = require('./package.json'),
     rename      = require('gulp-rename'),
     notify      = require('gulp-notify')
     srcmaps     = require('gulp-sourcemaps'),
-    rollup      = require('rollup');
+    rollup      = require('rollup'),
+    path        = require('path');
 
 
 const rollupBabel = require('rollup-plugin-babel');
@@ -36,13 +37,23 @@ gulp.task('jshint', function () {
 gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
     return rollup.rollup({
         input: './src/index.js',
-        external: ['Q', 'q', 'jquery', 'jQuery', 'leaflet', 'Leaflet', 'L', 'geoplatform.client'],
+        external: [
+            'Q', 'q',
+            'jquery', 'jQuery',
+            'leaflet', 'Leaflet', 'L',
+            'esri-leaflet',
+            'leaflet.markercluster',
+            'geoplatform.client'
+        ],
         output: {
             format: 'umd',
             globals: {
                 'q': 'Q',
                 'jquery': 'jQuery',
                 'leaflet': 'L',
+                'esri-leaflet': 'L.esri',
+                'leaflet-timedimension': 'L.TimeDimension',
+                'leaflet.markercluster': 'L.markerCluster',
                 'geoplatform.client': 'GeoPlatformClient'
             }
         },
@@ -66,6 +77,9 @@ gulp.task('js', 'Concat, Uglify JavaScript into a single file', function() {
               'q': 'Q',
               'jquery': 'jQuery',
               'leaflet': 'L',
+              'esri-leaflet': 'L.esri',
+              'leaflet-timedimension': 'L.TimeDimension',
+              'leaflet.markercluster': 'L.markerCluster',
               'geoplatform.client': 'GeoPlatformClient'
           },
           sourcemap: true
