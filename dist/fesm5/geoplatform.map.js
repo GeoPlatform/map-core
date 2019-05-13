@@ -1,12 +1,11 @@
 import { Draw } from 'leaflet-draw';
 import 'leaflet.markercluster';
-import * as TimeDimension from 'leaflet-timedimension/dist/leaflet.timedimension.min';
-import { Layer } from 'leaflet-timedimension/dist/leaflet.timedimension.min';
+import 'leaflet-timedimension/dist/leaflet.timedimension.src';
 import { FeatureManager, tiledMapLayer, imageMapLayer, FeatureLayer } from 'esri-leaflet';
 import { __extends } from 'tslib';
 import * as jquery from 'jquery';
 import { reject, defer, resolve } from 'q';
-import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Point, LatLng, geoJSON, featureGroup, LayerGroup } from 'leaflet';
+import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, TimeDimension, Browser, Point, LatLng, featureGroup, geoJSON, LayerGroup } from 'leaflet';
 import { QueryFactory, LayerService, JQueryHttpClient, Config, ItemService, ItemTypes, ServiceFactory } from 'geoplatform.client';
 
 /**
@@ -2466,7 +2465,7 @@ var WMST = /** @class */ (function (_super) {
         return times;
     };
     return WMST;
-}(Layer.WMS));
+}(TimeDimension.Layer.WMS));
 /**
  * @param {?} gpLayer
  * @return {?}

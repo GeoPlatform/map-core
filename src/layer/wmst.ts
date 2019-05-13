@@ -7,7 +7,7 @@ import * as Q from "q";
 
 import * as L from 'leaflet';
 import { TileLayer, tileLayer } from 'leaflet';
-import * as TimeDimension from 'leaflet-timedimension/dist/leaflet.timedimension.min';
+import 'leaflet-timedimension/dist/leaflet.timedimension.src';
 // import { TimeDimension, timeDimension } from "../libs/L.TimeDimension";
 
 import {Config} from 'geoplatform.client';
@@ -23,7 +23,7 @@ import WMS from './wms';
 
 // var WMST = (TimeDimension && TimeDimension.Layer || TileLayer).WMS.extend({
 
-class WMST extends TimeDimension.Layer.WMS {
+class WMST extends (L as any).TimeDimension.Layer.WMS {
 
     private _baseLayer : TileLayer.WMS
 
@@ -113,7 +113,7 @@ function wmst(gpLayer) {
     }
 
     return new WMST(leafletLayer, {
-        timeDimension: new TimeDimension(tdOpts),
+        timeDimension: new (L as any).TimeDimension(tdOpts),
         proxy: proxyUrl
     });
 }

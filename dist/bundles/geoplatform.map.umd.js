@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('leaflet-draw'), require('leaflet.markercluster'), require('leaflet-timedimension/dist/leaflet.timedimension.min'), require('esri-leaflet'), require('jquery'), require('q'), require('leaflet'), require('geoplatform.client')) :
-    typeof define === 'function' && define.amd ? define('geoplatform.map', ['exports', 'leaflet-draw', 'leaflet.markercluster', 'leaflet-timedimension/dist/leaflet.timedimension.min', 'esri-leaflet', 'jquery', 'q', 'leaflet', 'geoplatform.client'], factory) :
-    (factory((global.geoplatform = global.geoplatform || {}, global.geoplatform.map = {}),global.L.Draw,null,global.L.TimeDimension,global.L.esri,global.jQuery,global.Q,global.L,global.GeoPlatformClient));
-}(this, (function (exports,leafletDraw,leaflet_markercluster,TimeDimension,esri,jquery,Q,leaflet,geoplatform_client) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('leaflet-draw'), require('leaflet.markercluster'), require('leaflet-timedimension/dist/leaflet.timedimension.src'), require('esri-leaflet'), require('jquery'), require('q'), require('leaflet'), require('geoplatform.client')) :
+    typeof define === 'function' && define.amd ? define('geoplatform.map', ['exports', 'leaflet-draw', 'leaflet.markercluster', 'leaflet-timedimension/dist/leaflet.timedimension.src', 'esri-leaflet', 'jquery', 'q', 'leaflet', 'geoplatform.client'], factory) :
+    (factory((global.geoplatform = global.geoplatform || {}, global.geoplatform.map = {}),global.L.Draw,null,null,global.L.esri,global.jQuery,global.Q,global.L,global.GeoPlatformClient));
+}(this, (function (exports,leafletDraw,leaflet_markercluster,leaflet_timedimension_src,esri,jquery,Q,L,geoplatform_client) { 'use strict';
 
     /**
      * @fileoverview added by tsickle
@@ -48,7 +48,7 @@
      * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
      */
     var ɵ0 = function (options) {
-        leaflet.Util.setOptions(this, options);
+        L.Util.setOptions(this, options);
         this._dataLoaders = {};
         // Try to set the zoom control this control is attached to from the
         // options
@@ -80,9 +80,9 @@
         }
         else {
             // Otherwise, create a container for the indicator
-            container = leaflet.DomUtil.create('div', 'leaflet-control-zoom leaflet-bar');
+            container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-bar');
         }
-        this._indicator = leaflet.DomUtil.create('a', classes, container);
+        this._indicator = L.DomUtil.create('a', classes, container);
         return container;
     }, ɵ2 = function (map) {
         this._removeLayerListeners(map);
@@ -99,7 +99,7 @@
         else {
             // If this control is separate from the zoomControl, call the
             // parent method so we don't leave behind an empty container
-            return leaflet.Control.prototype.remove.call(this);
+            return L.Control.prototype.remove.call(this);
         }
     }, ɵ4 = function (id) {
         this._dataLoaders[id] = true;
@@ -128,20 +128,20 @@
         return size;
     }, ɵ9 = function () {
         // Show loading indicator
-        leaflet.DomUtil.addClass(this._indicator, 'is-loading');
+        L.DomUtil.addClass(this._indicator, 'is-loading');
         // If zoomControl exists, make the zoom-out button not last
         if (!this.options.separate) {
-            if (this.zoomControl instanceof leaflet.Control.Zoom) {
-                leaflet.DomUtil.removeClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
+            if (this.zoomControl instanceof L.Control.Zoom) {
+                L.DomUtil.removeClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
             }
         }
     }, ɵ10 = function () {
         // Hide loading indicator
-        leaflet.DomUtil.removeClass(this._indicator, 'is-loading');
+        L.DomUtil.removeClass(this._indicator, 'is-loading');
         // If zoomControl exists, make the zoom-out button last
         if (!this.options.separate) {
-            if (this.zoomControl instanceof leaflet.Control.Zoom) {
-                leaflet.DomUtil.addClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
+            if (this.zoomControl instanceof L.Control.Zoom) {
+                L.DomUtil.addClass(this.zoomControl._zoomOutButton, 'leaflet-bar-part-bottom');
             }
         }
     }, ɵ11 = function (e) {
@@ -213,7 +213,7 @@
         }, this);
     };
     /** @type {?} */
-    var loadingControl = leaflet.Control.extend({
+    var loadingControl = L.Control.extend({
         options: {
             position: 'topleft',
             separate: false,
@@ -256,7 +256,7 @@
             return new L_1.Control.Loading(options);
         };
     }
-    leaflet.Map.addInitHook(function () {
+    L.Map.addInitHook(function () {
         if (this.options.loadingControl) {
             this.loadingControl = new loadingControl();
             this.addControl(this.loadingControl);
@@ -271,29 +271,29 @@
         /** @type {?} */
         var className = 'leaflet-control-zoom leaflet-bar leaflet-control';
         /** @type {?} */
-        var container = leaflet.DomUtil.create('div', className);
+        var container = L.DomUtil.create('div', className);
         this._createButton('&#8674;', 'Measure', 'leaflet-control-measure leaflet-bar-part leaflet-bar-part-top-and-bottom', container, this._toggleMeasure, this);
         return container;
     }, ɵ1$1 = function (html, title, className, container, fn, context) {
         /** @type {?} */
-        var link = leaflet.DomUtil.create('a', className, container);
+        var link = L.DomUtil.create('a', className, container);
         link.innerHTML = html;
         ( /** @type {?} */(link)).href = '#';
         link.title = title;
-        leaflet.DomEvent
-            .on(link, 'click', leaflet.DomEvent.stopPropagation)
-            .on(link, 'click', leaflet.DomEvent.preventDefault)
+        L.DomEvent
+            .on(link, 'click', L.DomEvent.stopPropagation)
+            .on(link, 'click', L.DomEvent.preventDefault)
             .on(link, 'click', fn, context)
-            .on(link, 'dblclick', leaflet.DomEvent.stopPropagation);
+            .on(link, 'dblclick', L.DomEvent.stopPropagation);
         return link;
     }, ɵ2$1 = function () {
         this._measuring = !this._measuring;
         if (this._measuring) {
-            leaflet.DomUtil.addClass(this._container, 'leaflet-control-measure-on');
+            L.DomUtil.addClass(this._container, 'leaflet-control-measure-on');
             this._startMeasuring();
         }
         else {
-            leaflet.DomUtil.removeClass(this._container, 'leaflet-control-measure-on');
+            L.DomUtil.removeClass(this._container, 'leaflet-control-measure-on');
             this._stopMeasuring();
         }
     }, ɵ3$1 = function () {
@@ -301,20 +301,20 @@
         this._map._container.style.cursor = 'crosshair';
         this._doubleClickZoom = this._map.doubleClickZoom.enabled();
         this._map.doubleClickZoom.disable();
-        leaflet.DomEvent
+        L.DomEvent
             .on(this._map, 'mousemove', this._mouseMove, this)
             .on(this._map, 'click', this._mouseClick, this)
             .on(this._map, 'dblclick', this._finishPath, this);
         //.on( (document as Document), 'keydown', this._onKeyDown, this);
         if (!this._layerPaint) {
-            this._layerPaint = leaflet.layerGroup().addTo(this._map);
+            this._layerPaint = L.layerGroup().addTo(this._map);
         }
         if (!this._points) {
             this._points = [];
         }
     }, ɵ4$1 = function () {
         this._map._container.style.cursor = this._oldCursor;
-        leaflet.DomEvent
+        L.DomEvent
             //.off((document as Document), 'keydown', this._onKeyDown, this)
             .off(this._map, 'mousemove', this._mouseMove, this)
             .off(this._map, 'click', this._mouseClick, this)
@@ -338,7 +338,7 @@
                 clickable: false,
                 dashArray: '6,3'
             });
-            this._layerPaintPathTemp = leaflet.polyline([this._lastPoint, e.latlng], opts)
+            this._layerPaintPathTemp = L.polyline([this._lastPoint, e.latlng], opts)
                 .addTo(this._layerPaint);
         }
         else {
@@ -378,7 +378,7 @@
                 weight: 2,
                 clickable: false
             });
-            this._layerPaintPath = leaflet.polyline([this._lastPoint], opts).addTo(this._layerPaint);
+            this._layerPaintPath = L.polyline([this._lastPoint], opts).addTo(this._layerPaint);
         }
         if (this._layerPaintPath) {
             this._layerPaintPath.addLatLng(e.latlng);
@@ -397,7 +397,7 @@
             radius: 2,
             clickable: this._lastCircle ? true : false
         });
-        this._lastCircle = new leaflet.CircleMarker(e.latlng, markerOpts).addTo(this._layerPaint);
+        this._lastCircle = new L.CircleMarker(e.latlng, markerOpts).addTo(this._layerPaint);
         this._lastCircle.on('click', function () { this._finishPath(); }, this);
         // Save current location as last location
         this._lastPoint = e.latlng;
@@ -423,11 +423,11 @@
         this._layerPaintPathTemp = undefined;
     }, ɵ9$1 = function (position) {
         /** @type {?} */
-        var icon = leaflet.divIcon({
+        var icon = L.divIcon({
             className: 'leaflet-measure-tooltip',
             iconAnchor: [-5, -5]
         });
-        this._tooltip = leaflet.marker(position, {
+        this._tooltip = L.marker(position, {
             icon: icon,
             clickable: false
         }).addTo(this._layerPaint);
@@ -458,7 +458,7 @@
         }
     };
     /** @type {?} */
-    var measureControl = leaflet.Control.extend({
+    var measureControl = L.Control.extend({
         options: {
             position: 'topleft'
         },
@@ -485,10 +485,10 @@
             return new L_1$1.Control.Measure(options);
         };
     }
-    leaflet.Map.mergeOptions({
+    L.Map.mergeOptions({
         measureControl: false
     });
-    leaflet.Map.addInitHook(function () {
+    L.Map.addInitHook(function () {
         if (this.options.measureControl) {
             this.measureControl = new measureControl();
             this.addControl(this.measureControl);
@@ -500,8 +500,8 @@
      * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
      */
     var ɵ0$2 = function (map) {
-        this._container = leaflet.DomUtil.create('div', 'leaflet-control-mouseposition');
-        leaflet.DomEvent.disableClickPropagation(this._container);
+        this._container = L.DomUtil.create('div', 'leaflet-control-mouseposition');
+        L.DomEvent.disableClickPropagation(this._container);
         map.on('mousemove', this._onMouseMove, this);
         this._container.innerHTML = this.options.emptyString;
         return this._container;
@@ -509,9 +509,9 @@
         map.off('mousemove', this._onMouseMove);
     }, ɵ2$2 = function (e) {
         /** @type {?} */
-        var lng = this.options.lngFormatter ? this.options.lngFormatter(e.latlng.lng) : leaflet.Util.formatNum(e.latlng.lng, this.options.numDigits);
+        var lng = this.options.lngFormatter ? this.options.lngFormatter(e.latlng.lng) : L.Util.formatNum(e.latlng.lng, this.options.numDigits);
         /** @type {?} */
-        var lat = this.options.latFormatter ? this.options.latFormatter(e.latlng.lat) : leaflet.Util.formatNum(e.latlng.lat, this.options.numDigits);
+        var lat = this.options.latFormatter ? this.options.latFormatter(e.latlng.lat) : L.Util.formatNum(e.latlng.lat, this.options.numDigits);
         /** @type {?} */
         var value = this.options.lngFirst ? lng + this.options.separator + lat : lat + this.options.separator + lng;
         /** @type {?} */
@@ -519,7 +519,7 @@
         this._container.innerHTML = prefixAndValue;
     };
     /** @type {?} */
-    var positionControl = leaflet.Control.extend({
+    var positionControl = L.Control.extend({
         options: {
             position: 'bottomleft',
             separator: ' : ',
@@ -541,14 +541,14 @@
     //         return new L.Control.MousePosition(options);
     //     };
     // }
-    ( /** @type {?} */(leaflet.Control)).MousePosition = positionControl;
-    ( /** @type {?} */(leaflet.control)).mousePosition = function (options) {
-        return new ( /** @type {?} */(leaflet.Control)).MousePosition(options);
+    ( /** @type {?} */(L.Control)).MousePosition = positionControl;
+    ( /** @type {?} */(L.control)).mousePosition = function (options) {
+        return new ( /** @type {?} */(L.Control)).MousePosition(options);
     };
-    leaflet.Map.mergeOptions({
+    L.Map.mergeOptions({
         positionControl: false
     });
-    leaflet.Map.addInitHook(function () {
+    L.Map.addInitHook(function () {
         if (this.options.positionControl) {
             this.positionControl = new positionControl();
             this.addControl(this.positionControl);
@@ -663,7 +663,7 @@
             function () {
                 if (!this.visible)
                     return;
-                this.originalFeature = /** @type {?} */ (leaflet.GeoJSON.geometryToLayer(this.feature.toGeoJSON()));
+                this.originalFeature = /** @type {?} */ (L.GeoJSON.geometryToLayer(this.feature.toGeoJSON()));
                 this.feature.properties["_editing"] = true;
                 /** @type {?} */
                 var map = this.map.getMap();
@@ -672,7 +672,7 @@
                 if (!feature)
                     return;
                 /** @type {?} */
-                var editingLayer = this.editingLayer = new leaflet.FeatureGroup().addTo(map);
+                var editingLayer = this.editingLayer = new L.FeatureGroup().addTo(map);
                 //if the feature being edited is a multi-geometry
                 // ("MultiPoint", "MultiLineString", "MultiPolygon", "GeometryCollection")
                 // then we need to split them up into individual geometries and
@@ -683,7 +683,7 @@
                     this.feature.geometry.coordinates.each(function (childCoords) {
                         /** @type {?} */
                         var shape = { type: type_1, coordinates: childCoords };
-                        new leaflet.GeoJSON(shape, {
+                        new L.GeoJSON(shape, {
                             onEachFeature: function (feature, layer) {
                                 editingLayer.addLayer(layer);
                             }
@@ -692,7 +692,7 @@
                 }
                 else if (this.feature.geometry.type === 'GeometryCollection') {
                     this.feature.geometry.geometries.each(function (childGeometry) {
-                        new leaflet.GeoJSON(childGeometry, {
+                        new L.GeoJSON(childGeometry, {
                             onEachFeature: function (feature, layer) {
                                 editingLayer.addLayer(layer);
                             }
@@ -700,7 +700,7 @@
                     });
                 }
                 else {
-                    new leaflet.GeoJSON(feature.toGeoJSON()).eachLayer(function (layer) {
+                    new L.GeoJSON(feature.toGeoJSON()).eachLayer(function (layer) {
                         editingLayer.addLayer(layer);
                     });
                 }
@@ -901,7 +901,7 @@
                 ( /** @type {?} */(opts)).featureGroup = ( /** @type {?} */(this.options)).featureGroup;
                 this.handler = new leafletDraw.Draw.EditToolbar.Edit(map, opts);
                 /** @type {?} */
-                var container = leaflet.DomUtil.create('div', 'leaflet-edit-feature');
+                var container = L.DomUtil.create('div', 'leaflet-edit-feature');
                 return container;
             };
         /**
@@ -952,7 +952,7 @@
                 return result;
             };
         return EditFeature;
-    }(leaflet.Control));
+    }(L.Control));
     // import {
     //     Map, Layer, FeatureGroup, Control, GeoJSON, popup,
     //     Util, DomUtil, DomEvent, Evented
@@ -1527,10 +1527,10 @@
      */
     var ɵ0$5 = function (options) {
         esri.FeatureManager.prototype.initialize.call(this, options);
-        options = leaflet.Util.setOptions(this, options);
+        options = L.Util.setOptions(this, options);
         this._layers = {};
         this._leafletIds = {};
-        this.cluster = new leaflet.MarkerClusterGroup(options);
+        this.cluster = new L.MarkerClusterGroup(options);
         this._key = 'c' + (Math.random() * 1e9).toString(36).replace('.', '_');
         this.cluster.addEventParent(this);
     }, ɵ1$4 = function (map) {
@@ -1552,8 +1552,8 @@
             var layer = this._layers[geojson.id];
             if (!layer) {
                 /** @type {?} */
-                var newLayer = leaflet.GeoJSON.geometryToLayer(geojson, this.options);
-                newLayer.feature = leaflet.GeoJSON.asFeature(geojson);
+                var newLayer = L.GeoJSON.geometryToLayer(geojson, this.options);
+                newLayer.feature = L.GeoJSON.asFeature(geojson);
                 newLayer.defaultOptions = newLayer.options;
                 newLayer._leaflet_id = this._key + '_' + geojson.id;
                 this.resetStyle(newLayer.feature.id);
@@ -1838,7 +1838,7 @@
             /** @type {?} */
             var height = style.height || 16;
             /** @type {?} */
-            var icon = leaflet.icon({
+            var icon = L.icon({
                 iconUrl: style.content,
                 //base64 encoded string
                 iconSize: [width, height],
@@ -1849,10 +1849,10 @@
             var mopts = { icon: icon };
             if (geoplatform_client.Config.leafletPane)
                 ( /** @type {?} */(mopts)).pane = geoplatform_client.Config.leafletPane;
-            marker = leaflet.marker(latlng, mopts);
+            marker = L.marker(latlng, mopts);
         }
         else {
-            marker = leaflet.circleMarker(latlng, style);
+            marker = L.circleMarker(latlng, style);
         }
         /** @type {?} */
         var popupTemplate = this.options.popupTemplate || featurePopupTemplate;
@@ -1868,8 +1868,8 @@
         options = options || {};
         if (geoplatform_client.Config.leafletPane)
             options.pane = geoplatform_client.Config.leafletPane;
-        options.pointToLayer = leaflet.Util.bind(this.pointToLayerFn, this);
-        options.onEachFeature = leaflet.Util.bind(this.eachFeatureFn, this);
+        options.pointToLayer = L.Util.bind(this.pointToLayerFn, this);
+        options.onEachFeature = L.Util.bind(this.eachFeatureFn, this);
         // options.fields = ['FID', 'type', 'title', 'geometry'];
         //Increase from 1 to increase the distance away from the center that spiderfied markers are placed.
         // This needs to be increased to ensure all markers can be clicked
@@ -1886,7 +1886,7 @@
         if (geoplatform_client.Config.leafletPane)
             ( /** @type {?} */(svgOpts)).pane = geoplatform_client.Config.leafletPane;
         /** @type {?} */
-        var renderer = (leaflet.SVG && leaflet.svg(svgOpts)) || (leaflet.Canvas && leaflet.canvas());
+        var renderer = (L.SVG && L.svg(svgOpts)) || (L.Canvas && L.canvas());
         options.renderer = renderer;
         FeatureLayer$1.prototype.initialize.call(this, options);
         this.on('load', function () {
@@ -2323,7 +2323,7 @@
                 var wmvId = ( /** @type {?} */(this.wmsParams)).wmvId;
                 /** @type {?} */
                 var url = '/api/layers/' + wmvId + '/feature';
-                return geoplatform_client.Config.ualUrl + url + leaflet.Util.getParamString(params, url, true);
+                return geoplatform_client.Config.ualUrl + url + L.Util.getParamString(params, url, true);
             };
         /**
          * @param {?} content
@@ -2361,13 +2361,13 @@
                     return;
                 } // do nothing if there's an error
                 // Otherwise show the content in a popup, or something.
-                leaflet.popup({ maxWidth: 800 })
+                L.popup({ maxWidth: 800 })
                     .setLatLng(latlng)
                     .setContent(content)
                     .openOn(this._map);
             };
         return WMS;
-    }(leaflet.TileLayer.WMS));
+    }(L.TileLayer.WMS));
     /**
      * @param {?} layer
      * @return {?}
@@ -2487,7 +2487,7 @@
                 return times;
             };
         return WMST;
-    }(TimeDimension.Layer.WMS));
+    }(L.TimeDimension.Layer.WMS));
     /**
      * @param {?} gpLayer
      * @return {?}
@@ -2526,7 +2526,7 @@
             tdOpts.times = d1.toISOString() + '/' + d2.toISOString() + '/P1D';
         }
         return new WMST(leafletLayer, {
-            timeDimension: new TimeDimension(tdOpts),
+            timeDimension: new L.TimeDimension(tdOpts),
             proxy: proxyUrl
         });
     }
@@ -2592,10 +2592,10 @@
                     format: 'image/png'
                 };
                 /** @type {?} */
-                var wmtsParams = leaflet.Util.extend({}, this.defaultWmtsParams);
+                var wmtsParams = L.Util.extend({}, this.defaultWmtsParams);
                 /** @type {?} */
                 var tileSize = options.tileSize || this.options.tileSize;
-                if (options.detectRetina && leaflet.Browser.retina) {
+                if (options.detectRetina && L.Browser.retina) {
                     wmtsParams.width = wmtsParams.height = tileSize * 2;
                 }
                 else {
@@ -2609,7 +2609,7 @@
                 }
                 this.wmtsParams = wmtsParams;
                 this.matrixIds = options.matrixIds || this.getDefaultMatrix();
-                leaflet.Util.setOptions(this, options);
+                L.Util.setOptions(this, options);
             };
         /**
          * @param {?} map
@@ -2639,7 +2639,7 @@
                 nwPoint.x += 1;
                 nwPoint.y -= 1;
                 /** @type {?} */
-                var sePoint = nwPoint.add(new leaflet.Point(tileSize, tileSize));
+                var sePoint = nwPoint.add(new L.Point(tileSize, tileSize));
                 /** @type {?} */
                 var zoom = this._tileZoom;
                 /** @type {?} */
@@ -2685,7 +2685,7 @@
                 var qsi = url.indexOf("?");
                 if (qsi < 0 || (isTileMatrixTemplated < qsi && isTileRowTemplated < qsi || isTileColTemplated < qsi)) ;
                 else {
-                    url = url + leaflet.Util.getParamString(this.wmtsParams, url);
+                    url = url + L.Util.getParamString(this.wmtsParams, url);
                     if (isTileMatrixTemplated < 0)
                         url += "&TileMatrix=" + ident; //tileMatrixSet
                     if (isTileRowTemplated < 0)
@@ -2706,7 +2706,7 @@
          * @return {?}
          */
             function (params, noRedraw) {
-                leaflet.Util.extend(this.wmtsParams, params);
+                L.Util.extend(this.wmtsParams, params);
                 if (!noRedraw) {
                     this.redraw();
                 }
@@ -2727,7 +2727,7 @@
                 for (var i = 0; i < 22; i++) {
                     matrixIds3857[i] = {
                         identifier: "" + i,
-                        topLeftCorner: new leaflet.LatLng(20037508.3428, -20037508.3428)
+                        topLeftCorner: new L.LatLng(20037508.3428, -20037508.3428)
                     };
                 }
                 return matrixIds3857;
@@ -2746,7 +2746,7 @@
                 return this.options.subdomains[index];
             };
         return WMTS;
-    }(leaflet.TileLayer));
+    }(L.TileLayer));
     /**
      * @param {?} layer
      * @return {?}
@@ -2843,12 +2843,12 @@
                 }
                 this._url = url;
                 /** @type {?} */
-                var esriParams = leaflet.Util.extend({}, this.defaultESRIParams);
+                var esriParams = L.Util.extend({}, this.defaultESRIParams);
                 /** @type {?} */
                 var tileSize = options.tileSize || this.options.tileSize;
                 /** @type {?} */
                 var dim;
-                if (options.detectRetina && leaflet.Browser.retina) {
+                if (options.detectRetina && L.Browser.retina) {
                     dim = esriParams.height = tileSize * 2;
                 }
                 else {
@@ -2864,7 +2864,7 @@
                 //layer ids
                 // esriParams.layers = "show:" + esriParams.layers;
                 this.esriParams = esriParams;
-                leaflet.Util.setOptions(this, options);
+                L.Util.setOptions(this, options);
             };
         /**
          * @param {?} map
@@ -2903,16 +2903,16 @@
                 /** @type {?} */
                 var bbox = [nw.x, se.y, se.x, nw.y].join(',');
                 /** @type {?} */
-                var url = leaflet.Util.template(this._url, { s: this._getSubdomain(tilePoint) });
+                var url = L.Util.template(this._url, { s: this._getSubdomain(tilePoint) });
                 /** @type {?} */
-                var params = leaflet.Util.extend({}, this.esriParams);
+                var params = L.Util.extend({}, this.esriParams);
                 params.layers = "show:" + params.layers;
                 //convert to esri-special SR for spherical mercator
                 if (params.bboxsr === 'EPSG:3857')
                     params.bboxsr = '102100';
                 if (params.imagesr === 'EPSG:3857')
                     params.imagesr = '102100';
-                return url + leaflet.Util.getParamString(params, url, true) + '&BBOX=' + bbox;
+                return url + L.Util.getParamString(params, url, true) + '&BBOX=' + bbox;
             };
         /**
          * @param {?} params
@@ -2925,7 +2925,7 @@
          * @return {?}
          */
             function (params, noRedraw) {
-                leaflet.Util.extend(this.esriParams, params);
+                L.Util.extend(this.esriParams, params);
                 if (!noRedraw) {
                     this.redraw();
                 }
@@ -2945,7 +2945,7 @@
                 return this.options.subdomains[index];
             };
         return EsriTileLayer;
-    }(leaflet.TileLayer));
+    }(L.TileLayer));
     if (( /** @type {?} */(window)).L) {
         /** @type {?} */
         var L_1$5 = ( /** @type {?} */(window)).L;
@@ -2963,7 +2963,7 @@
      * @return {?}
      */
     function OSMLayerFactory() {
-        return new leaflet.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        return new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             minZoom: 1, maxZoom: 19,
             attribution: 'Map data (c) <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
         });
@@ -3204,7 +3204,7 @@
             /** @type {?} */
             var height = style.height || 16;
             /** @type {?} */
-            var icon = leaflet.icon({
+            var icon = L.icon({
                 iconUrl: style.content,
                 //base64 encoded string
                 iconSize: [width, height],
@@ -3215,7 +3215,7 @@
             var mopts = { icon: icon };
             if (geoplatform_client.Config.leafletPane)
                 ( /** @type {?} */(mopts)).pane = geoplatform_client.Config.leafletPane;
-            marker = leaflet.marker(latlng, mopts);
+            marker = L.marker(latlng, mopts);
         }
         else {
             style.radius = style.radius || style['stroke-width'] || 4;
@@ -3225,7 +3225,7 @@
             style.fillOpacity = style.opacity || style['fill-opacity'] || 0.3;
             style.fillColor = style.color || style.fill;
             style.renderer = this.options.renderer; //important for pane!
-            marker = leaflet.circleMarker(latlng, style);
+            marker = L.circleMarker(latlng, style);
         }
         /** @type {?} */
         var popupTemplate = this.options.popupTemplate || featurePopupTemplate;
@@ -3249,10 +3249,10 @@
         if (geoplatform_client.Config.leafletPane)
             ( /** @type {?} */(svgOpts)).pane = geoplatform_client.Config.leafletPane;
         /** @type {?} */
-        var renderer = (leaflet.SVG && leaflet.svg(svgOpts)) || (leaflet.Canvas && leaflet.canvas());
+        var renderer = (L.SVG && L.svg(svgOpts)) || (L.Canvas && L.canvas());
         options.renderer = renderer;
-        options.pointToLayer = leaflet.Util.bind(this.pointToLayerFn, this);
-        options.onEachFeature = leaflet.Util.bind(this.eachFeatureFn, this);
+        options.pointToLayer = L.Util.bind(this.pointToLayerFn, this);
+        options.onEachFeature = L.Util.bind(this.eachFeatureFn, this);
         // options.fields = ['FID', 'type', 'title', 'geometry'];
         FeatureLayer$2.prototype.initialize.call(this, options);
         this.on('load', function () {
@@ -3525,7 +3525,7 @@
                     style.opacity = style.opacity || 0.9;
                     style.fillOpacity = style.opacity;
                     style.fillColor = style.color;
-                    return leaflet.circleMarker(latlng, style);
+                    return L.circleMarker(latlng, style);
                 }
             };
             return _this;
@@ -4633,11 +4633,11 @@
                 // var coordinates = json.coordinates;
                 if (!this._featureLayer) {
                     // _featureLayer = geoJSON([], _geoJsonLayerOpts).addTo(_mapInstance);
-                    this._featureLayer = leaflet.featureGroup().addTo(this._mapInstance);
+                    this._featureLayer = L.featureGroup().addTo(this._mapInstance);
                 }
                 /** @type {?} */
                 var opts = jQuery$9.extend({}, this._geoJsonLayerOpts);
-                leaflet.geoJSON(json, opts).eachLayer(function (l) { return _this.addFeatureLayer(l); });
+                L.geoJSON(json, opts).eachLayer(function (l) { return _this.addFeatureLayer(l); });
                 if (typeof (fireEvent) === 'undefined' || fireEvent === true)
                     this.touch('features:changed');
                 else
@@ -4701,7 +4701,7 @@
                     //remove existing
                     this._featureLayer.removeLayer(layer);
                     //add replacement
-                    leaflet.geoJSON(featureJson, this._geoJsonLayerOpts)
+                    L.geoJSON(featureJson, this._geoJsonLayerOpts)
                         .eachLayer(function (l) { return _this.addFeatureLayer(l); });
                     this.touch("map:feature:changed");
                 }
@@ -4878,7 +4878,7 @@
          */
             function (layer) {
                 var _this = this;
-                if (!( /** @type {?} */(layer)).feature && layer instanceof leaflet.LayerGroup) {
+                if (!( /** @type {?} */(layer)).feature && layer instanceof L.LayerGroup) {
                     layer.eachLayer(function (child) {
                         _this._addFeatureLayer(child);
                     });

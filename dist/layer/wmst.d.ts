@@ -1,6 +1,7 @@
 import { TileLayer } from 'leaflet';
-import * as TimeDimension from 'leaflet-timedimension/dist/leaflet.timedimension.min';
-declare class WMST extends TimeDimension.Layer.WMS {
+import 'leaflet-timedimension/dist/leaflet.timedimension.src';
+declare const WMST_base: any;
+declare class WMST extends WMST_base {
     private _baseLayer;
     constructor(layer: TileLayer.WMS, opts?: any);
     _parseTimeDimensionFromCapabilities(xml: any): any;
