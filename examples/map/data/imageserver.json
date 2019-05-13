@@ -1,0 +1,155 @@
+{
+"_modified": 1544807886523,
+"_versionId": 3,
+"_status": "current",
+"type": "Layer",
+"id": "2e738952d5cf2b50c2f4ebd63cf06416",
+"uri": "http://www.geoplatform.gov/id/layer/780217392927ca45bdab2d07f8f80c88",
+"modified": 1544807886523,
+"label": "S1A_water_extent_20180914_111440_111617",
+"title": "S1A_water_extent_20180914_111440_111617",
+"description": "serviceDescription: Hurricance_Florence_2018/S1A_water_extent_20180914_111440_111617\ndescription: Hurricance_Florence_2018/S1A_water_extent_20180914_111440_111617\ndocumentInfo.Comments: null\ndocumentInfo.Subject: null\ndocumentInfo.Title: null\n",
+"servicedBy": [
+"a4910e4b83f8af9fc1d91adc20b3f621"
+],
+"services": [
+{
+"_score": 0.0017436796,
+"_modified": 1557489772418,
+"_versionId": 3,
+"_status": "current",
+"type": "regp:Service",
+"id": "a4910e4b83f8af9fc1d91adc20b3f621",
+"uri": "http://www.geoplatform.gov/id/service/b6461b5a40ae4cb254f2de886f9c1eb2",
+"modified": 1553798537664,
+"label": "Hurricance_Florence_2018/S1A_water_extent_20180914_111440_111617",
+"title": "Hurricance_Florence_2018/S1A_water_extent_20180914_111440_111617",
+"description": "serviceDescription: Hurricance_Florence_2018/S1A_water_extent_20180914_111440_111617\ndescription: Hurricance_Florence_2018/S1A_water_extent_20180914_111440_111617\ndocumentInfo.Comments: null\ndocumentInfo.Subject: null\ndocumentInfo.Title: null\n",
+"classifiers": {},
+"status": "submitted",
+"statistics": {
+"timestamp": 1557489617801,
+"online": true,
+"compliant": true,
+"days_online": 146,
+"days_in_service": 122,
+"percent_uptime": 96,
+"percent_uptime_7": 100,
+"speed": 0.39,
+"score": 99.69,
+"average_speed": 0.52,
+"average_speed_7": 0.38,
+"reliability": 98,
+"trend_7": 1
+},
+"temporal": {},
+"operatesOn": [
+"2e738952d5cf2b50c2f4ebd63cf06416"
+],
+"_analyzed": false,
+"created": 1544807885862,
+"createdBy": "JacobStephens",
+"extent": {
+"minx": -80.60065524019004,
+"maxx": -76.19823624028577,
+"miny": 31.03134071105512,
+"maxy": 38.870492963650996
+},
+"href": "https://maps.disasters.nasa.gov/ags03/rest/services/Hurricance_Florence_2018/S1A_water_extent_20180914_111440_111617/ImageServer",
+"identifiers": [
+"ngp:b1e82d5c-31aa-411a-aa26-18713ca6075c"
+],
+"keywords": [
+"DR4393",
+"DR4394"
+],
+"lastModifiedBy": "unknown",
+"visibility": "public",
+"serviceType": {
+"id": "bcdf764e52064c84323f3f1baea7e245",
+"uri": "http://www.geoplatform.gov/spec/esri-image-rest",
+"type": "dct:Standard",
+"title": "Esri REST Image Service",
+"description": "Esri ArcGIS Image Server REST API",
+"label": "Esri REST Image Service",
+"resourceType": [
+"ServiceType"
+],
+"_created": 1553797726679,
+"modified": 1553797726679,
+"_modified": 1553797726679,
+"_status": "current",
+"_createdBy": "gp-admin",
+"_lastModifiedBy": "gp-admin",
+"_versionId": 1
+}
+}
+],
+"thumbnail": {
+"label": "Layer Thumbnail",
+"mediaType": "image/png",
+"title": "Layer Thumbnail"
+},
+"statistics": {
+"timestamp": 1557489617801,
+"online": true,
+"compliant": true,
+"days_online": 146,
+"days_in_service": 122,
+"percent_uptime": 96,
+"percent_uptime_7": 100,
+"speed": 0.39,
+"score": 99.69,
+"average_speed": 0.52,
+"average_speed_7": 0.38,
+"reliability": 98,
+"trend_7": 1
+},
+"layerName": "S1A_water_extent_20180914_111440_111617",
+"layerType": "ImageLayer",
+"usedBy": [
+{
+"_score": 0.0016515281,
+"id": "9785f0e5e20b86dbc752bda603ecc5a7",
+"uri": "http://www.geoplatform.gov/id/community/bdc6b64f43e1bc0831d1b0cb85cc0226",
+"type": "Community",
+"label": "Disasters",
+"title": "Disasters",
+"status": "submitted",
+"modified": 1553798537664,
+"_modified": 1553798537664,
+"landingPage": "https://disasters.geoplatform.gov/",
+"_analyzed": false,
+"_status": "current",
+"_versionId": 1,
+"created": 1538671104204,
+"createdBy": "laraduffy",
+"lastModifiedBy": "laraduffy",
+"resourceTypes": [
+"foaf:Group",
+"foaf:Agent",
+"Community"
+],
+"visibility": "public"
+}
+],
+"_analyzed": false,
+"created": 1544807886523,
+"createdBy": "JacobStephens",
+"extent": {
+"minx": -80.60065524019004,
+"maxx": -76.19823624028577,
+"miny": 31.03134071105512,
+"maxy": 38.870492963650996
+},
+"keywords": [
+"DR4393",
+"DR4394"
+],
+"lastModifiedBy": "unknown",
+"minScale": 0,
+"maxScale": 0,
+"formats": [
+"esriImageServiceDataTypeGeneric"
+]
+}

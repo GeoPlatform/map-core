@@ -4,6 +4,8 @@ GeoPlatformClient.Config.configure({
     ualUrl : 'https://ual.geoplatform.gov'
 });
 
+const GeoPlatformMapCore = geoplatform.map;
+
 /*
  * Optionally, refresh list of service types after configuring API endpoint above
  * or continue to use default list provided in library
