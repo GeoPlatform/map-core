@@ -1,6 +1,9 @@
 {
     "$schema": "./node_modules/ng-packagr/package.schema.json",
-    "name": "@geoplatform/map",
+    "name": "geoplatform.map",
+    "main": "dist/bundles/esm2015/index.js",
+    "module": "dist/bundles/esm2015/index.js",
+    "typings": "dist/index.d.ts",
     "version": "0.3.0",
     "license": "MIT",
     "ngPackage": {
@@ -42,7 +45,7 @@
         "name": "GeoPlatformMapCore",
         "moduleName": "GeoPlatformMapCore",
         "amdId": "GeoPlatformMapCore",
-        "dest": "dist/@geoplatform/map"
+        "dest": "dist"
     },
     "whitelistedNonPeerDependencies": [
         "."
