@@ -8,7 +8,7 @@ GeoPlatformClient.Config.configure({
  * Optionally, refresh list of service types after configuring API endpoint above
  * or continue to use default list provided in library
  */
-//GeoPlatformMapCore.ServiceTypes.refresh();
+//GeoPlatform.mapcore.ServiceTypes.refresh();
 
 //define the application's angular module and make sure to include the $httpProvider
 // in the config function
@@ -31,7 +31,7 @@ let mapOptions = {
 };
 
 let leafletMap = L.map(elem, mapOptions);
-let mapInstance = GeoPlatformMapCore.MapFactory.get();
+let mapInstance = GeoPlatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //use Angular-based service instead of default (JQuery)

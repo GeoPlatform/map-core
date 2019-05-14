@@ -1,7 +1,7 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('leaflet-draw'), require('leaflet.markercluster'), require('leaflet-timedimension/dist/leaflet.timedimension.src'), require('esri-leaflet'), require('jquery'), require('q'), require('leaflet'), require('geoplatform.client')) :
-    typeof define === 'function' && define.amd ? define('geoplatform.map', ['exports', 'leaflet-draw', 'leaflet.markercluster', 'leaflet-timedimension/dist/leaflet.timedimension.src', 'esri-leaflet', 'jquery', 'q', 'leaflet', 'geoplatform.client'], factory) :
-    (factory((global.geoplatform = global.geoplatform || {}, global.geoplatform.map = {}),global.L.Draw,null,null,global.L.esri,global.jQuery,global.Q,global.L,global.GeoPlatformClient));
+    typeof define === 'function' && define.amd ? define('@geoplatform/mapcore', ['exports', 'leaflet-draw', 'leaflet.markercluster', 'leaflet-timedimension/dist/leaflet.timedimension.src', 'esri-leaflet', 'jquery', 'q', 'leaflet', 'geoplatform.client'], factory) :
+    (factory((global.GeoPlatform = global.GeoPlatform || {}, global.GeoPlatform.mapcore = {}),global.L.Draw,null,null,global.L.esri,global.jQuery,global.Q,global.L,global.GeoPlatformClient));
 }(this, (function (exports,leafletDraw,leaflet_markercluster,leaflet_timedimension_src,esri,jquery,Q,L,geoplatform_client) { 'use strict';
 
     /**
@@ -1636,7 +1636,7 @@
         return this._layers[id];
     };
     /** @type {?} */
-    var FeatureLayer$1 = esri.FeatureManager.extend({
+    var BaseClusteredFeatureLayer = esri.FeatureManager.extend({
         statics: {
             EVENTS: 'click dblclick mouseover mouseout mousemove contextmenu popupopen popupclose',
             CLUSTEREVENTS: 'clusterclick clusterdblclick clustermouseover clustermouseout clustermousemove clustercontextmenu'
@@ -1668,13 +1668,6 @@
         eachFeature: ɵ9$2,
         getFeature: ɵ10$2
     });
-    /**
-     * @param {?} options
-     * @return {?}
-     */
-    function featureLayer(options) {
-        return new FeatureLayer$1(options);
-    }
 
     /**
      * @fileoverview added by tsickle
@@ -1888,18 +1881,18 @@
         /** @type {?} */
         var renderer = (L.SVG && L.svg(svgOpts)) || (L.Canvas && L.canvas());
         options.renderer = renderer;
-        FeatureLayer$1.prototype.initialize.call(this, options);
+        BaseClusteredFeatureLayer.prototype.initialize.call(this, options);
         this.on('load', function () {
             if (typeof this.options.zIndex !== 'undefined')
                 this.setZIndex(this.options.zIndex);
         });
     }, ɵ3$3 = function (map) {
-        FeatureLayer$1.prototype.onAdd.call(this, map);
+        BaseClusteredFeatureLayer.prototype.onAdd.call(this, map);
         if (this.options.layerId) {
             this.loadStyle(this.options.layerId);
         }
     }, ɵ4$3 = function (features) {
-        FeatureLayer$1.prototype.createLayers.call(this, features);
+        BaseClusteredFeatureLayer.prototype.createLayers.call(this, features);
         this.setVisibility(this.currentVisibility);
         this.setOpacity(this.currentOpacity);
     }, ɵ5$3 = function (index) {
@@ -2063,7 +2056,7 @@
      * Provides custom style loading and point-ilization as well
      * as adding visibility and opacity manipulation methods
       @type {?} */
-    var ClusteredFeatureLayer = FeatureLayer$1.extend({
+    var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
         currentVisibility: true,
         currentOpacity: 1.0,
         _gpStyle: { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
@@ -2973,6 +2966,20 @@
      * @fileoverview added by tsickle
      * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
      */
+    /*
+     * Extend base Leaflet layer class to ensure there's always a function
+     * available for modifying zindex and opacity, even if nothing actually
+     * happens inside.
+     */
+    L.Layer.include({
+        // Redefining a method
+        setZIndex: function (value) {
+            //do nothing in this abstract class, let impls do the work
+        },
+        setOpacity: function (value) {
+            //do nothing in this abstract class, let impls do the work
+        }
+    });
     /**
      * Fetches style information from GeoPlatform UAL
      * @param {?=} service
@@ -2990,7 +2997,56 @@
             });
         };
     }
-    var LayerFactory = /** @class */ (function () {
+    /**
+     * Layer Factory
+     *
+     * Used to instantiate GeoPlatform Layer objects as Leaflet layer instances
+     * capable of being rendered on Leaflet maps.
+     *
+     * Usage:
+     *      let leafletLayer = LayerFactory.create(gpLayerObj);
+     *
+     *
+     * Basic layer support is built in, but additional layer types can be supported
+     * by registering new factory methods.
+     *
+     * Example:
+     *      LayerFactory.register( (gpLayerObj) => {
+     *          let isSupported = false;
+     *          //implement test to verify supported layer type
+     *          // ...
+     *          if(isSupported) {
+     *              return new MyCustomLayerClass(gpLayerObj);
+     *          }
+     *          return null;
+     *      });
+     *
+     */
+    var /**
+     * Layer Factory
+     *
+     * Used to instantiate GeoPlatform Layer objects as Leaflet layer instances
+     * capable of being rendered on Leaflet maps.
+     *
+     * Usage:
+     *      let leafletLayer = LayerFactory.create(gpLayerObj);
+     *
+     *
+     * Basic layer support is built in, but additional layer types can be supported
+     * by registering new factory methods.
+     *
+     * Example:
+     *      LayerFactory.register( (gpLayerObj) => {
+     *          let isSupported = false;
+     *          //implement test to verify supported layer type
+     *          // ...
+     *          if(isSupported) {
+     *              return new MyCustomLayerClass(gpLayerObj);
+     *          }
+     *          return null;
+     *      });
+     *
+     */ LayerFactory = /** @class */ (function () {
         function LayerFactory() {
             this.factories = []; // A list of configured factory functors to instantiate layers
             this.init();
@@ -3183,6 +3239,8 @@
      */
     /** @type {?} */
     var jQuery$8 = jquery;
+    /** @type {?} */
+    var EsriFeatureLayer = esri.FeatureLayer;
     var ɵ0$7 = function (feature, latlng) {
         /** @type {?} */
         var style = feature && feature.properties ? feature.properties.style : null;
@@ -3254,7 +3312,7 @@
         options.pointToLayer = L.Util.bind(this.pointToLayerFn, this);
         options.onEachFeature = L.Util.bind(this.eachFeatureFn, this);
         // options.fields = ['FID', 'type', 'title', 'geometry'];
-        FeatureLayer$2.prototype.initialize.call(this, options);
+        FeatureLayer$1.prototype.initialize.call(this, options);
         this.on('load', function () {
             if (typeof this.options.zIndex !== 'undefined')
                 this.setZIndex(this.options.zIndex);
@@ -3351,7 +3409,7 @@
      * Provides custom style loading and point-ilization as well
      * as adding visibility and opacity manipulation methods
       @type {?} */
-    var FeatureLayer$2 = esri.FeatureLayer.extend({
+    var FeatureLayer$1 = EsriFeatureLayer.extend({
         _gpStyle: { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
         /**
              * @param {object} feature - GeoJSON Point Feature
@@ -5314,11 +5372,11 @@
     exports.DefaultBaseLayer = DefaultBaseLayer;
     exports.LayerFactory = LayerFactory$1;
     exports.OSMLayerFactory = OSMLayerFactory;
-    exports.ESRIClusterFeatureLayer = featureLayer;
+    exports.BaseClusteredFeatureLayer = BaseClusteredFeatureLayer;
     exports.ClusteredFeatureLayer = ClusteredFeatureLayer;
     exports.clusteredFeatures = clusteredFeatures;
     exports.geoJsonFeed = geoJsonFeed;
-    exports.FeatureLayer = FeatureLayer$2;
+    exports.FeatureLayer = FeatureLayer$1;
     exports.WMS = WMS;
     exports.wms = wms;
     exports.WMST = WMST;
@@ -5332,10 +5390,9 @@
     exports.ServiceTypes = types;
     exports.PopupTemplate = featurePopupTemplate;
     exports.StyleResolver = featureStyleResolver;
-    exports.ɵa = FeatureLayer$1;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-//# sourceMappingURL=geoplatform.map.umd.js.map
+//# sourceMappingURL=geoplatform-mapcore.umd.js.map

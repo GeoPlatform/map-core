@@ -11,7 +11,7 @@ GeoPlatformClient.Config.configure({
  * Optionally, refresh list of service types after configuring API endpoint above
  * or continue to use default list provided in library
  */
-//GeoPlatformMapCore.ServiceTypes.refresh();
+//GeoPlatform.mapcore.ServiceTypes.refresh();
 
 
 let elem = document.getElementById('map');
@@ -29,7 +29,7 @@ let mapOptions = {
 let leafletMap = L.map(elem, mapOptions);
 
 
-let mapInstance = GeoPlatformMapCore.MapFactory.get();
+let mapInstance = GeoPlatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 mapInstance.setErrorHandler( (e) => {
     console.log("Error Handler : " + e.id + " - " + e.message);
@@ -40,7 +40,7 @@ mapInstance.on('layer:error', (err) => {
 });
 
 //load OpenStreet Map layer using API and set as base layer
-GeoPlatformMapCore.OSM.get().then(osm => {
+GeoPlatform.mapcore.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
     mapInstance.addLayers([LAYER]);
 }).catch(e => {

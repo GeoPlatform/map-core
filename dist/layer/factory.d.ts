@@ -1,5 +1,30 @@
 import { Layer } from "leaflet";
 import { LayerService } from 'geoplatform.client';
+/**
+ * Layer Factory
+ *
+ * Used to instantiate GeoPlatform Layer objects as Leaflet layer instances
+ * capable of being rendered on Leaflet maps.
+ *
+ * Usage:
+ *      let leafletLayer = LayerFactory.create(gpLayerObj);
+ *
+ *
+ * Basic layer support is built in, but additional layer types can be supported
+ * by registering new factory methods.
+ *
+ * Example:
+ *      LayerFactory.register( (gpLayerObj) => {
+ *          let isSupported = false;
+ *          //implement test to verify supported layer type
+ *          // ...
+ *          if(isSupported) {
+ *              return new MyCustomLayerClass(gpLayerObj);
+ *          }
+ *          return null;
+ *      });
+ *
+ */
 declare class LayerFactory {
     private factories;
     private service;

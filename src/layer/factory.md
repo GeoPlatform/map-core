@@ -3,7 +3,7 @@
 
 ```js
 import { LayerService, NodeHttpClient, Config } from 'geoplatform.client';
-import { LayerFactory, MapInstance } from 'geoplatform.mapcore';
+import { LayerFactory, MapInstance } from '@geoplatform/mapcore';
 
 let map = ... //create Leaflet map
 let mapInst = ... //create and bind MapCore MapInstance to map
@@ -34,7 +34,7 @@ The following sections show examples of creating leaflet layers for various type
 ## WMS (Web Map Service)
 
 ```js
-import { LayerFactory, WMS, wms } from 'geoplatform.mapcore';
+import { LayerFactory, WMS, wms } from '@geoplatform/mapcore';
 
 let wmsLayer = ... //GP Layer Object with WMS Service associated
 
@@ -51,7 +51,7 @@ let c = wms(wmsLayer);
 
 ## WMTS (Web Map Tile Service)
 ```js
-import { LayerFactory, WMTS, wmts } from 'geoplatform.mapcore';
+import { LayerFactory, WMTS, wmts } from '@geoplatform/mapcore';
 
 let wmtsLayer = ... //GP Layer Object with WMTS Service associated
 
@@ -68,7 +68,7 @@ let c = wmts(wmtsLayer);
 
 ## WMST (Web Map Service with Time)
 ```js
-import { LayerFactory, WMST, wmst } from 'geoplatform.mapcore';
+import { LayerFactory, WMST, wmst } from '@geoplatform/mapcore';
 
 let wmstLayer = ... //GP Layer Object with WMST Service associated
 
@@ -85,7 +85,7 @@ let c = wmst(wmstLayer);
 
 ## Feature Layer
 ```js
-import { LayerFactory, FeatureLayer } from 'geoplatform.mapcore';
+import { LayerFactory, FeatureLayer } from '@geoplatform/mapcore';
 
 let featureLayer = ... //GP Layer Object with Esri FeatureServer Service associated
 
@@ -103,7 +103,7 @@ Like Feature Layers, but render features in clusters to prevent over-saturating 
 Leaflet rendering in the client.
 
 ```js
-import { LayerFactory, clusteredFeatures } from 'geoplatform.mapcore';
+import { LayerFactory, clusteredFeatures } from '@geoplatform/mapcore';
 
 import featureLayer = ... // GP Layer object with Esri FeatureServer Service associated
 
@@ -117,9 +117,9 @@ let b = clusteredFeatures(featureLayer);
 ```
 
 
-## GeoJson Feed Layer
+## GeoJSON Feed Layer
 ```js
-import { LayerFactory, geoJsonFeed } from 'geoplatform.mapcore';
+import { LayerFactory, geoJsonFeed } from '@geoplatform/mapcore';
 
 import feedLayer = ... // GP Layer object with GeoJSON Feed Service associated
 
@@ -136,7 +136,7 @@ let b = geoJsonFeed(feedLayer);
 Used to display layers hosted by Esri Map Servers
 
 ```js
-import { LayerFactory, EsriTileLayer } from 'geoplatform.mapcore';
+import { LayerFactory, ESRITileLayer } from '@geoplatform/mapcore';
 
 //The following are all equivalent
 //...
@@ -146,14 +146,14 @@ import layer = ... // GP Layer object with Esri MapServer Service associated
 let a = LayerFactory.create(layer);
 
 //create leaflet layer by passing GP Layer object to convenience function
-let b = new EsriTileLayer(url, opts);
+let b = new ESRITileLayer(url, opts);
 ```
 
 
 ## Registering Additional Layer Support
 
 ```js
-import { LayerFactory } from 'geoplatform.mapcore';
+import { LayerFactory } from '@geoplatform/mapcore';
 function customFactoryFn(gpLayer) {
     let result = null;
     let isSupported = false;

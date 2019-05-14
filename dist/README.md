@@ -35,13 +35,13 @@ if(!Config.ualUrl) {
 }
 ...
 //then start importing map core components
-import { MapInstance } from 'geoplatform.mapcore';
+import { MapInstance } from '@geoplatform/mapcore';
 ...
 ```
 
 __Note:__ You must configure the `GeoPlatformClient.Config` environment
 variables in order to utilize certain features of Map Core, such as creating
-Leaflet layers using `GeoPlatformMapCore.LayerFactory`.  
+Leaflet layers using `GeoPlatform.mapcore.LayerFactory`.  
 
 ```html
 <script src="geoplatform.client.js"></script>
@@ -54,7 +54,7 @@ Leaflet layers using `GeoPlatformMapCore.LayerFactory`.
         ...
     });
 </script>
-<script src="geoplatform.mapcore.js"></script>
+<script src="geoplatform-mapcore.umd.min.js"></script>
 ```
 
 See [Environment Variables](Environment_Variables) below for details on what is expected to be provided.
@@ -63,11 +63,11 @@ See [Environment Variables](Environment_Variables) below for details on what is 
 
 
 
-Alternatively, load Map Core (and Client API) distribution files from CDN:
+<!-- Alternatively, load Map Core (and Client API) distribution files from CDN:
 ```html
 <script src="http://dyk46gk69472z.cloudfront.net/gp.mapcore/_VERSION_/js/geoplatform.client.js"></script>
 <script src="http://dyk46gk69472z.cloudfront.net/gp.mapcore/_VERSION_/js/geoplatform.mapcore.js"></script>
-```
+``` -->
 
 
 ## Environment Variables
@@ -116,10 +116,10 @@ The default services used within Map Core components are jQuery-based,
 but can be overridden by passing the desired service implementation.
 
 ```javascript
-//example using 'GeoPlatformClient' and 'GeoPlatformMapCore' global variables
+//example using 'GeoPlatformClient' and 'GeoPlatform.mapcore' global variables
 //use angular $http to fetch OSM base layer definition
 let ngLayerSvc = new GeoPlatformClient.LayerService(new GeoPlatformClient.NGHttpClient());
-GeoPlatformMapCore.OSM.get(ngLayerSvc).then( layer => {...}).catch( e => {...});
+GeoPlatform.mapcore.OSM.get(ngLayerSvc).then( layer => {...}).catch( e => {...});
 ```
 
 To change the underlying service transport used by MapInstance, set the
@@ -127,7 +127,7 @@ desired HttpClient implementation like so:
 
 ```javascript
 //use angular $http to load and save maps inside MapInstance
-let mapInstance = GeoPlatformMapCore.MapFactory.get();
+let mapInstance = GeoPlatform.mapcore.MapFactory.get();
 mapInstance.setHttpClient(new GeoPlatformClient.NGHttpClient());  //use angular
 ```
 

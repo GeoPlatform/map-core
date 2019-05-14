@@ -17,7 +17,7 @@ import {
 import {WMS, wms} from './wms';
 import {WMST, wmst} from './wmst';
 import {WMTS, wmts} from './wmts';
-import ESRITileLayer from './L.TileLayer.ESRI';
+import ESRITileLayer from './esri-tile-layer';
 import OSMLayerFactory from './osm-factory';
 import { Config, ItemTypes, LayerService, JQueryHttpClient } from 'geoplatform.client';
 
@@ -30,6 +30,29 @@ interface LayerOptions {
     url ?: string,
     useCors ?: boolean
 };
+
+
+
+
+/*
+ * Extend base Leaflet layer class to ensure there's always a function
+ * available for modifying zindex and opacity, even if nothing actually
+ * happens inside.
+ */
+Layer.include({
+
+    // Redefining a method
+    setZIndex: function(value : number) {
+        //do nothing in this abstract class, let impls do the work
+    },
+
+    setOpacity: function(value : number) {
+        //do nothing in this abstract class, let impls do the work
+    }
+
+});
+
+
 
 
 /**
@@ -57,7 +80,31 @@ function styleResolverFactory(service ?: LayerService) : any {
 
 
 
-
+/**
+ * Layer Factory
+ *
+ * Used to instantiate GeoPlatform Layer objects as Leaflet layer instances
+ * capable of being rendered on Leaflet maps.
+ *
+ * Usage:
+ *      let leafletLayer = LayerFactory.create(gpLayerObj);
+ *
+ *
+ * Basic layer support is built in, but additional layer types can be supported
+ * by registering new factory methods.
+ *
+ * Example:
+ *      LayerFactory.register( (gpLayerObj) => {
+ *          let isSupported = false;
+ *          //implement test to verify supported layer type
+ *          // ...
+ *          if(isSupported) {
+ *              return new MyCustomLayerClass(gpLayerObj);
+ *          }
+ *          return null;
+ *      });
+ *
+ */
 class LayerFactory {
 
     private factories : Function[];

@@ -20,27 +20,22 @@ let mapOptions = {
 let leafletMap = L.map(elem, mapOptions);
 
 if(typeof(L.Control.MiniMap) !== 'undefined') {
-    let minimapBaseLayer = GeoPlatformMapCore.OSMLayerFactory();
+    let minimapBaseLayer = GeoPlatform.mapcore.OSMLayerFactory();
     new L.Control.MiniMap(minimapBaseLayer,{position:"bottomleft"}).addTo(leafletMap);
 }
 
-//referencing GeoPlatformMapCore.MousePosition control using Leaflet shorthand
+//referencing GeoPlatform.mapcore.MousePosition control using Leaflet shorthand
 L.control.mousePosition({ separator: ' , ', numDigits: 3 }).addTo(leafletMap);
 
 L.control.scale().addTo(leafletMap);
 
-let mapInstance = GeoPlatformMapCore.MapFactory.get();
+let mapInstance = GeoPlatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //load OpenStreet Map layer using API and set as base layer
-GeoPlatformMapCore.OSM.get().then(osm => {
+GeoPlatform.mapcore.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
-
-
     handleCircularReference();
-
-
-
 }).catch(e => { console.log("Unable to get OSM base layer"); });
 
 
@@ -50,7 +45,7 @@ function handleCircularReference() {
     let service = {
         type: GeoPlatformClient.ItemTypes.SERVICE,
         label: "Circular Reference Service",
-        serviceType: GeoPlatformMapCore.ServiceTypes.WMS,
+        serviceType: GeoPlatform.mapcore.ServiceTypes.WMS,
         href: "http://www.google.com"
     };
     let layer = {

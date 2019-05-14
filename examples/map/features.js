@@ -7,7 +7,7 @@ GeoPlatformClient.Config.configure({
  * Optionally, refresh list of service types after configuring API endpoint above
  * or continue to use default list provided in library
  */
-//GeoPlatformMapCore.ServiceTypes.refresh();
+//GeoPlatform.mapcore.ServiceTypes.refresh();
 
 
 //NOTE: This example requires the Leaflet.Draw plugin
@@ -25,11 +25,11 @@ let mapOptions = {
 };
 
 var leafletMap = L.map(elem, mapOptions);
-var mapInstance = GeoPlatformMapCore.MapFactory.get();
+var mapInstance = GeoPlatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //load OpenStreet Map layer using API and set as base layer
-GeoPlatformMapCore.OSM.get().then(osm => {
+GeoPlatform.mapcore.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
     initFeatures();
 }).catch(e => { console.log("Unable to get OSM base layer"); });

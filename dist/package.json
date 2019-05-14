@@ -1,9 +1,9 @@
 {
   "$schema": "./node_modules/ng-packagr/package.schema.json",
-  "name": "geoplatform.map",
-  "main": "bundles/geoplatform.map.umd.js",
-  "module": "fesm5/geoplatform.map.js",
-  "typings": "geoplatform.map.d.ts",
+  "name": "@geoplatform/mapcore",
+  "main": "bundles/geoplatform-mapcore.umd.js",
+  "module": "fesm5/geoplatform-mapcore.js",
+  "typings": "geoplatform-mapcore.d.ts",
   "version": "0.3.0",
   "license": "MIT",
   "whitelistedNonPeerDependencies": [
@@ -70,11 +70,11 @@
     "typescript": "^2.9.2",
     "zone.js": "^0.8.19"
   },
-  "es2015": "fesm2015/geoplatform.map.js",
-  "esm5": "esm5/geoplatform.map.js",
-  "esm2015": "esm2015/geoplatform.map.js",
-  "fesm5": "fesm5/geoplatform.map.js",
-  "fesm2015": "fesm2015/geoplatform.map.js",
-  "metadata": "geoplatform.map.metadata.json",
+  "es2015": "fesm2015/geoplatform-mapcore.js",
+  "esm5": "esm5/geoplatform-mapcore.js",
+  "esm2015": "esm2015/geoplatform-mapcore.js",
+  "fesm5": "fesm5/geoplatform-mapcore.js",
+  "fesm2015": "fesm2015/geoplatform-mapcore.js",
+  "metadata": "geoplatform-mapcore.metadata.json",
   "sideEffects": false
 }

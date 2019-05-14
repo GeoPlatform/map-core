@@ -11,8 +11,9 @@ import {
 } from 'leaflet';
 
 import * as esri from "esri-leaflet";
+var EsriFeatureLayer = esri.FeatureLayer;
 
-import {Config} from "geoplatform.client";
+import { Config } from "geoplatform.client";
 import featurePopupTemplate from '../shared/popup-template';
 
 /**
@@ -20,7 +21,7 @@ import featurePopupTemplate from '../shared/popup-template';
  * Provides custom style loading and point-ilization as well
  * as adding visibility and opacity manipulation methods
  */
-var FeatureLayer = esri.FeatureLayer.extend({
+var FeatureLayer = EsriFeatureLayer.extend({
 
     _gpStyle : { color: "#00f", weight: 2, fillColor: '#00f', fillOpacity: 0.3 },
 
@@ -216,6 +217,5 @@ var FeatureLayer = esri.FeatureLayer.extend({
     }
 
 });
-
 
 export default FeatureLayer;

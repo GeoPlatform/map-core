@@ -11,7 +11,7 @@ import * as esri from "esri-leaflet";
 
 var version = "2.0.0";
 
-var FeatureLayer = esri.FeatureManager.extend({
+var BaseClusteredFeatureLayer = esri.FeatureManager.extend({
 
   statics: {
     EVENTS: 'click dblclick mouseover mouseout mousemove contextmenu popupopen popupclose',
@@ -176,12 +176,14 @@ var FeatureLayer = esri.FeatureManager.extend({
   }
 });
 
-function featureLayer (options) {
-  return new FeatureLayer(options);
-}
+// function featureLayer (options) {
+//   return new FeatureLayer(options);
+// }
+//
+// export {
+//     FeatureLayer,
+//     featureLayer as default,
+//     version as VERSION
+// }
 
-export {
-    FeatureLayer,
-    featureLayer as default,
-    version as VERSION
-}
+export default BaseClusteredFeatureLayer;

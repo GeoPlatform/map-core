@@ -1,20 +1,17 @@
 
-// import * as L from "leaflet";
-// import * as esri from "esri-leaflet";
-
 import Polyfills from "./polyfills";
 Polyfills();
 
 
-import LoadingControl from './control/L.Control.Loading';
-import MeasureControl from './control/L.Control.MeasureControl';
-import MousePositionControl from './control/L.Control.MousePosition';
-import FeatureEditor from './control/L.Control.FeatureEditor';
+import LoadingControl from './control/loading';
+import MeasureControl from './control/measure';
+import MousePositionControl from './control/mouse-position';
+import FeatureEditor from './control/feature-editor';
 
 import DefaultBaseLayer from './layer/baselayer-default';
 import LayerFactory from './layer/factory';
 import OSMLayerFactory from './layer/osm-factory';
-import ESRIClusterFeatureLayer from './layer/L.esri.Cluster.FeatureLayer';
+import BaseClusteredFeatureLayer from './layer/base-clustered-feature-layer';
 import {
     ClusteredFeatureLayer,
     clusteredFeatures,
@@ -24,7 +21,7 @@ import FeatureLayer from './layer/feature';
 import {WMS, wms} from './layer/wms';
 import {WMST, wmst} from './layer/wmst';
 import {WMTS, wmts} from './layer/wmts';
-import ESRITileLayer from './layer/L.TileLayer.ESRI';
+import ESRITileLayer from './layer/esri-tile-layer';
 import OSM from './layer/osm';
 
 import MapInstance from './map/instance';
@@ -46,7 +43,7 @@ export {
     DefaultBaseLayer,
     LayerFactory,
     OSMLayerFactory,
-    ESRIClusterFeatureLayer,
+    BaseClusteredFeatureLayer,
     ClusteredFeatureLayer,
     clusteredFeatures,
     geoJsonFeed,

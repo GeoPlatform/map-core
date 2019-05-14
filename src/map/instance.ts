@@ -1048,7 +1048,7 @@ export default class MapInstance extends Listener {
 
         //otherwise, find feature...
         if(!this._featureLayer) return null;
-        
+
         var features = this._featureLayer.getLayers();
         for(var i=0; i<features.length; ++i) {
             if( (features[i] as any).feature &&
@@ -1336,6 +1336,7 @@ export default class MapInstance extends Listener {
         this._layerStates = null;
         this._featureLayer = null;
     }
+
 
     /**
      * Used to take an existing map that is already persisted on the

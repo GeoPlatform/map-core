@@ -15,7 +15,7 @@ import {
     Layer
 } from 'leaflet';
 
-import { FeatureLayer as EsriClusterFeatureLayer } from './L.esri.Cluster.FeatureLayer';
+import BaseClusteredFeatureLayer from './base-clustered-feature-layer';
 import featureStyleResolver from '../shared/style-resolver';
 import featurePopupTemplate from '../shared/popup-template';
 
@@ -25,7 +25,7 @@ import featurePopupTemplate from '../shared/popup-template';
  * Provides custom style loading and point-ilization as well
  * as adding visibility and opacity manipulation methods
  */
-var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
+var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
 
     currentVisibility: true,
     currentOpacity: 1.0,
@@ -127,7 +127,7 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
         var renderer = (SVG && svg(svgOpts)) || (Canvas && canvas());
         options.renderer = renderer;
 
-        EsriClusterFeatureLayer.prototype.initialize.call(this, options);
+        BaseClusteredFeatureLayer.prototype.initialize.call(this, options);
 
         this.on('load', function() {
             if(typeof this.options.zIndex !== 'undefined')
@@ -137,7 +137,7 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
     },
 
     onAdd: function(map) {
-        EsriClusterFeatureLayer.prototype.onAdd.call(this, map);
+        BaseClusteredFeatureLayer.prototype.onAdd.call(this, map);
 
         if(this.options.layerId) {
             this.loadStyle(this.options.layerId);
@@ -146,7 +146,7 @@ var ClusteredFeatureLayer = EsriClusterFeatureLayer.extend({
 
     /** override super class' method to set viz/opac after sub layers created */
     createLayers: function (features) {
-        EsriClusterFeatureLayer.prototype.createLayers.call(this, features);
+        BaseClusteredFeatureLayer.prototype.createLayers.call(this, features);
         this.setVisibility(this.currentVisibility);
         this.setOpacity(this.currentOpacity);
     },

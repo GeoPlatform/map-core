@@ -4,13 +4,11 @@ GeoPlatformClient.Config.configure({
     ualUrl : 'https://ual.geoplatform.gov'
 });
 
-const GeoPlatformMapCore = geoplatform.map;
-
 /*
  * Optionally, refresh list of service types after configuring API endpoint above
  * or continue to use default list provided in library
  */
-//GeoPlatformMapCore.ServiceTypes.refresh();
+//GeoPlatform.mapcore.ServiceTypes.refresh();
 
 
 let elem = document.getElementById('map');
@@ -28,17 +26,17 @@ let mapOptions = {
 let leafletMap = L.map(elem, mapOptions);
 
 if(typeof(L.Control.MiniMap) !== 'undefined') {
-    let minimapBaseLayer = GeoPlatformMapCore.OSMLayerFactory();
+    let minimapBaseLayer = GeoPlatform.mapcore.OSMLayerFactory();
     new L.Control.MiniMap(minimapBaseLayer,{position:"bottomleft"}).addTo(leafletMap);
 }
 
-//referencing GeoPlatformMapCore.MousePosition control using Leaflet shorthand
+//referencing GeoPlatform.mapcore.MousePosition control using Leaflet shorthand
 L.control.mousePosition({ separator: ' , ', numDigits: 3 }).addTo(leafletMap);
 L.control.scale().addTo(leafletMap);
 // L.Control.loading().addTo(leafletMap);
 
 
-let mapInstance = GeoPlatformMapCore.MapFactory.get();
+let mapInstance = GeoPlatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 mapInstance.setErrorHandler( (e) => {
     console.log("Error Handler : " + e.id + " - " + e.message);
@@ -46,12 +44,19 @@ mapInstance.setErrorHandler( (e) => {
 
 
 
+
+
 function loadLayer(file) {
     $.getJSON(file).done(layer => {
-        mapInstance.addLayers(layer);
+        try {
+            mapInstance.addLayers(layer);
+        } catch(e) {
+            console.log("Error addling layer from file " + file +
+                " to the map: " + e.message);
+        }
     }).fail(function() {
         console.log( "error loading layer from file " + file );
-    })
+    });
 }
 
 
@@ -71,7 +76,7 @@ function loadLayer(file) {
 
 
 //load OpenStreet Map layer using API and set as base layer
-GeoPlatformMapCore.OSM.get().then(osm => {
+GeoPlatform.mapcore.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
 
     // let http = new GeoPlatformClient.JQueryHttpClient();
@@ -139,9 +144,9 @@ function toggle(layerId) {
 
 
 
-// loadLayer('examples/map/data/wms.json');
-// loadLayer('examples/map/data/mapserver.json');
+loadLayer('examples/map/data/wms.json');
+loadLayer('examples/map/data/mapserver.json');
 // loadLayer('examples/map/data/featureserver.json');
-// loadLayer('examples/map/data/imageserver.json');
+loadLayer('examples/map/data/imageserver.json');
 // loadLayer('examples/map/data/wmts.json');
-loadLayer('examples/map/data/geojson.json');
+// loadLayer('examples/map/data/geojson.json');
