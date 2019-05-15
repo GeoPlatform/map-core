@@ -1,16 +1,23 @@
-var pkg         = require('./package.json'),
-    gulp        = require('gulp'),
-    concat      = require('gulp-concat');
+var pkg     = require('./package.json'),
+    gulp    = require('gulp'),
+    concat  = require('gulp-concat'),
+    gap     = require('gulp-append-prepend');
 
 
-require('gulp-help')(gulp, { description: 'Help listing.' });
+gulp.task('license', function() {
+    gulp.src('dist/bundles/geoplatform-mapcore.umd.js')
+        .pipe( gap.prependFile('LICENSE.txt') )
+        .pipe(gulp.dest('dist/bundles'));
+    gulp.src('dist/bundles/geoplatform-mapcore.umd.min.js')
+        .pipe( gap.prependFile('LICENSE.txt') )
+        .pipe(gulp.dest('dist/bundles'));
+});
 
-gulp.task('less', 'Compile less into a single app.css.', function() {
-    gulp.src(['src/**/*.less', 'src/**/*.css'])
-        .pipe(concat(pkg.name + '.less'))
-        .pipe(gulp.dest('dist/css'))
-        .pipe(notify('Compiled styles'));
+gulp.task('styles', function() {
+    gulp.src('src/**/*.css')
+    .pipe(concat('geoplatform-mapcore.css'))
+    .pipe(gulp.dest('dist/bundles/'))
 });
 
 
-gulp.task('default', ['less']);
+gulp.task('default', ['license', "styles"]);

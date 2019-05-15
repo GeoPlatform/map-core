@@ -1,15 +1,12 @@
 
 
-import * as jquery from "jquery";
-const jQuery = jquery;
-
 import * as Q from "q";
 import {
     Map, TileLayer, tileLayer, Browser,
     Point, Util, LatLng
 } from 'leaflet';
 
-import { Config } from 'geoplatform.client';
+import { Config } from '@geoplatform/client';
 
 
 

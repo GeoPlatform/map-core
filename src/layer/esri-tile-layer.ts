@@ -1,12 +1,8 @@
 
-
-import * as jquery from "jquery";
-const jQuery = jquery;
-
 import * as Q from "q";
 import { Map, TileLayer, tileLayer, Point, Coords, Browser, Util } from 'leaflet';
 
-import {Config} from 'geoplatform.client';
+import {Config} from '@geoplatform/client';
 
 
 class EsriTileLayer extends TileLayer {

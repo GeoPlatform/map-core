@@ -1,11 +1,8 @@
 
-import * as jquery from "jquery";
-const jQuery = jquery;
-
 import * as Q from "q";
 import {
-    ItemService, JQueryHttpClient, QueryFactory, Config
-} from 'geoplatform.client';
+    ItemService, XHRHttpClient, QueryFactory, Config
+} from '@geoplatform/client';
 
 
 
@@ -137,7 +134,7 @@ function updateList(service : ItemService) {
         if(service && typeof(service.search) !== 'undefined') {
             svc = service;
         } else { // otherwise, use defaults
-            svc = new ItemService(url, new JQueryHttpClient());
+            svc = new ItemService(url, new XHRHttpClient());
         }
 
         svc.search(query).then( data => {

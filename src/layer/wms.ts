@@ -5,7 +5,7 @@ const jQuery = jquery;
 import * as Q from "q";
 import { Map, TileLayer, tileLayer, LatLng, Util, popup } from 'leaflet';
 
-import {Config} from 'geoplatform.client';
+import {Config} from '@geoplatform/client';
 
 
 

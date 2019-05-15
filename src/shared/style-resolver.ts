@@ -3,7 +3,7 @@ import * as jquery from "jquery";
 const jQuery = jquery;
 
 import * as Q from "q";
-import { Config } from 'geoplatform.client';
+import { Config } from '@geoplatform/client';
 
 /**
  * Fetches style information from GeoPlatform UAL

@@ -1,8 +1,5 @@
 
 
-import * as jquery from "jquery";
-const jQuery = jquery;
-
 import * as Q from "q";
 
 import * as L from 'leaflet';
@@ -10,18 +7,11 @@ import { TileLayer, tileLayer } from 'leaflet';
 import 'leaflet-timedimension/dist/leaflet.timedimension.src';
 // import { TimeDimension, timeDimension } from "../libs/L.TimeDimension";
 
-import {Config} from 'geoplatform.client';
+import {Config} from '@geoplatform/client';
 
 import WMS from './wms';
 
-// function tdPolyFill(options) {
-//     return new WMST(options);
-// }
-//
-// var TimeDimension = L.TimeDimension;
-// var timeDimension = L.timeDimension || tdPolyFill;
 
-// var WMST = (TimeDimension && TimeDimension.Layer || TileLayer).WMS.extend({
 
 class WMST extends (L as any).TimeDimension.Layer.WMS {
 

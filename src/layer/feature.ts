@@ -13,7 +13,7 @@ import {
 import * as esri from "esri-leaflet";
 var EsriFeatureLayer = esri.FeatureLayer;
 
-import { Config } from "geoplatform.client";
+import { Config } from "@geoplatform/client";
 import featurePopupTemplate from '../shared/popup-template';
 
 /**

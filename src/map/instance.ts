@@ -14,8 +14,8 @@ import {
 import {
     Config, ItemTypes,
     ServiceFactory, ItemService, MapService, LayerService,
-    JQueryHttpClient
-} from 'geoplatform.client';
+    XHRHttpClient
+} from '@geoplatform/client';
 
 import LayerFactory from '../layer/factory';
 import OSM from "../layer/osm";
@@ -86,7 +86,7 @@ export default class MapInstance extends Listener {
     constructor(key) {
         super();
 
-        this.setHttpClient(new JQueryHttpClient());
+        this.setHttpClient(new XHRHttpClient());
         this.setServiceFactory(ServiceFactory);
 
         //generate random key (see factory below)
@@ -358,7 +358,7 @@ export default class MapInstance extends Listener {
                 params[p[0]] = p[1];
             });
 
-            let layerService = this.getService(ItemTypes.LAYER);
+            let layerService = this.getService(ItemTypes.LAYER) as LayerService;
             if(layerService) {
                 layerService.validate(id, params)
                 .catch(e => {
@@ -513,7 +513,8 @@ export default class MapInstance extends Listener {
 
         let promise = null;
         if(!layer) {
-            promise = DefaultBaseLayer.get(this.getService(ItemTypes.LAYER));
+            let svc = this.getService(ItemTypes.LAYER) as LayerService;
+            promise = DefaultBaseLayer.get(svc);
         } else
             promise = Q.resolve(layer);
 
@@ -1133,14 +1134,14 @@ export default class MapInstance extends Listener {
      * @param metadata
      * @return resolving persisted map
      */
-    save (metadata : any) : Promise<any> {
+    save (metadata : any) : Q.Promise<any> {
         return this.saveMap(metadata);
     }
 
     /**
      * @param md object containing metadata properties for map
      */
-    saveMap (md : any) : Promise<any> {
+    saveMap (md : any) : Q.Promise<any> {
 
         let metadata = md || {};
 
@@ -1188,7 +1189,7 @@ export default class MapInstance extends Listener {
      * @param mapId identifier of map
      * @return resolving the map object
      */
-    fetchMap (mapId : string) : Promise<any> {
+    fetchMap (mapId : string) : Q.Promise<any> {
         //Having to send cache busting parameter to avoid CORS header cache
         // not sending correct Origin value
         return this.getService(ItemTypes.MAP).get(mapId);
@@ -1200,7 +1201,7 @@ export default class MapInstance extends Listener {
      * @param mapId identifier of map
      * @return resolving the map object
      */
-    loadMap (mapId : string) : Promise<any> {
+    loadMap (mapId : string) : Q.Promise<any> {
 
         return this.fetchMap(mapId).then(map => {
 
@@ -1212,9 +1213,9 @@ export default class MapInstance extends Listener {
                 throw new Error("The requested map ('" + mapId +
                     "') came back as a string");
 
-            } else if(map.message) {
+            } else if((map as any).message) {
                 throw new Error("There was an error loading the requested map ('" +
-                    mapId + "'): " + map.message);
+                    mapId + "'): " + (map as any).message);
             }
 
 

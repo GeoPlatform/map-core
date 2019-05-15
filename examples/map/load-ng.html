@@ -17,12 +17,13 @@
 </head>
 <body>
 
-    <div id="map">
+    <div id="map" load-map>
     </div>
 
 
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/q/q.js"></script>
+    <script src="node_modules/axios/dist/axios.min.js"></script>
     <script src="node_modules/leaflet/dist/leaflet-src.js"></script>
     <script src="node_modules/leaflet-draw/dist/leaflet.draw-src.js"></script>
     <script src="node_modules/esri-leaflet/dist/esri-leaflet.js"></script>
@@ -32,7 +33,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.js"></script>
 
-    <script src="node_modules/geoplatform.client/dist/js/geoplatform.client.js"></script>
+    <script src="node_modules/@geoplatform/client/dist/bundles/geoplatform-client.umd.js"></script>
+    <script src="node_modules/@geoplatform/client/dist/bundles/geoplatform-client-angularjs.umd.js"></script>
     <script src="dist/bundles/geoplatform-mapcore.umd.js"></script>
 
     <script src="examples/map/load-ng.js"></script>

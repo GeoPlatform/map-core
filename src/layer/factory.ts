@@ -1,7 +1,5 @@
 
 import * as Q from "q";
-import * as jquery from "jquery";
-const jQuery = jquery;
 
 import { Layer } from "leaflet";
 import * as esri from "esri-leaflet";
@@ -19,7 +17,7 @@ import {WMST, wmst} from './wmst';
 import {WMTS, wmts} from './wmts';
 import ESRITileLayer from './esri-tile-layer';
 import OSMLayerFactory from './osm-factory';
-import { Config, ItemTypes, LayerService, JQueryHttpClient } from 'geoplatform.client';
+import { Config, ItemTypes, LayerService, XHRHttpClient } from '@geoplatform/client';
 
 interface LayerOptions {
     layers ?: string|string[],
@@ -129,7 +127,7 @@ class LayerFactory {
      */
     getStyleResolver() : Function {
         if(!this.service || typeof(this.service.style) === 'undefined') {
-            this.service = new LayerService(Config.ualUrl, new JQueryHttpClient());
+            this.service = new LayerService(Config.ualUrl, new XHRHttpClient());
         }
         return styleResolverFactory(this.service);
     }

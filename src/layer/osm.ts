@@ -1,8 +1,8 @@
 
 import * as Q from "q";
 import {
-    QueryFactory, LayerService, JQueryHttpClient, Config 
-}  from 'geoplatform.client';
+    QueryFactory, LayerService, XHRHttpClient, Config
+}  from '@geoplatform/client';
 
 
 /**
@@ -22,12 +22,12 @@ export default {
                 ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
     },
 
-    get : function(layerService ?: LayerService) : Promise<any> {
+    get : function(layerService ?: LayerService) : Q.Promise<any> {
         let query = QueryFactory()
             .fields('*')
             .resourceTypes("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
         if(!layerService)
-            layerService = new LayerService(Config.ualUrl, new JQueryHttpClient());
+            layerService = new LayerService(Config.ualUrl, new XHRHttpClient());
         return layerService.search(query)
         .then( response => response.results.length ? response.results[0] : null)
         .catch( e => Q.reject(e));

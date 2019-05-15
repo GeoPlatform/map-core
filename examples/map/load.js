@@ -1,6 +1,6 @@
 
 //configure geoplatform env variables needed to interact with the API
-GeoPlatformClient.Config.configure({
+geoplatform.client.Config.configure({
     ualUrl : 'https://ual.geoplatform.gov',
     env: 'development' //to prevent bumping map's numViews
 });
@@ -9,7 +9,7 @@ GeoPlatformClient.Config.configure({
  * Optionally, refresh list of service types after configuring API endpoint above
  * or continue to use default list provided in library
  */
-//GeoPlatform.mapcore.ServiceTypes.refresh();
+//geoplatform.mapcore.ServiceTypes.refresh();
 
 
 
@@ -26,7 +26,7 @@ let mapOptions = {
 };
 
 let leafletMap = L.map(elem, mapOptions);
-let mapInstance = GeoPlatform.mapcore.MapFactory.get();
+let mapInstance = geoplatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 
@@ -51,11 +51,11 @@ loadMap('examples/map/data/map.json');
 
 
 ////just for example purposes, find the first map available
-// let query = GeoPlatformClient.QueryFactory().keywords('WMV');
+// let query = geoplatform.client.QueryFactory().keywords('WMV');
 //
-// let service = new GeoPlatformClient.MapService(
-//     GeoPlatformClient.Config.ualUrl,
-//     new GeoPlatformClient.JQueryHttpClient());
+// let service = new geoplatform.client.MapService(
+//     geoplatform.client.Config.ualUrl,
+//     new geoplatform.client.JQueryHttpClient());
 //
 // service.search(query)
 // .then( response => {

@@ -1,6 +1,6 @@
 
 //configure geoplatform env variables needed to interact with the API
-GeoPlatformClient.Config.configure({
+geoplatform.client.Config.configure({
     ualUrl : 'https://ual.geoplatform.gov'
 });
 
@@ -14,7 +14,7 @@ if(typeof(L.vectorGrid) !== 'undefined') {
     /*
      * register a vector tile layer factory
      */
-    var LayerFactory = GeoPlatform.mapcore.LayerFactory;
+    var LayerFactory = geoplatform.mapcore.LayerFactory;
     LayerFactory.register( (layer) => {
 
         if(!layer) return null;
@@ -61,7 +61,7 @@ if(typeof(L.vectorGrid) !== 'undefined') {
  * Optionally, refresh list of service types after configuring API endpoint above
  * or continue to use default list provided in library
  */
-//GeoPlatform.mapcore.ServiceTypes.refresh();
+//geoplatform.mapcore.ServiceTypes.refresh();
 
 
 let elem = document.getElementById('map');
@@ -78,20 +78,20 @@ let mapOptions = {
 
 let leafletMap = L.map(elem, mapOptions);
 
-//referencing GeoPlatform.mapcore.MousePosition control using Leaflet shorthand
+//referencing geoplatform.mapcore.MousePosition control using Leaflet shorthand
 L.control.mousePosition({ separator: ' , ', numDigits: 3 }).addTo(leafletMap);
 L.control.scale().addTo(leafletMap);
 // L.Control.loading().addTo(leafletMap);
 
 
-let mapInstance = GeoPlatform.mapcore.MapFactory.get();
+let mapInstance = geoplatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 mapInstance.setErrorHandler( (e) => {
     console.log("Error Handler : " + e.id + " - " + e.message);
 });
 
 //load OpenStreet Map layer using API and set as base layer
-GeoPlatform.mapcore.OSM.get().then(osm => {
+geoplatform.mapcore.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
 
     // var gl = L.mapboxGL({

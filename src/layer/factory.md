@@ -2,7 +2,7 @@
 # MapCore `LayerFactory`
 
 ```js
-import { LayerService, NodeHttpClient, Config } from 'geoplatform.client';
+import { LayerService, NodeHttpClient, Config } from '@geoplatform/client';
 import { LayerFactory, MapInstance } from '@geoplatform/mapcore';
 
 let map = ... //create Leaflet map
