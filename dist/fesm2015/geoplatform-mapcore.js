@@ -1,7 +1,7 @@
 import { Draw } from 'leaflet-draw';
 import 'leaflet.markercluster';
 import 'leaflet-timedimension/dist/leaflet.timedimension.src';
-import { FeatureManager, FeatureLayer, tiledMapLayer, imageMapLayer } from 'esri-leaflet';
+import { FeatureManager, tiledMapLayer, imageMapLayer, FeatureLayer } from 'esri-leaflet';
 import * as jquery from 'jquery';
 import { reject, defer, resolve } from 'q';
 import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Point, LatLng, TimeDimension, Layer, featureGroup, geoJSON, LayerGroup } from 'leaflet';
