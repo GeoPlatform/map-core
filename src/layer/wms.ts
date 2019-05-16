@@ -1,11 +1,15 @@
 
+/// <reference path="../../node_modules/@geoplatform/client/dist/shared/models.d.ts" />
+
 import * as jquery from "jquery";
 const jQuery = jquery;
 
 import * as Q from "q";
 import { Map, TileLayer, tileLayer, LatLng, Util, popup } from 'leaflet';
 
-import {Config} from '@geoplatform/client';
+import {
+    Config, Layer as LayerModel, Service as ServiceModel
+} from '@geoplatform/client';
 
 
 
@@ -113,40 +117,43 @@ class WMS extends TileLayer.WMS {
 }
 
 
-function wms(layer) {
+function wms(layer : LayerModel) : WMS {
 
-    let service = layer.services && layer.services.length ?
+    let service : ServiceModel = layer.services && layer.services.length ?
         layer.services[0] : null;
     if(!service) {
-        let msg = `wms() -
-                  Cannot create leaflet layer for GP Layer:
-                  layer has no service`;
-        throw new Error(msg);
+        throw new Error("Cannot create leaflet layer for WMS Layer '" +
+            (layer.label || layer.id) +
+            "' because layer has no service associated with it");
     }
 
-    let url = service.href;
-    let formats = layer.supportedFormats || [];
-    let format  = formats.length ? formats[0] : "image/png";
-
+    let url : string = service.href;
     if(!url) {
         throw new Error("WMS layer's service does not defined a service url");
     }
 
-    let version = '1.1.1';
-    if(service.api && service.api.length) {
-        let is130 = service.api.filter(api => api.accessURL.indexOf('wms/1.3.0')>0 ).length > 0;
-        if(is130) version = '1.3.0';
+    let formats : string[] = layer.supportedFormats || [];
+    let format : string  = formats.length ? formats[0] : "image/png";
+
+    //determine proper version of the WMS spec to use
+    let version : string = '1.1.1';
+    let versions : string[] = service.serviceTypeVersions || [];
+    if(versions.length && versions.indexOf('1.1.1') < 0) {
+        version = versions[0];
+    } else {
+        console.log("Warning: WMS Service doesn't list supported versions, assuming 1.1.1");
     }
 
-    let opts = {
-        layers: layer.layerName,
-        transparent: true,
-        format: format,
-        wmvId: layer.id,
-        version: version
+    let opts : any = {
+        layers      : layer.layerName,
+        transparent : true,
+        format      : format,
+        wmvId       : layer.id,
+        version     : version
     };
-    if(Config.leafletPane)
+    if(Config.leafletPane) {
         (opts as any).pane = Config.leafletPane;
+    }
 
     return new WMS(url, opts);
 

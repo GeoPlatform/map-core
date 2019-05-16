@@ -1,5 +1,5 @@
 import { Layer } from "leaflet";
-import { LayerService } from '@geoplatform/client';
+import { LayerService, Layer as LayerModel } from '@geoplatform/client';
 /**
  * Layer Factory
  *
@@ -38,7 +38,7 @@ declare class LayerFactory {
      * @param layer - GP Layer object
      * @return leaflet layer instance or null
      */
-    create(layer: any): Layer;
+    create(layer: LayerModel): Layer;
     init(): void;
 }
 declare const _default: LayerFactory;

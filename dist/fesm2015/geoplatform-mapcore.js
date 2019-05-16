@@ -2233,31 +2233,31 @@ class WMS extends TileLayer.WMS {
  */
 function wms(layer) {
     /** @type {?} */
-    let service = layer.services && layer.services.length ?
-        layer.services[0] : null;
+    let service = layer["services"] && layer["services"].length ?
+        layer["services"][0] : null;
     if (!service) {
-        /** @type {?} */
-        let msg = `wms() -
-                  Cannot create leaflet layer for GP Layer:
-                  layer has no service`;
-        throw new Error(msg);
+        throw new Error("Cannot create leaflet layer for WMS Layer '" +
+            (layer.label || layer.id) +
+            "' because layer has no service associated with it");
     }
     /** @type {?} */
     let url = service.href;
-    /** @type {?} */
-    let formats = layer.supportedFormats || [];
-    /** @type {?} */
-    let format = formats.length ? formats[0] : "image/png";
     if (!url) {
         throw new Error("WMS layer's service does not defined a service url");
     }
     /** @type {?} */
+    let formats = layer.supportedFormats || [];
+    /** @type {?} */
+    let format = formats.length ? formats[0] : "image/png";
+    /** @type {?} */
     let version = '1.1.1';
-    if (service.api && service.api.length) {
-        /** @type {?} */
-        let is130 = service.api.filter(api => api.accessURL.indexOf('wms/1.3.0') > 0).length > 0;
-        if (is130)
-            version = '1.3.0';
+    /** @type {?} */
+    let versions = service.serviceTypeVersions || [];
+    if (versions.length && versions.indexOf('1.1.1') < 0) {
+        version = versions[0];
+    }
+    else {
+        console.log("Warning: WMS Service doesn't list supported versions, assuming 1.1.1");
     }
     /** @type {?} */
     let opts = {
@@ -2267,8 +2267,9 @@ function wms(layer) {
         wmvId: layer.id,
         version: version
     };
-    if (Config["leafletPane"])
+    if (Config["leafletPane"]) {
         (/** @type {?} */ (opts)).pane = Config["leafletPane"];
+    }
     return new WMS(url, opts);
 }
 if ((/** @type {?} */ (window)).L) {
@@ -2902,14 +2903,16 @@ class LayerFactory {
         });
         // ESRI factory
         this.register((layer) => {
-            if (!layer || !layer.services || !layer.services.length)
+            if (!layer || !layer["services"] || !layer["services"].length)
                 return null;
             /** @type {?} */
-            let service = layer.services[0];
+            let service = layer["services"][0];
             /** @type {?} */
             let url = service.href;
             /** @type {?} */
-            let typeUri = service.serviceType ? service.serviceType.uri : null;
+            let svcType = service.serviceType;
+            /** @type {?} */
+            let typeUri = svcType ? svcType.uri : null;
             /** @type {?} */
             let srs = layer.supportedCRS ? layer.supportedCRS[0] : null;
             /** @type {?} */
@@ -2964,12 +2967,14 @@ class LayerFactory {
         });
         // OGC factory
         this.register((layer) => {
-            if (!layer || !layer.services || !layer.services.length)
+            if (!layer || !layer["services"] || !layer["services"].length)
                 return null;
             /** @type {?} */
-            let service = layer.services[0];
+            let service = layer["services"][0];
             /** @type {?} */
-            let typeUri = service.serviceType ? service.serviceType.uri : null;
+            let svcType = service.serviceType;
+            /** @type {?} */
+            let typeUri = svcType ? svcType.uri : null;
             if (types.WMS && types.WMS.uri === typeUri) {
                 return wms(layer);
             }
@@ -2982,12 +2987,14 @@ class LayerFactory {
             return null;
         });
         this.register((layer) => {
-            if (!layer || !layer.services || !layer.services.length)
+            if (!layer || !layer["services"] || !layer["services"].length)
                 return null;
             /** @type {?} */
-            let service = layer.services[0];
+            let service = layer["services"][0];
             /** @type {?} */
-            let typeUri = service.serviceType ? service.serviceType.uri : null;
+            let svcType = service.serviceType;
+            /** @type {?} */
+            let typeUri = svcType ? svcType.uri : null;
             if (types.FEED && types.FEED.uri === typeUri) {
                 return geoJsonFeed(layer, {
                     styleResolver: this.getStyleResolver()

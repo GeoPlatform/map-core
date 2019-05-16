@@ -2370,29 +2370,31 @@ This software has been approved for release by the U.S. Department of the Interi
      */
     function wms(layer) {
         /** @type {?} */
-        var service = layer.services && layer.services.length ?
-            layer.services[0] : null;
+        var service = layer["services"] && layer["services"].length ?
+            layer["services"][0] : null;
         if (!service) {
-            /** @type {?} */
-            var msg = "wms() -\n                  Cannot create leaflet layer for GP Layer:\n                  layer has no service";
-            throw new Error(msg);
+            throw new Error("Cannot create leaflet layer for WMS Layer '" +
+                (layer.label || layer.id) +
+                "' because layer has no service associated with it");
         }
         /** @type {?} */
         var url = service.href;
-        /** @type {?} */
-        var formats = layer.supportedFormats || [];
-        /** @type {?} */
-        var format = formats.length ? formats[0] : "image/png";
         if (!url) {
             throw new Error("WMS layer's service does not defined a service url");
         }
         /** @type {?} */
+        var formats = layer.supportedFormats || [];
+        /** @type {?} */
+        var format = formats.length ? formats[0] : "image/png";
+        /** @type {?} */
         var version = '1.1.1';
-        if (service.api && service.api.length) {
-            /** @type {?} */
-            var is130 = service.api.filter(function (api) { return api.accessURL.indexOf('wms/1.3.0') > 0; }).length > 0;
-            if (is130)
-                version = '1.3.0';
+        /** @type {?} */
+        var versions = service.serviceTypeVersions || [];
+        if (versions.length && versions.indexOf('1.1.1') < 0) {
+            version = versions[0];
+        }
+        else {
+            console.log("Warning: WMS Service doesn't list supported versions, assuming 1.1.1");
         }
         /** @type {?} */
         var opts = {
@@ -2402,8 +2404,9 @@ This software has been approved for release by the U.S. Department of the Interi
             wmvId: layer.id,
             version: version
         };
-        if (client.Config["leafletPane"])
+        if (client.Config["leafletPane"]) {
             ( /** @type {?} */(opts)).pane = client.Config["leafletPane"];
+        }
         return new WMS(url, opts);
     }
     if (( /** @type {?} */(window)).L) {
@@ -3138,14 +3141,16 @@ This software has been approved for release by the U.S. Department of the Interi
                 });
                 // ESRI factory
                 this.register(function (layer) {
-                    if (!layer || !layer.services || !layer.services.length)
+                    if (!layer || !layer["services"] || !layer["services"].length)
                         return null;
                     /** @type {?} */
-                    var service = layer.services[0];
+                    var service = layer["services"][0];
                     /** @type {?} */
                     var url = service.href;
                     /** @type {?} */
-                    var typeUri = service.serviceType ? service.serviceType.uri : null;
+                    var svcType = service.serviceType;
+                    /** @type {?} */
+                    var typeUri = svcType ? svcType.uri : null;
                     /** @type {?} */
                     var srs = layer.supportedCRS ? layer.supportedCRS[0] : null;
                     /** @type {?} */
@@ -3200,12 +3205,14 @@ This software has been approved for release by the U.S. Department of the Interi
                 });
                 // OGC factory
                 this.register(function (layer) {
-                    if (!layer || !layer.services || !layer.services.length)
+                    if (!layer || !layer["services"] || !layer["services"].length)
                         return null;
                     /** @type {?} */
-                    var service = layer.services[0];
+                    var service = layer["services"][0];
                     /** @type {?} */
-                    var typeUri = service.serviceType ? service.serviceType.uri : null;
+                    var svcType = service.serviceType;
+                    /** @type {?} */
+                    var typeUri = svcType ? svcType.uri : null;
                     if (types.WMS && types.WMS.uri === typeUri) {
                         return wms(layer);
                     }
@@ -3218,12 +3225,14 @@ This software has been approved for release by the U.S. Department of the Interi
                     return null;
                 });
                 this.register(function (layer) {
-                    if (!layer || !layer.services || !layer.services.length)
+                    if (!layer || !layer["services"] || !layer["services"].length)
                         return null;
                     /** @type {?} */
-                    var service = layer.services[0];
+                    var service = layer["services"][0];
                     /** @type {?} */
-                    var typeUri = service.serviceType ? service.serviceType.uri : null;
+                    var svcType = service.serviceType;
+                    /** @type {?} */
+                    var typeUri = svcType ? svcType.uri : null;
                     if (types.FEED && types.FEED.uri === typeUri) {
                         return geoJsonFeed(layer, {
                             styleResolver: _this.getStyleResolver()

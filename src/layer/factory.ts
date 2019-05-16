@@ -17,7 +17,11 @@ import {WMST, wmst} from './wmst';
 import {WMTS, wmts} from './wmts';
 import ESRITileLayer from './esri-tile-layer';
 import OSMLayerFactory from './osm-factory';
-import { Config, ItemTypes, LayerService, XHRHttpClient } from '@geoplatform/client';
+import {
+    Config, ItemTypes, LayerService, XHRHttpClient,
+    Layer as LayerModel, Service as ServiceModel,
+    ServiceTypeStandard
+} from '@geoplatform/client';
 
 interface LayerOptions {
     layers ?: string|string[],
@@ -136,7 +140,7 @@ class LayerFactory {
      * @param layer - GP Layer object
      * @return leaflet layer instance or null
      */
-    create(layer : any) : Layer {
+    create( layer : LayerModel ) : Layer {
         if(!layer) {
             throw new Error("LayerFactory expects a layer object");
         }
@@ -152,7 +156,7 @@ class LayerFactory {
     init () {
 
         //OSM factory
-        this.register((layer : any)=> {
+        this.register( ( layer : LayerModel )=> {
             if(layer && layer.resourceTypes &&
                 layer.resourceTypes.length &&
                 ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer")) {
@@ -161,11 +165,12 @@ class LayerFactory {
         });
 
         // ESRI factory
-        this.register( (layer : any) => {
+        this.register( (layer : LayerModel) => {
             if(!layer || !layer.services || !layer.services.length) return null;
-            let service = layer.services[0],
-                url     = service.href,
-                typeUri = service.serviceType ? service.serviceType.uri : null,
+            let service : ServiceModel = layer.services[0];
+            let url     = service.href,
+                svcType : ServiceTypeStandard = service.serviceType,
+                typeUri = svcType ? svcType.uri : null,
                 srs     = layer.supportedCRS ? layer.supportedCRS[0] : null,
                 format  = layer.supportedFormats ? layer.supportedFormats[0] : null,
                 opts : LayerOptions;
@@ -214,10 +219,12 @@ class LayerFactory {
         });
 
         // OGC factory
-        this.register( (layer : any) => {
+        this.register( (layer : LayerModel) => {
             if(!layer || !layer.services || !layer.services.length) return null;
-            let service = layer.services[0],
-                typeUri = service.serviceType ? service.serviceType.uri : null;
+            let service : ServiceModel = layer.services[0];
+            let svcType : ServiceTypeStandard = service.serviceType;
+            let typeUri : string = svcType ? svcType.uri : null;
+
             if(ServiceTypes.WMS && ServiceTypes.WMS.uri === typeUri) {
                 return wms(layer);
             } else if(ServiceTypes.WMST && ServiceTypes.WMST.uri === typeUri) {
@@ -229,10 +236,11 @@ class LayerFactory {
         });
 
 
-        this.register( (layer : any) => {
+        this.register( (layer : LayerModel) => {
             if(!layer || !layer.services || !layer.services.length) return null;
-            let service = layer.services[0],
-                typeUri = service.serviceType ? service.serviceType.uri : null;
+            let service : ServiceModel = layer.services[0];
+            let svcType : ServiceTypeStandard = service.serviceType;
+            let typeUri : string = svcType ? svcType.uri : null;
             if(ServiceTypes.FEED && ServiceTypes.FEED.uri === typeUri) {
                 return geoJsonFeed(layer, {
                     styleResolver: this.getStyleResolver()
