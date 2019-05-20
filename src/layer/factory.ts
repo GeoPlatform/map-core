@@ -171,7 +171,7 @@ class LayerFactory {
             let url     = service.href,
                 svcType : ServiceTypeStandard = service.serviceType,
                 typeUri = svcType ? svcType.uri : null,
-                srs     = layer.supportedCRS ? layer.supportedCRS[0] : null,
+                // srs     = layer.supportedCRS ? layer.supportedCRS[0] : null,
                 format  = layer.supportedFormats ? layer.supportedFormats[0] : null,
                 opts : LayerOptions;
 
@@ -187,7 +187,14 @@ class LayerFactory {
                     transparent: true,
                     format: format || "png32"
                 } as LayerOptions;
-                if(srs) opts.srs = srs;
+
+                // if(srs) opts.srs = srs;
+                let supportedCrs = layer.crs || [];
+                if(supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
+                    console.log("Layer '" + layer.label + "' does not support " +
+                        "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
+                }
+
                 if(Config.leafletPane)
                     opts.pane = Config.leafletPane;
                 return new ESRITileLayer(url, opts);

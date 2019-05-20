@@ -2362,6 +2362,12 @@ function wms(layer) {
     /** @type {?} */
     var format = formats.length ? formats[0] : "image/png";
     /** @type {?} */
+    var supportedCrs = layer["crs"] || [];
+    if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
+        console.log("Layer '" + layer.label + "' does not support " +
+            "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
+    }
+    /** @type {?} */
     var version = '1.1.1';
     /** @type {?} */
     var versions = service.serviceTypeVersions || [];
@@ -2728,6 +2734,12 @@ var WMTS = /** @class */ (function (_super) {
 function wmts(layer) {
     /** @type {?} */
     var url = layer.services && layer.services.length ? layer.services[0].href : null;
+    /** @type {?} */
+    var supportedCrs = layer.crs || [];
+    if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
+        console.log("Layer '" + layer.label + "' does not support " +
+            "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
+    }
     /** @type {?} */
     var options = {
         layer: layer.layerName,
@@ -3128,9 +3140,9 @@ LayerFactory = /** @class */ (function () {
             /** @type {?} */
             var typeUri = svcType ? svcType.uri : null;
             /** @type {?} */
-            var srs = layer.supportedCRS ? layer.supportedCRS[0] : null;
-            /** @type {?} */
-            var format = layer.supportedFormats ? layer.supportedFormats[0] : null;
+            var 
+            // srs     = layer.supportedCRS ? layer.supportedCRS[0] : null,
+            format = layer.supportedFormats ? layer.supportedFormats[0] : null;
             /** @type {?} */
             var opts;
             /**
@@ -3149,8 +3161,12 @@ LayerFactory = /** @class */ (function () {
                     transparent: true,
                     format: format || "png32"
                 });
-                if (srs)
-                    opts.srs = srs;
+                /** @type {?} */
+                var supportedCrs = layer["crs"] || [];
+                if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
+                    console.log("Layer '" + layer.label + "' does not support " +
+                        "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
+                }
                 if (Config["leafletPane"])
                     opts.pane = Config["leafletPane"];
                 return new EsriTileLayer(url, opts);

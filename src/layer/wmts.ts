@@ -174,6 +174,12 @@ function wmts(layer) {
 
     let url = layer.services && layer.services.length ? layer.services[0].href : null;
 
+    let supportedCrs = layer.crs || [];
+    if(supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
+        console.log("Layer '" + layer.label + "' does not support " +
+            "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
+    }
+
     let options = {
         layer: layer.layerName,
         style: 'default',

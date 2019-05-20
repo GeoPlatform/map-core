@@ -135,6 +135,12 @@ function wms(layer : LayerModel) : WMS {
     let formats : string[] = layer.supportedFormats || [];
     let format : string  = formats.length ? formats[0] : "image/png";
 
+    let supportedCrs = layer.crs || [];
+    if(supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
+        console.log("Layer '" + layer.label + "' does not support " + 
+            "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
+    }
+
     //determine proper version of the WMS spec to use
     let version : string = '1.1.1';
     let versions : string[] = service.serviceTypeVersions || [];
