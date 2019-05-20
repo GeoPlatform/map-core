@@ -1685,12 +1685,18 @@
             throw new Error("WMS layer's service does not defined a service url");
         }
 
+        var supportedCrs = layer.crs || [];
+        if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
+            console.log("Layer '" + layer.label + "' does not support " + "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
+        }
+
+        //determine proper version of the WMS spec to use
         var version = '1.1.1';
-        if (service.api && service.api.length) {
-            var is130 = service.api.filter(function (api) {
-                return api.accessURL.indexOf('wms/1.3.0') > 0;
-            }).length > 0;
-            if (is130) version = '1.3.0';
+        var versions = service.serviceTypeVersions || [];
+        if (versions.length && versions.indexOf('1.1.1') < 0) {
+            version = versions[0];
+        } else {
+            console.log("Warning: WMS Service doesn't list supported versions, assuming 1.1.1");
         }
 
         var opts = {

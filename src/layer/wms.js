@@ -119,11 +119,21 @@ function wms(layer) {
         throw new Error("WMS layer's service does not defined a service url");
     }
 
-    let version = '1.1.1';
-    if(service.api && service.api.length) {
-        let is130 = service.api.filter(api => api.accessURL.indexOf('wms/1.3.0')>0 ).length > 0;
-        if(is130) version = '1.3.0';
+    let supportedCrs = layer.crs || [];
+    if(supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
+        console.log("Layer '" + layer.label + "' does not support " +
+            "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
     }
+
+    //determine proper version of the WMS spec to use
+    let version = '1.1.1';
+    let versions = service.serviceTypeVersions || [];
+    if(versions.length && versions.indexOf('1.1.1') < 0) {
+        version = versions[0];
+    } else {
+        console.log("Warning: WMS Service doesn't list supported versions, assuming 1.1.1");
+    }
+
 
     let opts = {
         layers: layer.layerName,
