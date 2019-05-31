@@ -7,46 +7,46 @@ GeoPlatformClient.Config.configure({
 var L = GeoPlatformMapCore.L;
 
 
-/*
- * register a vector tile layer factory
- */
-var LayerFactory = GeoPlatformMapCore.LayerFactory;
-LayerFactory.register( (layer) => {
-
-    if(!layer) return null;
-    let distros = layer.distributions || [];
-    if(!distros.length) return null;
-    let distro = distros[0];
-    if(distro.href.indexOf(".pbf") < 0) return null;
-
-    let styleFn = function(featureProperties, z){
-        let fill = '#AD816E';
-        // console.log("NC Type: " + featureProperties.WETLAND_TYPE);
-        switch(featureProperties.WETLAND_TYPE) {
-            case "Estuarine and Marine Deepwater": fill = "#097F8B"; break;
-            case "Estuarine and Marine Wetland": fill = "#73BAA7"; break;
-            case "Freshwater Emergent Wetland": fill = "#87C023"; break;
-            case "Freshwater Forested/Shrub Wetland": fill = "#108034"; break;
-            case "Freshwater Pond": fill = "#688FB6"; break;
-            case "Lake": fill = "#100673"; break;
-            case "Riverine": fill = "#048DB9"; break;
-            default: fill = "#AD816E";
-        }
-        return { color: fill, weight: 1 };
-    };
-
-    var styles = {
-        "nc_wetlands" : styleFn,
-        "va_wetlands": styleFn
-    };
-    var vtUrl = distro.href;
-	var vtOpts = {
-		rendererFactory: L.canvas.tile,
-		vectorTileLayerStyles: styles,
-	};
-	return L.vectorGrid.protobuf(vtUrl, vtOpts);
-
-});
+// /*
+//  * register a vector tile layer factory
+//  */
+// var LayerFactory = GeoPlatformMapCore.LayerFactory;
+// LayerFactory.register( (layer) => {
+//
+//     if(!layer) return null;
+//     let distros = layer.distributions || [];
+//     if(!distros.length) return null;
+//     let distro = distros[0];
+//     if(distro.href.indexOf(".pbf") < 0) return null;
+//
+//     let styleFn = function(featureProperties, z){
+//         let fill = '#AD816E';
+//         // console.log("NC Type: " + featureProperties.WETLAND_TYPE);
+//         switch(featureProperties.WETLAND_TYPE) {
+//             case "Estuarine and Marine Deepwater": fill = "#097F8B"; break;
+//             case "Estuarine and Marine Wetland": fill = "#73BAA7"; break;
+//             case "Freshwater Emergent Wetland": fill = "#87C023"; break;
+//             case "Freshwater Forested/Shrub Wetland": fill = "#108034"; break;
+//             case "Freshwater Pond": fill = "#688FB6"; break;
+//             case "Lake": fill = "#100673"; break;
+//             case "Riverine": fill = "#048DB9"; break;
+//             default: fill = "#AD816E";
+//         }
+//         return { color: fill, weight: 1 };
+//     };
+//
+//     var styles = {
+//         "nc_wetlands" : styleFn,
+//         "va_wetlands": styleFn
+//     };
+//     var vtUrl = distro.href;
+// 	var vtOpts = {
+// 		rendererFactory: L.canvas.tile,
+// 		vectorTileLayerStyles: styles,
+// 	};
+// 	return L.vectorGrid.protobuf(vtUrl, vtOpts);
+//
+// });
 
 
 
@@ -93,14 +93,12 @@ GeoPlatformMapCore.OSM.get().then(osm => {
     // }).addTo(leafletMap);
 
     let vtLayer = {
+        id: "f41290dac72ecad35b5a039847edb44f",
         type: "Layer",
         label: "Wetlands Vector Tiles",
-        layerType: "FeatureLayer",
-        //the following is a hack and should not be how this is done for reals...
-        distributions: [{
-            type: "dcat:Distribution",
-            href: "https://s3.amazonaws.com/usace-maptiles-tests/wetlands-gz/{z}/{x}/{y}.pbf"
-        }]
+        layerType: "TileLayer",
+        resourceTypes: ['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
+        href: "https://s3.amazonaws.com/usace-maptiles-tests/wetlands-gz/{z}/{x}/{y}.pbf"
     };
     mapInstance.addLayers(vtLayer);
 

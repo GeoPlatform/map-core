@@ -186,6 +186,49 @@ class LayerFactory {
 
 
 
+
+
+        this.register( (layer) => {
+
+            if(!layer) return null;
+
+            const MBVTRT = 'http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer';
+            let resourceTypes = layer.resourceTypes || [];
+            if(resourceTypes.indexOf(MBVTRT) < 0) { //not tagged as VT layer
+                return null;
+            }
+
+            let href = layer.href;
+            if(!href || href.indexOf(".pbf") < 0) {
+                console.log("LayerFactory - Layer does not define an Access URL");
+                return null;  //missing URL
+            }
+
+            //if Leaflet vector grid plugin is not installed, can't render VT Layers
+            if( typeof(L.vectorGrid) === 'undefined' &&
+                typeof(L.vectorGrid.protobuf) === 'undefined') {
+                console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
+                return null;
+            }
+
+            // let styleFn = function(featureProperties, z){
+            //     let fill = '#AD816E';
+            //     return { color: fill, weight: 1 };
+            // };
+            //
+            // var styles = {
+            //     "nc_wetlands" : styleFn,
+            //     "va_wetlands": styleFn
+            // };
+            var vtOpts = {
+        		rendererFactory: L.canvas.tile
+                // ,
+        		// vectorTileLayerStyles: styles,
+        	};
+        	return L.vectorGrid.protobuf(href, vtOpts);
+
+        });
+
     }
 }
 
