@@ -4644,12 +4644,13 @@
                     //     "nc_wetlands" : styleFn,
                     //     "va_wetlands": styleFn
                     // };
-                    var vtOpts = {
+                    var opts = {
                         rendererFactory: L$1.canvas.tile
                         // ,
                         // vectorTileLayerStyles: styles,
                     };
-                    return L$1.vectorGrid.protobuf(href, vtOpts);
+                    if (GeoPlatformClient.Config.leafletPane) opts.pane = GeoPlatformClient.Config.leafletPane;
+                    return L$1.vectorGrid.protobuf(href, opts);
                 });
             }
         }]);

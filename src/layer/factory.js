@@ -220,12 +220,13 @@ class LayerFactory {
             //     "nc_wetlands" : styleFn,
             //     "va_wetlands": styleFn
             // };
-            var vtOpts = {
+            var opts = {
         		rendererFactory: L.canvas.tile
                 // ,
         		// vectorTileLayerStyles: styles,
         	};
-        	return L.vectorGrid.protobuf(href, vtOpts);
+            if(Config.leafletPane) opts.pane = Config.leafletPane;
+        	return L.vectorGrid.protobuf(href, opts);
 
         });
 
