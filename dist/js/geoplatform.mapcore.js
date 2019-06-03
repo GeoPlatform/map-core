@@ -5438,7 +5438,11 @@
 
                     leafletLayer = LayerFactory$1.create(layer);
                     if (!leafletLayer) {
-                        throw new Error("Could not create leaflet layer for GP Layer '" + layer.id + "'");
+                        var msg = "Could not create leaflet instance for GP Layer '" + layer.id + "'.";
+                        if (!layer.services || !layer.services.length) {
+                            msg += '  The layer instance has no services included, ' + 'which will prevent most layers from being displayed.';
+                        }
+                        throw new Error(msg);
                     }
                 } catch (e) {
                     this.logLayerError(layer.id, "Layer '" + layer.label + "' could not be added to the " + "map instance; " + e.message);

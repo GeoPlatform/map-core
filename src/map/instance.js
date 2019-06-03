@@ -641,8 +641,12 @@ class MapInstance extends Listener {
 
             leafletLayer = LayerFactory.create(layer);
             if(!leafletLayer) {
-                throw new Error("Could not create leaflet layer for GP Layer '" +
-                    layer.id + "'");
+                let msg = "Could not create leaflet instance for GP Layer '" + layer.id + "'.";
+                if(!layer.services || !layer.services.length) {
+                    msg += '  The layer instance has no services included, ' +
+                        'which will prevent most layers from being displayed.';
+                }
+                throw new Error(msg);
             }
 
         } catch(e) {
