@@ -6092,30 +6092,7 @@
                 this._mapId = map.id;
                 this._mapDef = map;
 
-                map.extent = map.extent || {};
-                var west = isNaN(map.extent.minx) ? -179.0 : map.extent.minx * 1.0;
-                var east = isNaN(map.extent.maxx) ? 179.0 : map.extent.maxx * 1.0;
-                var south = isNaN(map.extent.miny) ? -89.0 : map.extent.miny * 1.0;
-                var north = isNaN(map.extent.maxy) ? 89.0 : map.extent.maxy * 1.0;
-
-                //ensure x,y is ordered correctly
-                var t = void 0;
-                if (west > east) {
-                    t = Math.min(west, east);
-                    east = map.extent.maxx = Math.max(west, east);
-                    west = map.extent.minx = t;
-                }
-                if (south > north) {
-                    t = Math.min(south, north);
-                    north = map.extent.maxy = Math.max(south, north);
-                    south = map.extent.miny = t;
-                }
-
-                //prevent out-of-bounds extents
-                if (west < -180.0) west = -179.0;
-                if (east > 180.0) east = 179.0;
-                if (south < -90.0) south = -89.0;
-                if (north > 90.0) north = 89.0;
+                map.extent = this.ensureExtent(map.extent);
 
                 //set extent from loaded map
                 this._defaultExtent = map.extent;
@@ -6144,6 +6121,42 @@
 
                 this.clean();
                 this.notify('map:loaded', map);
+            }
+
+            /**
+             * @param {object} extent
+             * @return {object} corrected or default extent
+             */
+
+        }, {
+            key: "ensureExtent",
+            value: function ensureExtent(extent) {
+
+                var west = !extent || isNaN(extent.minx) ? -179.0 : extent.minx * 1.0;
+                var east = !extent || isNaN(extent.maxx) ? 179.0 : extent.maxx * 1.0;
+                var south = !extent || isNaN(extent.miny) ? -89.0 : extent.miny * 1.0;
+                var north = !extent || isNaN(extent.maxy) ? 89.0 : extent.maxy * 1.0;
+
+                //ensure x,y is ordered correctly
+                var t = void 0;
+                if (west > east) {
+                    t = Math.min(west, east);
+                    east = Math.max(west, east);
+                    west = t;
+                }
+                if (south > north) {
+                    t = Math.min(south, north);
+                    north = Math.max(south, north);
+                    south = t;
+                }
+
+                //prevent out-of-bounds extents
+                if (west < -180.0) west = -179.0;
+                if (east > 180.0) east = 179.0;
+                if (south < -90.0) south = -89.0;
+                if (north > 90.0) north = 89.0;
+
+                return { minx: west, miny: south, maxx: east, maxy: north };
             }
 
             /**

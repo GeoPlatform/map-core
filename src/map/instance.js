@@ -1231,6 +1231,7 @@ class MapInstance extends Listener {
         });
     }
 
+
     /**
      * Load a map from its descriptor as the current
      * map managed by this service
@@ -1244,30 +1245,7 @@ class MapInstance extends Listener {
         this._mapId = map.id;
         this._mapDef = map;
 
-        map.extent = map.extent || {};
-        let west =  isNaN(map.extent.minx) ? -179.0 : map.extent.minx*1.0;
-        let east =  isNaN(map.extent.maxx) ?  179.0 : map.extent.maxx*1.0;
-        let south = isNaN(map.extent.miny) ?  -89.0 : map.extent.miny*1.0;
-        let north = isNaN(map.extent.maxy) ?   89.0 : map.extent.maxy*1.0;
-
-        //ensure x,y is ordered correctly
-        let t;
-        if(west > east) {
-            t = Math.min(west, east);
-            east = map.extent.maxx = Math.max(west, east);
-            west = map.extent.minx = t;
-        }
-        if(south > north) {
-            t = Math.min(south, north);
-            north = map.extent.maxy = Math.max(south, north);
-            south = map.extent.miny = t;
-        }
-
-        //prevent out-of-bounds extents
-        if(west < -180.0) west = -179.0;
-        if(east > 180.0)  east =  179.0;
-        if(south < -90.0) south = -89.0;
-        if(north > 90.0)  north =  89.0;
+        map.extent = this.ensureExtent(map.extent);
 
         //set extent from loaded map
         this._defaultExtent = map.extent;
@@ -1303,6 +1281,39 @@ class MapInstance extends Listener {
         this.clean();
         this.notify('map:loaded', map);
 
+    }
+
+    /**
+     * @param {object} extent
+     * @return {object} corrected or default extent
+     */
+    ensureExtent( extent ) {
+
+        let west  = !extent || isNaN(extent.minx) ? -179.0 : extent.minx*1.0;
+        let east  = !extent || isNaN(extent.maxx) ?  179.0 : extent.maxx*1.0;
+        let south = !extent || isNaN(extent.miny) ?  -89.0 : extent.miny*1.0;
+        let north = !extent || isNaN(extent.maxy) ?   89.0 : extent.maxy*1.0;
+
+        //ensure x,y is ordered correctly
+        let t;
+        if(west > east) {
+            t = Math.min(west, east);
+            east = Math.max(west, east);
+            west = t;
+        }
+        if(south > north) {
+            t = Math.min(south, north);
+            north = Math.max(south, north);
+            south = t;
+        }
+
+        //prevent out-of-bounds extents
+        if(west < -180.0) west = -179.0;
+        if(east > 180.0)  east =  179.0;
+        if(south < -90.0) south = -89.0;
+        if(north > 90.0)  north =  89.0;
+
+        return { minx : west, miny : south, maxx : east, maxy : north };
     }
 
 
