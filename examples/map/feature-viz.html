@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base href="/">
+    <title>Features Example</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.0/leaflet.draw.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.3.0/MarkerCluster.css" />
+    <link rel="stylesheet" type="text/css" href="src/control/L.Control.Loading.css" />
+    <style type="text/css">
+        #map { width: 400px; height: 300px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <div id="map">
+    </div>
+
+    <input type="checkbox" onclick="toggleVisibility()">
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/q.js/1.5.1/q.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.0/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/esri-leaflet/2.1.2/esri-leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.3.0/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iso8601-js-period@0.2.1/iso8601.min.js"></script>
+
+    <script src="node_modules/geoplatform.client/dist/js/geoplatform.client.js"></script>
+    <script src="dist/js/geoplatform.mapcore.js"></script>
+
+    <script>
+
+    //configure geoplatform env variables needed to interact with the API
+    GeoPlatformClient.Config.configure({
+        ualUrl : 'https://sit-ual.geoplatform.us'
+    });
+
+    let elem = document.getElementById('map');
+    let mapOptions = {
+        center: [38, -96],
+        zoom: 5,
+        minZoom: 2,
+        maxZoom: 21,
+        maxBounds: [[-90,-180],[90,180]],
+        tap: true,
+        touchZoom:true,
+        loadingControl: true
+    };
+
+    var leafletMap = L.map(elem, mapOptions);
+    var mapInstance = GeoPlatformMapCore.MapFactory.get();
+    mapInstance.setMap(leafletMap);
+
+    //load OpenStreet Map layer using API and set as base layer
+    GeoPlatformMapCore.OSM.get().then(osm => {
+        mapInstance.setBaseLayer(osm);
+        initFeatures();
+    }).catch(e => { console.log("Unable to get OSM base layer"); });
+
+
+    function initFeatures() {
+
+        let layerObj = {
+            "type": "Layer",
+            "id": "d01d30dddf4e188d65a1f71f22e0ba7a",
+            "uri": "http://www.geoplatform.gov/id/layer/968a969a71368f1b78bd1e33b7d9caaa",
+            "modified": 1553890290567,
+            "label": "Critical Habitat - Polygon Features - Proposed",
+            "title": "Critical Habitat - Polygon Features - Proposed",
+            "description": "CRITHAB_POLY_20160908",
+            "layerName": "3",
+            "layerType": "FeatureLayer",
+            "services": [
+            {
+                "type": "regp:Service",
+                "id": "4e362b5bf0a24c809b01dc6aa009404e",
+                "uri": "http://www.geoplatform.gov/id/service/d52a432214cf20e5e1418f0c48e3ff32",
+                "label": "USFWS_Critical_Habitat (FeatureServer)",
+                "title": "USFWS_Critical_Habitat (FeatureServer)",
+                "extent": {
+                "minx": 123.740791208557,
+                "maxx": -57.464633692247844,
+                "miny": -22.2651651096875,
+                "maxy": 76.19796728808892
+                },
+                "href": "https://services.arcgis.com/QVENGdaPbd4LUkLV/ArcGIS/rest/services/USFWS_Critical_Habitat/FeatureServer",
+                "serviceType": {
+                    "_created": 1553817586836,
+                    "_modified": 1559244289364,
+                    "_createdBy": "gp-admin",
+                    "_lastModifiedBy": "gp-admin",
+                    "_versionId": 3,
+                    "id": "48980c5bad0c8d4666b393874eb5279a",
+                    "uri": "http://www.geoplatform.gov/spec/esri-feature-rest",
+                    "label": "Esri REST Feature Service",
+                    "type": "dct:Standard",
+                    "title": "Esri REST Feature Service",
+                    "description": "Esri ArcGIS Feature Server REST API",
+                    "resourceType": [
+                    "ServiceType"
+                    ],
+                    "modified": 1559244289364,
+                    "_status": "current"
+                }
+            }]
+        };
+
+        mapInstance.addLayers([layerObj]);
+    }
+
+
+    function toggleVisibility() {
+        mapInstance.toggleLayerVisibility('d01d30dddf4e188d65a1f71f22e0ba7a');
+    }
+
+
+    </script>
+
+</body>
+</html>
