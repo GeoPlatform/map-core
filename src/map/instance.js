@@ -257,9 +257,24 @@ class MapInstance extends Listener {
         metadata = metadata || {};
 
         //map layers
-        metadata.layers = this._layerStates.slice(0);
+        metadata.layers = this._layerStates.map(state => {
+            let result = {
+                visibility : state.visibility || true,
+                opacity : isNaN(state.opacity) ? 1.0 : state.opacity*1,
+                layer: {
+                    id: state.layer.id,
+                    uri: state.layer.uri,
+                    label: state.layer.label
+                }
+            };
+            return result;
+        });
         // ... UAL should support accepting just an id here, so we'll do just that
-        metadata.baseLayer = this._baseLayerDef;
+        metadata.baseLayer = {
+            id: this._baseLayerDef.id,
+            uri: this._baseLayerDef.uri,
+            label: this._baseLayerDef.label
+        };
 
         metadata.annotations = this._featureLayer ?
             { title: "Map Features", geoJSON: this._featureLayer.toGeoJSON() } : null;
@@ -1144,8 +1159,7 @@ class MapInstance extends Listener {
         }
 
         // console.log("Updating: " + JSON.stringify(map));
-        return this.getService(ItemTypes.MAP)
-        .save(content)
+        return this.getService(ItemTypes.MAP).save(content)
         .then( result => {
 
             //track new map's info so we can update it with next save
