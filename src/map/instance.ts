@@ -281,9 +281,24 @@ export default class MapInstance extends Listener {
         metadata = metadata || {};
 
         //map layers
-        metadata.layers = this._layerStates.slice(0);
+        metadata.layers = this._layerStates.map(state => {
+            let result = {
+                visibility : state.visibility || true,
+                opacity : isNaN(state.opacity) ? 1.0 : state.opacity*1,
+                layer: {
+                    id: state.layer.id,
+                    uri: state.layer.uri,
+                    label: state.layer.label
+                }
+            };
+            return result;
+        });
         // ... UAL should support accepting just an id here, so we'll do just that
-        metadata.baseLayer = this._baseLayerDef;
+        metadata.baseLayer = {
+            id: this._baseLayerDef.id,
+            uri: this._baseLayerDef.uri,
+            label: this._baseLayerDef.label
+        };
 
         metadata.annotations = this._featureLayer ?
             { title: "Map Features", geoJSON: this._featureLayer.toGeoJSON() } : null;
@@ -667,8 +682,12 @@ export default class MapInstance extends Listener {
 
             leafletLayer = LayerFactory.create(layer);
             if(!leafletLayer) {
-                throw new Error("Could not create leaflet layer for GP Layer '" +
-                    layer.id + "'");
+                let msg = "Could not create leaflet instance for GP Layer '" + layer.id + "'.";
+                if(!layer.services || !layer.services.length) {
+                    msg += '  The layer instance has no services included, ' +
+                        'which will prevent most layers from being displayed.';
+                }
+                throw new Error(msg);
             }
 
         } catch(e) {
@@ -1265,30 +1284,7 @@ export default class MapInstance extends Listener {
         this._mapId = map.id;
         this._mapDef = map;
 
-        map.extent = map.extent || {};
-        let west =  isNaN(map.extent.minx) ? -179.0 : map.extent.minx*1.0;
-        let east =  isNaN(map.extent.maxx) ?  179.0 : map.extent.maxx*1.0;
-        let south = isNaN(map.extent.miny) ?  -89.0 : map.extent.miny*1.0;
-        let north = isNaN(map.extent.maxy) ?   89.0 : map.extent.maxy*1.0;
-
-        //ensure x,y is ordered correctly
-        let t;
-        if(west > east) {
-            t = Math.min(west, east);
-            east = map.extent.maxx = Math.max(west, east);
-            west = map.extent.minx = t;
-        }
-        if(south > north) {
-            t = Math.min(south, north);
-            north = map.extent.maxy = Math.max(south, north);
-            south = map.extent.miny = t;
-        }
-
-        //prevent out-of-bounds extents
-        if(west < -180.0) west = -179.0;
-        if(east > 180.0)  east =  179.0;
-        if(south < -90.0) south = -89.0;
-        if(north > 90.0)  north =  89.0;
+        map.extent = this.ensureExtent(map.extent);
 
         //set extent from loaded map
         this._defaultExtent = map.extent;
@@ -1324,6 +1320,40 @@ export default class MapInstance extends Listener {
         this.clean();
         this.notify('map:loaded', map);
 
+    }
+
+
+    /**
+     * @param extent
+     * @return corrected or default extent
+     */
+    ensureExtent( extent : any ) : any {
+
+        let west  = !extent || isNaN(extent.minx) ? -179.0 : extent.minx*1.0;
+        let east  = !extent || isNaN(extent.maxx) ?  179.0 : extent.maxx*1.0;
+        let south = !extent || isNaN(extent.miny) ?  -89.0 : extent.miny*1.0;
+        let north = !extent || isNaN(extent.maxy) ?   89.0 : extent.maxy*1.0;
+
+        //ensure x,y is ordered correctly
+        let t;
+        if(west > east) {
+            t = Math.min(west, east);
+            east = Math.max(west, east);
+            west = t;
+        }
+        if(south > north) {
+            t = Math.min(south, north);
+            north = Math.max(south, north);
+            south = t;
+        }
+
+        //prevent out-of-bounds extents
+        if(west < -180.0) west = -179.0;
+        if(east > 180.0)  east =  179.0;
+        if(south < -90.0) south = -89.0;
+        if(north > 90.0)  north =  89.0;
+
+        return { minx : west, miny : south, maxx : east, maxy : north };
     }
 
 

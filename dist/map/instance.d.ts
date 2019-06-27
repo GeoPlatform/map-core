@@ -284,6 +284,11 @@ export default class MapInstance extends Listener {
      */
     loadMapFromObj(map: any): void;
     /**
+     * @param extent
+     * @return corrected or default extent
+     */
+    ensureExtent(extent: any): any;
+    /**
      *
      */
     destroyMap(): void;

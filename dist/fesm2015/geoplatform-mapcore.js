@@ -4,6 +4,7 @@ import 'leaflet-timedimension/dist/leaflet.timedimension.src';
 import { FeatureManager, tiledMapLayer, imageMapLayer, FeatureLayer } from 'esri-leaflet';
 import * as jquery from 'jquery';
 import { reject, defer, resolve } from 'q';
+import * as L from 'leaflet';
 import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Point, LatLng, TimeDimension, Layer, featureGroup, geoJSON, LayerGroup } from 'leaflet';
 import { QueryFactory, LayerService, XHRHttpClient, Config, ItemService, ItemTypes, ServiceFactory } from '@geoplatform/client';
 
@@ -253,10 +254,10 @@ var loadingControl = Control.extend({
 });
 if ((/** @type {?} */ (window)).L) {
     /** @type {?} */
-    const L = (/** @type {?} */ (window)).L;
-    L.Control.Loading = loadingControl;
-    L.Control.loading = function (options) {
-        return new L.Control.Loading(options);
+    const L$$1 = (/** @type {?} */ (window)).L;
+    L$$1.Control.Loading = loadingControl;
+    L$$1.Control.loading = function (options) {
+        return new L$$1.Control.Loading(options);
     };
 }
 Map.addInitHook(function () {
@@ -482,10 +483,10 @@ var measureControl = Control.extend({
 });
 if ((/** @type {?} */ (window)).L) {
     /** @type {?} */
-    const L = (/** @type {?} */ (window)).L;
-    L.Control.Measure = measureControl;
-    L.control.measure = function (options) {
-        return new L.Control.Measure(options);
+    const L$$1 = (/** @type {?} */ (window)).L;
+    L$$1.Control.Measure = measureControl;
+    L$$1.control.measure = function (options) {
+        return new L$$1.Control.Measure(options);
     };
 }
 Map.mergeOptions({
@@ -1187,6 +1188,17 @@ class EditFeature extends Control {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/** @type {?} */
+const LayerResourceTypes = {
+    MapBoxVectorTile: 'http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer',
+    OSM: 'http://www.geoplatform.gov/ont/openlayer/OSMLayer',
+    BaseLayer: 'http://www.geoplatform.gov/ont/openlayer/BaseLayer'
+};
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 var OSM = {
     /**
      * @param {Object} layer - GeoPlatform Layer object
@@ -1196,12 +1208,12 @@ var OSM = {
         return layer &&
             layer.resourceTypes &&
             layer.resourceTypes.length &&
-            ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
+            ~layer.resourceTypes.indexOf(LayerResourceTypes.OSM);
     },
     get: function (layerService) {
         let query = QueryFactory()
             .fields('*')
-            .resourceTypes("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
+            .resourceTypes(LayerResourceTypes.OSM);
         if (!layerService)
             layerService = new LayerService(Config.ualUrl, new XHRHttpClient());
         return layerService.search(query)
@@ -1818,6 +1830,9 @@ const ɵ0$6 = function (feature, latlng) {
     // }
 }, ɵ7$3 = function (bool) {
     this.currentVisibility = !!bool;
+    if (this.options.renderer._container) {
+        this.options.renderer._container.style.display = bool ? '' : 'none';
+    }
     //clustered features
     if (this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
         for (let id in this.cluster._featureGroup._layers) {
@@ -2280,9 +2295,9 @@ function wms(layer) {
 }
 if ((/** @type {?} */ (window)).L) {
     /** @type {?} */
-    const L = (/** @type {?} */ (window)).L;
-    L.TileLayer.WMS = WMS;
-    L.tileLayer.wms = wms;
+    const L$$1 = (/** @type {?} */ (window)).L;
+    L$$1.TileLayer.WMS = WMS;
+    L$$1.tileLayer.wms = wms;
 }
 
 /**
@@ -2392,9 +2407,9 @@ function wmst(gpLayer) {
 }
 if ((/** @type {?} */ (window)).L) {
     /** @type {?} */
-    const L = (/** @type {?} */ (window)).L;
-    L.TileLayer.WMST = WMST;
-    L.tileLayer.wmst = wmst;
+    const L$$1 = (/** @type {?} */ (window)).L;
+    L$$1.TileLayer.WMST = WMST;
+    L$$1.tileLayer.wmst = wmst;
 }
 
 /**
@@ -2639,9 +2654,9 @@ function wmts(layer) {
 }
 if ((/** @type {?} */ (window)).L) {
     /** @type {?} */
-    const L = (/** @type {?} */ (window)).L;
-    L.TileLayer.WMTS = WMTS;
-    L.tileLayer.wmts = wmts;
+    const L$$1 = (/** @type {?} */ (window)).L;
+    L$$1.TileLayer.WMTS = WMTS;
+    L$$1.tileLayer.wmts = wmts;
 }
 
 /**
@@ -2771,10 +2786,10 @@ class EsriTileLayer extends TileLayer {
 }
 if ((/** @type {?} */ (window)).L) {
     /** @type {?} */
-    const L = (/** @type {?} */ (window)).L;
-    L.TileLayer.ESRI = EsriTileLayer;
-    L.tileLayer.esri = function (url, options) {
-        return new L.TileLayer.ESRI(url, options);
+    const L$$1 = (/** @type {?} */ (window)).L;
+    L$$1.TileLayer.ESRI = EsriTileLayer;
+    L$$1.tileLayer.esri = function (url, options) {
+        return new L$$1.TileLayer.ESRI(url, options);
     };
 }
 
@@ -2909,7 +2924,7 @@ class LayerFactory {
         this.register((layer) => {
             if (layer && layer.resourceTypes &&
                 layer.resourceTypes.length &&
-                ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer")) {
+                ~layer.resourceTypes.indexOf(LayerResourceTypes.OSM)) {
                 return OSMLayerFactory();
             }
         });
@@ -3017,6 +3032,37 @@ class LayerFactory {
                 });
             }
             return null;
+        });
+        this.register((layer) => {
+            if (!layer)
+                return null;
+            /** @type {?} */
+            let resourceTypes = layer.resourceTypes || [];
+            if (resourceTypes.indexOf(LayerResourceTypes.MapBoxVectorTile) < 0) { //not tagged as VT layer
+                //not tagged as VT layer
+                return null;
+            }
+            /** @type {?} */
+            let href = layer.href;
+            if (!href || href.indexOf(".pbf") < 0) {
+                console.log("LayerFactory - Layer does not define an Access URL");
+                return null; //missing URL
+            }
+            /** @type {?} */
+            const Leaflet = /** @type {?} */ (L);
+            //if Leaflet vector grid plugin is not installed, can't render VT Layers
+            if (typeof (Leaflet.vectorGrid) === 'undefined' &&
+                typeof (Leaflet.vectorGrid.protobuf) === 'undefined') {
+                console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
+                return null;
+            }
+            /** @type {?} */
+            var opts = {
+                rendererFactory: (/** @type {?} */ (canvas)).tile
+            };
+            if (Config["leafletPane"])
+                opts.pane = Config["leafletPane"];
+            return Leaflet.vectorGrid.protobuf(href, opts);
         });
     }
 }
@@ -3463,9 +3509,25 @@ class MapInstance extends Listener {
     getMapResourceContent(metadata) {
         metadata = metadata || {};
         //map layers
-        metadata.layers = this._layerStates.slice(0);
+        metadata.layers = this._layerStates.map(state => {
+            /** @type {?} */
+            let result = {
+                visibility: state.visibility || true,
+                opacity: isNaN(state.opacity) ? 1.0 : state.opacity * 1,
+                layer: {
+                    id: state.layer.id,
+                    uri: state.layer.uri,
+                    label: state.layer.label
+                }
+            };
+            return result;
+        });
         // ... UAL should support accepting just an id here, so we'll do just that
-        metadata.baseLayer = this._baseLayerDef;
+        metadata.baseLayer = {
+            id: this._baseLayerDef.id,
+            uri: this._baseLayerDef.uri,
+            label: this._baseLayerDef.label
+        };
         metadata.annotations = this._featureLayer ?
             { title: "Map Features", geoJSON: this._featureLayer.toGeoJSON() } : null;
         /** @type {?} */
@@ -3845,8 +3907,13 @@ class MapInstance extends Listener {
                 throw new Error("Invalid argument, missing layer and or state");
             leafletLayer = LayerFactory$1.create(layer);
             if (!leafletLayer) {
-                throw new Error("Could not create leaflet layer for GP Layer '" +
-                    layer.id + "'");
+                /** @type {?} */
+                let msg = "Could not create leaflet instance for GP Layer '" + layer.id + "'.";
+                if (!layer.services || !layer.services.length) {
+                    msg += '  The layer instance has no services included, ' +
+                        'which will prevent most layers from being displayed.';
+                }
+                throw new Error(msg);
             }
         }
         catch (e) {
@@ -4409,36 +4476,7 @@ class MapInstance extends Listener {
         // console.log(map);
         this._mapId = map.id;
         this._mapDef = map;
-        map.extent = map.extent || {};
-        /** @type {?} */
-        let west = isNaN(map.extent.minx) ? -179.0 : map.extent.minx * 1.0;
-        /** @type {?} */
-        let east = isNaN(map.extent.maxx) ? 179.0 : map.extent.maxx * 1.0;
-        /** @type {?} */
-        let south = isNaN(map.extent.miny) ? -89.0 : map.extent.miny * 1.0;
-        /** @type {?} */
-        let north = isNaN(map.extent.maxy) ? 89.0 : map.extent.maxy * 1.0;
-        /** @type {?} */
-        let t;
-        if (west > east) {
-            t = Math.min(west, east);
-            east = map.extent.maxx = Math.max(west, east);
-            west = map.extent.minx = t;
-        }
-        if (south > north) {
-            t = Math.min(south, north);
-            north = map.extent.maxy = Math.max(south, north);
-            south = map.extent.miny = t;
-        }
-        //prevent out-of-bounds extents
-        if (west < -180.0)
-            west = -179.0;
-        if (east > 180.0)
-            east = 179.0;
-        if (south < -90.0)
-            south = -89.0;
-        if (north > 90.0)
-            north = 89.0;
+        map.extent = this.ensureExtent(map.extent);
         //set extent from loaded map
         this._defaultExtent = map.extent;
         /** @type {?} */
@@ -4468,6 +4506,42 @@ class MapInstance extends Listener {
         ]);
         this.clean();
         this.notify('map:loaded', map);
+    }
+    /**
+     * @param {?} extent
+     * @return {?} corrected or default extent
+     */
+    ensureExtent(extent) {
+        /** @type {?} */
+        let west = !extent || isNaN(extent.minx) ? -179.0 : extent.minx * 1.0;
+        /** @type {?} */
+        let east = !extent || isNaN(extent.maxx) ? 179.0 : extent.maxx * 1.0;
+        /** @type {?} */
+        let south = !extent || isNaN(extent.miny) ? -89.0 : extent.miny * 1.0;
+        /** @type {?} */
+        let north = !extent || isNaN(extent.maxy) ? 89.0 : extent.maxy * 1.0;
+        /** @type {?} */
+        let t;
+        if (west > east) {
+            t = Math.min(west, east);
+            east = Math.max(west, east);
+            west = t;
+        }
+        if (south > north) {
+            t = Math.min(south, north);
+            north = Math.max(south, north);
+            south = t;
+        }
+        //prevent out-of-bounds extents
+        if (west < -180.0)
+            west = -179.0;
+        if (east > 180.0)
+            east = 179.0;
+        if (south < -90.0)
+            south = -89.0;
+        if (north > 90.0)
+            north = 89.0;
+        return { minx: west, miny: south, maxx: east, maxy: north };
     }
     /**
      *

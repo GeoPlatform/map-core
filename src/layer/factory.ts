@@ -1,6 +1,7 @@
 
 import * as Q from "q";
 
+import * as L from 'leaflet';
 import { Layer } from "leaflet";
 import * as esri from "esri-leaflet";
 import ServiceTypes from "../service/types";
@@ -17,6 +18,7 @@ import {WMST, wmst} from './wmst';
 import {WMTS, wmts} from './wmts';
 import ESRITileLayer from './esri-tile-layer';
 import OSMLayerFactory from './osm-factory';
+import {LayerResourceTypes} from '../shared/resource-types';
 import {
     Config, ItemTypes, LayerService, XHRHttpClient,
     Layer as LayerModel, Service as ServiceModel,
@@ -159,7 +161,7 @@ class LayerFactory {
         this.register( ( layer : LayerModel )=> {
             if(layer && layer.resourceTypes &&
                 layer.resourceTypes.length &&
-                ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer")) {
+                ~layer.resourceTypes.indexOf(LayerResourceTypes.OSM)) {
                 return OSMLayerFactory();
             }
         });
@@ -254,6 +256,52 @@ class LayerFactory {
                 });
             }
             return null;
+        });
+
+
+
+
+        this.register( (layer : LayerModel) => {
+
+            if(!layer) return null;
+
+            let resourceTypes = layer.resourceTypes || [];
+            if(resourceTypes.indexOf(LayerResourceTypes.MapBoxVectorTile) < 0) { //not tagged as VT layer
+                return null;
+            }
+
+            let href = layer.href;
+            if(!href || href.indexOf(".pbf") < 0) {
+                console.log("LayerFactory - Layer does not define an Access URL");
+                return null;  //missing URL
+            }
+
+            const Leaflet = L as any;
+
+            //if Leaflet vector grid plugin is not installed, can't render VT Layers
+            if( typeof(Leaflet.vectorGrid) === 'undefined' &&
+                typeof(Leaflet.vectorGrid.protobuf) === 'undefined') {
+                console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
+                return null;
+            }
+
+            // let styleFn = function(featureProperties, z){
+            //     let fill = '#AD816E';
+            //     return { color: fill, weight: 1 };
+            // };
+            //
+            // var styles = {
+            //     "nc_wetlands" : styleFn,
+            //     "va_wetlands": styleFn
+            // };
+            var opts : any = {
+        		rendererFactory: ( L.canvas as any ).tile
+                // ,
+        		// vectorTileLayerStyles: styles,
+        	};
+            if(Config.leafletPane) opts.pane = Config.leafletPane;
+        	return Leaflet.vectorGrid.protobuf(href, opts);
+
         });
 
 

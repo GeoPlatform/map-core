@@ -1,5 +1,6 @@
 
 import * as Q from "q";
+import { LayerResourceTypes } from "../shared/resource-types";
 import {
     QueryFactory, LayerService, XHRHttpClient, Config
 }  from '@geoplatform/client';
@@ -19,13 +20,13 @@ export default {
         return  layer &&
                 layer.resourceTypes &&
                 layer.resourceTypes.length &&
-                ~layer.resourceTypes.indexOf("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
+                ~layer.resourceTypes.indexOf(LayerResourceTypes.OSM);
     },
 
     get : function(layerService ?: LayerService) : Q.Promise<any> {
         let query = QueryFactory()
             .fields('*')
-            .resourceTypes("http://www.geoplatform.gov/ont/openlayer/OSMLayer");
+            .resourceTypes(LayerResourceTypes.OSM);
         if(!layerService)
             layerService = new LayerService(Config.ualUrl, new XHRHttpClient());
         return layerService.search(query)

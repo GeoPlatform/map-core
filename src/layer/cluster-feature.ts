@@ -201,6 +201,10 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
 
         this.currentVisibility = !!bool;
 
+        if(this.options.renderer._container) {
+            this.options.renderer._container.style.display = bool ? '' : 'none';
+        }
+
         //clustered features
         if(this.cluster && this.cluster._featureGroup && this.cluster._featureGroup._layers) {
             for(let id in this.cluster._featureGroup._layers) {
