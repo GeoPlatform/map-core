@@ -5011,6 +5011,7 @@
                         visibility: state.visibility || true,
                         opacity: isNaN(state.opacity) ? 1.0 : state.opacity * 1,
                         layer: {
+                            type: state.layer.type || ItemTypes.LAYER,
                             id: state.layer.id,
                             uri: state.layer.uri,
                             label: state.layer.label
@@ -5020,6 +5021,7 @@
                 });
                 // ... UAL should support accepting just an id here, so we'll do just that
                 metadata.baseLayer = {
+                    type: this._baseLayerDef.type || ItemTypes.LAYER,
                     id: this._baseLayerDef.id,
                     uri: this._baseLayerDef.uri,
                     label: this._baseLayerDef.label
