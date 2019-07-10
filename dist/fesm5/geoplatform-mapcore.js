@@ -4,9 +4,8 @@ import 'leaflet-timedimension/dist/leaflet.timedimension.src';
 import { FeatureManager, FeatureLayer, tiledMapLayer, imageMapLayer } from 'esri-leaflet';
 import { __extends } from 'tslib';
 import * as jquery from 'jquery';
-import { reject, defer, resolve } from 'q';
 import * as L from 'leaflet';
-import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, TimeDimension, Browser, Point, LatLng, Layer, featureGroup, geoJSON, LayerGroup } from 'leaflet';
+import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Layer, TimeDimension, Browser, Point, LatLng, featureGroup, geoJSON, LayerGroup } from 'leaflet';
 import { QueryFactory, LayerService, XHRHttpClient, Config, ItemService, ItemTypes, ServiceFactory } from '@geoplatform/client';
 
 /**
@@ -1303,8 +1302,7 @@ var OSM = {
         if (!layerService)
             layerService = new LayerService(Config.ualUrl, new XHRHttpClient());
         return layerService.search(query)
-            .then(function (response) { return response.results.length ? response.results[0] : null; })
-            .catch(function (e) { return reject(e); });
+            .then(function (response) { return response.results.length ? response.results[0] : null; });
     }
 };
 
@@ -1669,27 +1667,21 @@ var jQuery = jquery;
  * @return {?}
  */
 function featureStyleResolver(id) {
-    /** @type {?} */
-    var deferred = defer();
-    if (!jQuery) {
-        deferred.reject(new Error("Unable to load feature layer style, jQuery is not installed"));
-        return deferred.promise;
-    }
-    jQuery.ajax({
-        url: Config["ualUrl"] + '/api/layers/' + id + '/style',
-        dataType: 'json',
-        success: function (data) {
-            deferred.resolve(data);
-        },
-        error: function (xhr, status, message) {
-            /** @type {?} */
-            var em = "FeatureStyleResolver() -\n               Error loading style information for layer " + id + " : " + message;
-            /** @type {?} */
-            var error = new Error(em);
-            deferred.reject(error);
+    return new Promise(function (resolve, reject) {
+        if (!jQuery) {
+            reject(new Error("Unable to load feature layer style, jQuery is not installed"));
         }
+        jQuery.ajax({
+            url: Config["ualUrl"] + '/api/layers/' + id + '/style',
+            dataType: 'json',
+            success: function (data) { resolve(data); },
+            error: function (xhr, status, message) {
+                /** @type {?} */
+                var em = "FeatureStyleResolver() -\n                   Error loading style information for layer " + id + " : " + message;
+                reject(new Error(em));
+            }
+        });
     });
-    return deferred.promise;
 }
 
 /**
@@ -2144,26 +2136,20 @@ function geoJsonFeed(layer, options) {
     /** @type {?} */
     var styleLoaderFactory = function (url) {
         return function (layerId) {
-            /** @type {?} */
-            var deferred = defer();
-            if (!jQuery$1) {
-                deferred.reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
-                return deferred.promise;
-            }
-            jQuery$1.ajax(url, {
-                dataType: 'json',
-                success: function (data) {
-                    deferred.resolve(data);
-                },
-                error: function (xhr, status, message) {
-                    /** @type {?} */
-                    var em = "geoJsonFeed() -\n                        Error loading style information for layer " + layerId + " : " + message;
-                    /** @type {?} */
-                    var error = new Error(em);
-                    deferred.reject(error);
+            return new Promise(function (resolve, reject) {
+                if (!jQuery$1) {
+                    reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
                 }
+                jQuery$1.ajax(url, {
+                    dataType: 'json',
+                    success: function (data) { resolve(data); },
+                    error: function (xhr, status, message) {
+                        /** @type {?} */
+                        var em = "geoJsonFeed() -\n                            Error loading style information for layer " + layerId + " : " + message;
+                        reject(new Error(em));
+                    }
+                });
             });
-            return deferred.promise; //uses jQuery promise
         };
     };
     /** @type {?} */
@@ -2998,10 +2984,14 @@ function styleResolverFactory(service) {
         throw new Error("Must provide a LayerService instance");
     }
     return function featureStyleResolver(id) {
-        return service.style(id).catch(function (e) {
-            /** @type {?} */
-            var msg = "Error loading style information for layer " + id + " : " + e.message;
-            return reject(new Error(msg));
+        return new Promise(function (resolve, reject) {
+            service.style(id)
+                .then(function (result) { return resolve(result); })
+                .catch(function (e) {
+                /** @type {?} */
+                var msg = "Error loading style information for layer " + id + " : " + e.message;
+                reject(new Error(msg));
+            });
         });
     };
 }
@@ -4206,7 +4196,7 @@ var MapInstance = /** @class */ (function (_super) {
             promise = DefaultBaseLayer.get(svc);
         }
         else
-            promise = resolve(layer);
+            promise = Promise.resolve(layer);
         promise.then(function (layer) {
             /** @type {?} */
             var leafletLayer = LayerFactory$1.create(layer);
@@ -5094,24 +5084,25 @@ var MapInstance = /** @class */ (function (_super) {
             content.title = content.label;
         }
         // console.log("Updating: " + JSON.stringify(map));
-        return this.getService(ItemTypes.MAP)
-            .save(content)
-            .then(function (result) {
-            //track new map's info so we can update it with next save
-            if (!_this._mapId)
-                _this._mapId = result.id;
-            _this._mapDef = result;
-            _this._defaultExtent = result["extent"];
-            _this.clean();
-            return result;
-        })
-            .catch(function (err) {
-            console.log("MapCore MapInstance.saveMap() - " +
-                "The requested map could not be saved because: " + err.message);
-            /** @type {?} */
-            var e = new Error("The requested map could not be saved because of the following error(s): " +
-                err.message);
-            return reject(e);
+        return new Promise(function (resolve, reject) {
+            _this.getService(ItemTypes.MAP).save(content)
+                .then(function (result) {
+                //track new map's info so we can update it with next save
+                if (!_this._mapId)
+                    _this._mapId = result.id;
+                _this._mapDef = result;
+                _this._defaultExtent = result["extent"];
+                _this.clean();
+                resolve(result);
+            })
+                .catch(function (err) {
+                console.log("MapCore MapInstance.saveMap() - " +
+                    "The requested map could not be saved because: " + err.message);
+                /** @type {?} */
+                var e = new Error("The requested map could not be saved because of the following error(s): " +
+                    err.message);
+                reject(e);
+            });
         });
     };
     /**
@@ -5154,48 +5145,50 @@ var MapInstance = /** @class */ (function (_super) {
      */
     function (mapId) {
         var _this = this;
-        return this.fetchMap(mapId).then(function (map) {
-            if (!map) {
-                throw new Error("The requested map ('" + mapId +
-                    "') came back null");
-            }
-            else if (typeof (map) === 'string') {
-                throw new Error("The requested map ('" + mapId +
-                    "') came back as a string");
-            }
-            else if ((/** @type {?} */ (map)).message) {
-                throw new Error("There was an error loading the requested map ('" +
-                    mapId + "'): " + (/** @type {?} */ (map)).message);
-            }
-            //loading a map by its ID, so we need to increment it's view count
-            if ('development' !== Config["env"]) {
-                setTimeout(function (map) {
-                    /** @type {?} */
-                    var views = map.statistics ? (map.statistics.numViews || 0) : 0;
-                    /** @type {?} */
-                    var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
-                    _this.getService(ItemTypes.MAP).patch(map.id, patch)
-                        // this.mapService.patch(map.id, patch)
-                        .then(function (updated) { map.statistics = updated["statistics"]; })
-                        .catch(function (e) {
-                        console.log("MapInstance.saveMap() - Error updating view " +
-                            "count for map ('" + mapId + "'): " + e);
-                    });
-                }, 1000, map);
-            }
-            //load the map into the viewer
-            //load the map into the viewer
-            _this.loadMapFromObj(map);
-            return map;
-        })
-            .catch(function (err) {
-            console.log("MapInstance.loadMap() - " +
-                "The requested map could not be loaded because " + err.message);
-            /** @type {?} */
-            var e = new Error("The requested map ('" + mapId +
-                "') could not be loaded because of the following error(s): " +
-                err.message);
-            return reject(e);
+        return new Promise(function (resolve, reject) {
+            _this.fetchMap(mapId).then(function (map) {
+                if (!map) {
+                    throw new Error("The requested map ('" + mapId +
+                        "') came back null");
+                }
+                else if (typeof (map) === 'string') {
+                    throw new Error("The requested map ('" + mapId +
+                        "') came back as a string");
+                }
+                else if ((/** @type {?} */ (map)).message) {
+                    throw new Error("There was an error loading the requested map ('" +
+                        mapId + "'): " + (/** @type {?} */ (map)).message);
+                }
+                //loading a map by its ID, so we need to increment it's view count
+                if ('development' !== Config["env"]) {
+                    setTimeout(function (map) {
+                        /** @type {?} */
+                        var views = map.statistics ? (map.statistics.numViews || 0) : 0;
+                        /** @type {?} */
+                        var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
+                        _this.getService(ItemTypes.MAP).patch(map.id, patch)
+                            // this.mapService.patch(map.id, patch)
+                            .then(function (updated) { map.statistics = updated["statistics"]; })
+                            .catch(function (e) {
+                            console.log("MapInstance.saveMap() - Error updating view " +
+                                "count for map ('" + mapId + "'): " + e);
+                        });
+                    }, 1000, map);
+                }
+                //load the map into the viewer
+                //load the map into the viewer
+                _this.loadMapFromObj(map);
+                resolve(map);
+            })
+                .catch(function (err) {
+                console.log("MapInstance.loadMap() - " +
+                    "The requested map could not be loaded because " + err.message);
+                /** @type {?} */
+                var e = new Error("The requested map ('" + mapId +
+                    "') could not be loaded because of the following error(s): " +
+                    err.message);
+                reject(e);
+            });
         });
     };
     /**

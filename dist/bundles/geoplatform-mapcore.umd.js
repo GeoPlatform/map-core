@@ -2,10 +2,10 @@
 This software has been approved for release by the U.S. Department of the Interior. Although the software has been subjected to rigorous review, the DOI reserves the right to update the software as needed pursuant to further analysis and review. No warranty, expressed or implied, is made by the DOI or the U.S. Government as to the functionality of the software and related material nor shall the fact of release constitute any such warranty. Furthermore, the software is released on condition that neither the DOI nor the U.S. Government shall be held liable for any damages resulting from its authorized or unauthorized use.
 */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('leaflet-draw'), require('leaflet.markercluster'), require('leaflet-timedimension/dist/leaflet.timedimension.src'), require('esri-leaflet'), require('jquery'), require('q'), require('leaflet'), require('@geoplatform/client')) :
-    typeof define === 'function' && define.amd ? define('@geoplatform/mapcore', ['exports', 'leaflet-draw', 'leaflet.markercluster', 'leaflet-timedimension/dist/leaflet.timedimension.src', 'esri-leaflet', 'jquery', 'q', 'leaflet', '@geoplatform/client'], factory) :
-    (factory((global.geoplatform = global.geoplatform || {}, global.geoplatform.mapcore = {}),global.L.Draw,null,null,global.L.esri,global.jQuery,global.Q,global.L,global.geoplatform.client));
-}(this, (function (exports,leafletDraw,leaflet_markercluster,leaflet_timedimension_src,esri,jquery,Q,L,client) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('leaflet-draw'), require('leaflet.markercluster'), require('leaflet-timedimension/dist/leaflet.timedimension.src'), require('esri-leaflet'), require('jquery'), require('leaflet'), require('@geoplatform/client')) :
+    typeof define === 'function' && define.amd ? define('@geoplatform/mapcore', ['exports', 'leaflet-draw', 'leaflet.markercluster', 'leaflet-timedimension/dist/leaflet.timedimension.src', 'esri-leaflet', 'jquery', 'leaflet', '@geoplatform/client'], factory) :
+    (factory((global.geoplatform = global.geoplatform || {}, global.geoplatform.mapcore = {}),global.L.Draw,null,null,global.L.esri,global.jQuery,global.L,global.geoplatform.client));
+}(this, (function (exports,leafletDraw,leaflet_markercluster,leaflet_timedimension_src,esri,jquery,L,client) { 'use strict';
 
     /**
      * @fileoverview added by tsickle
@@ -1329,8 +1329,7 @@ This software has been approved for release by the U.S. Department of the Interi
             if (!layerService)
                 layerService = new client.LayerService(client.Config.ualUrl, new client.XHRHttpClient());
             return layerService.search(query)
-                .then(function (response) { return response.results.length ? response.results[0] : null; })
-                .catch(function (e) { return Q.reject(e); });
+                .then(function (response) { return response.results.length ? response.results[0] : null; });
         }
     };
 
@@ -1695,27 +1694,21 @@ This software has been approved for release by the U.S. Department of the Interi
      * @return {?}
      */
     function featureStyleResolver(id) {
-        /** @type {?} */
-        var deferred = Q.defer();
-        if (!jQuery) {
-            deferred.reject(new Error("Unable to load feature layer style, jQuery is not installed"));
-            return deferred.promise;
-        }
-        jQuery.ajax({
-            url: client.Config["ualUrl"] + '/api/layers/' + id + '/style',
-            dataType: 'json',
-            success: function (data) {
-                deferred.resolve(data);
-            },
-            error: function (xhr, status, message) {
-                /** @type {?} */
-                var em = "FeatureStyleResolver() -\n               Error loading style information for layer " + id + " : " + message;
-                /** @type {?} */
-                var error = new Error(em);
-                deferred.reject(error);
+        return new Promise(function (resolve, reject) {
+            if (!jQuery) {
+                reject(new Error("Unable to load feature layer style, jQuery is not installed"));
             }
+            jQuery.ajax({
+                url: client.Config["ualUrl"] + '/api/layers/' + id + '/style',
+                dataType: 'json',
+                success: function (data) { resolve(data); },
+                error: function (xhr, status, message) {
+                    /** @type {?} */
+                    var em = "FeatureStyleResolver() -\n                   Error loading style information for layer " + id + " : " + message;
+                    reject(new Error(em));
+                }
+            });
         });
-        return deferred.promise;
     }
 
     /**
@@ -2170,26 +2163,20 @@ This software has been approved for release by the U.S. Department of the Interi
         /** @type {?} */
         var styleLoaderFactory = function (url) {
             return function (layerId) {
-                /** @type {?} */
-                var deferred = Q.defer();
-                if (!jQuery$1) {
-                    deferred.reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
-                    return deferred.promise;
-                }
-                jQuery$1.ajax(url, {
-                    dataType: 'json',
-                    success: function (data) {
-                        deferred.resolve(data);
-                    },
-                    error: function (xhr, status, message) {
-                        /** @type {?} */
-                        var em = "geoJsonFeed() -\n                        Error loading style information for layer " + layerId + " : " + message;
-                        /** @type {?} */
-                        var error = new Error(em);
-                        deferred.reject(error);
+                return new Promise(function (resolve, reject) {
+                    if (!jQuery$1) {
+                        reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
                     }
+                    jQuery$1.ajax(url, {
+                        dataType: 'json',
+                        success: function (data) { resolve(data); },
+                        error: function (xhr, status, message) {
+                            /** @type {?} */
+                            var em = "geoJsonFeed() -\n                            Error loading style information for layer " + layerId + " : " + message;
+                            reject(new Error(em));
+                        }
+                    });
                 });
-                return deferred.promise; //uses jQuery promise
             };
         };
         /** @type {?} */
@@ -3022,10 +3009,14 @@ This software has been approved for release by the U.S. Department of the Interi
             throw new Error("Must provide a LayerService instance");
         }
         return function featureStyleResolver(id) {
-            return service.style(id).catch(function (e) {
-                /** @type {?} */
-                var msg = "Error loading style information for layer " + id + " : " + e.message;
-                return Q.reject(new Error(msg));
+            return new Promise(function (resolve, reject) {
+                service.style(id)
+                    .then(function (result) { return resolve(result); })
+                    .catch(function (e) {
+                    /** @type {?} */
+                    var msg = "Error loading style information for layer " + id + " : " + e.message;
+                    reject(new Error(msg));
+                });
             });
         };
     }
@@ -4229,7 +4220,7 @@ This software has been approved for release by the U.S. Department of the Interi
                     promise = DefaultBaseLayer.get(svc);
                 }
                 else
-                    promise = Q.resolve(layer);
+                    promise = Promise.resolve(layer);
                 promise.then(function (layer) {
                     /** @type {?} */
                     var leafletLayer = LayerFactory$1.create(layer);
@@ -5117,24 +5108,25 @@ This software has been approved for release by the U.S. Department of the Interi
                     content.title = content.label;
                 }
                 // console.log("Updating: " + JSON.stringify(map));
-                return this.getService(client.ItemTypes.MAP)
-                    .save(content)
-                    .then(function (result) {
-                    //track new map's info so we can update it with next save
-                    if (!_this._mapId)
-                        _this._mapId = result.id;
-                    _this._mapDef = result;
-                    _this._defaultExtent = result["extent"];
-                    _this.clean();
-                    return result;
-                })
-                    .catch(function (err) {
-                    console.log("MapCore MapInstance.saveMap() - " +
-                        "The requested map could not be saved because: " + err.message);
-                    /** @type {?} */
-                    var e = new Error("The requested map could not be saved because of the following error(s): " +
-                        err.message);
-                    return Q.reject(e);
+                return new Promise(function (resolve, reject) {
+                    _this.getService(client.ItemTypes.MAP).save(content)
+                        .then(function (result) {
+                        //track new map's info so we can update it with next save
+                        if (!_this._mapId)
+                            _this._mapId = result.id;
+                        _this._mapDef = result;
+                        _this._defaultExtent = result["extent"];
+                        _this.clean();
+                        resolve(result);
+                    })
+                        .catch(function (err) {
+                        console.log("MapCore MapInstance.saveMap() - " +
+                            "The requested map could not be saved because: " + err.message);
+                        /** @type {?} */
+                        var e = new Error("The requested map could not be saved because of the following error(s): " +
+                            err.message);
+                        reject(e);
+                    });
                 });
             };
         /**
@@ -5177,48 +5169,50 @@ This software has been approved for release by the U.S. Department of the Interi
          */
             function (mapId) {
                 var _this = this;
-                return this.fetchMap(mapId).then(function (map) {
-                    if (!map) {
-                        throw new Error("The requested map ('" + mapId +
-                            "') came back null");
-                    }
-                    else if (typeof (map) === 'string') {
-                        throw new Error("The requested map ('" + mapId +
-                            "') came back as a string");
-                    }
-                    else if (( /** @type {?} */(map)).message) {
-                        throw new Error("There was an error loading the requested map ('" +
-                            mapId + "'): " + ( /** @type {?} */(map)).message);
-                    }
-                    //loading a map by its ID, so we need to increment it's view count
-                    if ('development' !== client.Config["env"]) {
-                        setTimeout(function (map) {
-                            /** @type {?} */
-                            var views = map.statistics ? (map.statistics.numViews || 0) : 0;
-                            /** @type {?} */
-                            var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
-                            _this.getService(client.ItemTypes.MAP).patch(map.id, patch)
-                                // this.mapService.patch(map.id, patch)
-                                .then(function (updated) { map.statistics = updated["statistics"]; })
-                                .catch(function (e) {
-                                console.log("MapInstance.saveMap() - Error updating view " +
-                                    "count for map ('" + mapId + "'): " + e);
-                            });
-                        }, 1000, map);
-                    }
-                    //load the map into the viewer
-                    //load the map into the viewer
-                    _this.loadMapFromObj(map);
-                    return map;
-                })
-                    .catch(function (err) {
-                    console.log("MapInstance.loadMap() - " +
-                        "The requested map could not be loaded because " + err.message);
-                    /** @type {?} */
-                    var e = new Error("The requested map ('" + mapId +
-                        "') could not be loaded because of the following error(s): " +
-                        err.message);
-                    return Q.reject(e);
+                return new Promise(function (resolve, reject) {
+                    _this.fetchMap(mapId).then(function (map) {
+                        if (!map) {
+                            throw new Error("The requested map ('" + mapId +
+                                "') came back null");
+                        }
+                        else if (typeof (map) === 'string') {
+                            throw new Error("The requested map ('" + mapId +
+                                "') came back as a string");
+                        }
+                        else if (( /** @type {?} */(map)).message) {
+                            throw new Error("There was an error loading the requested map ('" +
+                                mapId + "'): " + ( /** @type {?} */(map)).message);
+                        }
+                        //loading a map by its ID, so we need to increment it's view count
+                        if ('development' !== client.Config["env"]) {
+                            setTimeout(function (map) {
+                                /** @type {?} */
+                                var views = map.statistics ? (map.statistics.numViews || 0) : 0;
+                                /** @type {?} */
+                                var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
+                                _this.getService(client.ItemTypes.MAP).patch(map.id, patch)
+                                    // this.mapService.patch(map.id, patch)
+                                    .then(function (updated) { map.statistics = updated["statistics"]; })
+                                    .catch(function (e) {
+                                    console.log("MapInstance.saveMap() - Error updating view " +
+                                        "count for map ('" + mapId + "'): " + e);
+                                });
+                            }, 1000, map);
+                        }
+                        //load the map into the viewer
+                        //load the map into the viewer
+                        _this.loadMapFromObj(map);
+                        resolve(map);
+                    })
+                        .catch(function (err) {
+                        console.log("MapInstance.loadMap() - " +
+                            "The requested map could not be loaded because " + err.message);
+                        /** @type {?} */
+                        var e = new Error("The requested map ('" + mapId +
+                            "') could not be loaded because of the following error(s): " +
+                            err.message);
+                        reject(e);
+                    });
                 });
             };
         /**

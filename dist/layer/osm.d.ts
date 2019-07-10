@@ -1,4 +1,3 @@
-import * as Q from "q";
 import { LayerService } from '@geoplatform/client';
 declare const _default: {
     /**
@@ -6,7 +5,7 @@ declare const _default: {
      * @return {boolean} true if is an OSM layer
      */
     test: (layer: any) => number;
-    get: (layerService?: LayerService) => Q.Promise<any>;
+    get: (layerService?: LayerService) => any;
 };
 /**
  * @param {LayerService} layerService - optional, GeoPlatform Layer service to use to fetch the layer

@@ -2,7 +2,6 @@
 import * as jquery from "jquery";
 const jQuery = jquery;
 
-import * as Q from  "q";
 import { Config } from '@geoplatform/client';
 
 import {
@@ -404,24 +403,20 @@ function geoJsonFeed(layer, options) : Layer {
 
     let styleLoaderFactory = function(url) {
         return function (layerId) {
-            let deferred = Q.defer();
-            if(!jQuery) {
-                deferred.reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
-                return deferred.promise;
-            }
-            jQuery.ajax(url, {
-                dataType:'json',
-                success: function(data) {
-                    deferred.resolve(data);
-                },
-                error: function(xhr, status, message) {
-                    let em = `geoJsonFeed() -
-                        Error loading style information for layer ${layerId} : ${message}`;
-                    let error = new Error(em);
-                    deferred.reject(error);
+            return new Promise<any>( (resolve, reject) => {
+                if(!jQuery) {
+                    reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
                 }
+                jQuery.ajax(url, {
+                    dataType:'json',
+                    success: function(data) { resolve(data); },
+                    error: function(xhr, status, message) {
+                        let em = `geoJsonFeed() -
+                            Error loading style information for layer ${layerId} : ${message}`;
+                        reject( new Error(em) );
+                    }
+                });
             });
-            return deferred.promise;          //uses jQuery promise
         };
     };
 

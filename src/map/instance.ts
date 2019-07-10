@@ -531,7 +531,7 @@ export default class MapInstance extends Listener {
             let svc = this.getService(ItemTypes.LAYER) as LayerService;
             promise = DefaultBaseLayer.get(svc);
         } else
-            promise = Q.resolve(layer);
+            promise = Promise.resolve(layer);
 
         promise.then( layer => {
 
@@ -1153,14 +1153,14 @@ export default class MapInstance extends Listener {
      * @param metadata
      * @return resolving persisted map
      */
-    save (metadata : any) : Q.Promise<any> {
+    save (metadata : any) : Promise<any> {
         return this.saveMap(metadata);
     }
 
     /**
      * @param md object containing metadata properties for map
      */
-    saveMap (md : any) : Q.Promise<any> {
+    saveMap (md : any) : Promise<any> {
 
         let metadata = md || {};
 
@@ -1180,25 +1180,26 @@ export default class MapInstance extends Listener {
         }
 
         // console.log("Updating: " + JSON.stringify(map));
-        return this.getService(ItemTypes.MAP)
-        .save(content)
-        .then( result => {
+        return new Promise<any>( (resolve, reject) => {
+            this.getService(ItemTypes.MAP).save(content)
+            .then( result => {
 
-            //track new map's info so we can update it with next save
-            if(!this._mapId)
-                this._mapId = result.id;
+                //track new map's info so we can update it with next save
+                if(!this._mapId)
+                    this._mapId = result.id;
 
-            this._mapDef = result;
-            this._defaultExtent = result.extent;
-            this.clean();
-            return result;
-        })
-        .catch(err=>{
-            console.log("MapCore MapInstance.saveMap() - " +
-                "The requested map could not be saved because: " + err.message);
-            let e = new Error("The requested map could not be saved because of the following error(s): " +
-                err.message);
-            return Q.reject(e);
+                this._mapDef = result;
+                this._defaultExtent = result.extent;
+                this.clean();
+                resolve(result);
+            })
+            .catch(err=>{
+                console.log("MapCore MapInstance.saveMap() - " +
+                    "The requested map could not be saved because: " + err.message);
+                let e = new Error("The requested map could not be saved because of the following error(s): " +
+                    err.message);
+                reject(e);
+            });
         });
 
     }
@@ -1208,7 +1209,7 @@ export default class MapInstance extends Listener {
      * @param mapId identifier of map
      * @return resolving the map object
      */
-    fetchMap (mapId : string) : Q.Promise<any> {
+    fetchMap (mapId : string) : any {
         //Having to send cache busting parameter to avoid CORS header cache
         // not sending correct Origin value
         return this.getService(ItemTypes.MAP).get(mapId);
@@ -1220,54 +1221,57 @@ export default class MapInstance extends Listener {
      * @param mapId identifier of map
      * @return resolving the map object
      */
-    loadMap (mapId : string) : Q.Promise<any> {
+    loadMap (mapId : string) : any {
 
-        return this.fetchMap(mapId).then(map => {
+        return new Promise<any>( (resolve, reject) => {
 
-            if(!map) {
-                throw new Error("The requested map ('" + mapId +
-                    "') came back null");
+            this.fetchMap(mapId).then(map => {
 
-            } else if(typeof(map) === 'string') {
-                throw new Error("The requested map ('" + mapId +
-                    "') came back as a string");
+                if(!map) {
+                    throw new Error("The requested map ('" + mapId +
+                        "') came back null");
 
-            } else if((map as any).message) {
-                throw new Error("There was an error loading the requested map ('" +
-                    mapId + "'): " + (map as any).message);
-            }
+                } else if(typeof(map) === 'string') {
+                    throw new Error("The requested map ('" + mapId +
+                        "') came back as a string");
+
+                } else if((map as any).message) {
+                    throw new Error("There was an error loading the requested map ('" +
+                        mapId + "'): " + (map as any).message);
+                }
 
 
-            //loading a map by its ID, so we need to increment it's view count
-            if('development' !== Config.env) {
+                //loading a map by its ID, so we need to increment it's view count
+                if('development' !== Config.env) {
 
-                setTimeout( (map) => {
-                    //update view count
-                    let views = map.statistics ? (map.statistics.numViews||0) : 0;
-                    let patch = [ { op: 'replace', path: '/statistics/numViews', value: views+1 } ];
-                    this.getService(ItemTypes.MAP).patch(map.id, patch)
-                    // this.mapService.patch(map.id, patch)
-                    .then( updated => { map.statistics = updated.statistics; })
-                    .catch( e => {
-                        console.log("MapInstance.saveMap() - Error updating view " +
-                            "count for map ('" + mapId + "'): " + e);
-                    });
-                }, 1000, map);
+                    setTimeout( (map) => {
+                        //update view count
+                        let views = map.statistics ? (map.statistics.numViews||0) : 0;
+                        let patch = [ { op: 'replace', path: '/statistics/numViews', value: views+1 } ];
+                        this.getService(ItemTypes.MAP).patch(map.id, patch)
+                        // this.mapService.patch(map.id, patch)
+                        .then( updated => { map.statistics = updated.statistics; })
+                        .catch( e => {
+                            console.log("MapInstance.saveMap() - Error updating view " +
+                                "count for map ('" + mapId + "'): " + e);
+                        });
+                    }, 1000, map);
 
-            }
+                }
 
-            //load the map into the viewer
-            this.loadMapFromObj(map);
+                //load the map into the viewer
+                this.loadMapFromObj(map);
 
-            return map;
-        })
-        .catch( err => {
-            console.log("MapInstance.loadMap() - " +
-                "The requested map could not be loaded because " + err.message);
-            let e = new Error("The requested map ('" + mapId +
-                "') could not be loaded because of the following error(s): " +
-                err.message);
-            return Q.reject(e);
+                resolve(map);
+            })
+            .catch( err => {
+                console.log("MapInstance.loadMap() - " +
+                    "The requested map could not be loaded because " + err.message);
+                let e = new Error("The requested map ('" + mapId +
+                    "') could not be loaded because of the following error(s): " +
+                    err.message);
+                reject(e);
+            });
         });
     }
 

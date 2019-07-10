@@ -1,4 +1,3 @@
-import * as Q from "q";
 import { Map, Layer, LatLngBounds, FeatureGroup } from 'leaflet';
 import { ItemService, MapService } from '@geoplatform/client';
 declare class Listener {
@@ -259,24 +258,24 @@ export default class MapInstance extends Listener {
      * @param metadata
      * @return resolving persisted map
      */
-    save(metadata: any): Q.Promise<any>;
+    save(metadata: any): Promise<any>;
     /**
      * @param md object containing metadata properties for map
      */
-    saveMap(md: any): Q.Promise<any>;
+    saveMap(md: any): Promise<any>;
     /**
      * Retrieve a map's descriptor from the registry
      * @param mapId identifier of map
      * @return resolving the map object
      */
-    fetchMap(mapId: string): Q.Promise<any>;
+    fetchMap(mapId: string): any;
     /**
      * Retrieve a map's descriptor and load it as the
      * current map managed by this service
      * @param mapId identifier of map
      * @return resolving the map object
      */
-    loadMap(mapId: string): Q.Promise<any>;
+    loadMap(mapId: string): any;
     /**
      * Load a map from its descriptor as the current
      * map managed by this service

@@ -23,15 +23,14 @@ export default {
                 ~layer.resourceTypes.indexOf(LayerResourceTypes.OSM);
     },
 
-    get : function(layerService ?: LayerService) : Q.Promise<any> {
+    get : function(layerService ?: LayerService) : any {
         let query = QueryFactory()
             .fields('*')
             .resourceTypes(LayerResourceTypes.OSM);
         if(!layerService)
             layerService = new LayerService(Config.ualUrl, new XHRHttpClient());
         return layerService.search(query)
-        .then( response => response.results.length ? response.results[0] : null)
-        .catch( e => Q.reject(e));
+        .then( response => response.results.length ? response.results[0] : null);
     }
 
 };

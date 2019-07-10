@@ -1,6 +1,4 @@
 
-import * as Q from "q";
-
 import * as L from 'leaflet';
 import { Layer } from "leaflet";
 import * as esri from "esri-leaflet";
@@ -70,9 +68,13 @@ function styleResolverFactory(service ?: LayerService) : any {
     }
 
     return function featureStyleResolver(id) {
-        return service.style(id).catch(e => {
-            let msg = `Error loading style information for layer ${id} : ${e.message}`;
-            return Q.reject( new Error(msg) );
+        return new Promise<any>( (resolve, reject) => {
+            service.style(id)
+            .then( result => resolve(result) )
+            .catch(e => {
+                let msg = `Error loading style information for layer ${id} : ${e.message}`;
+                reject( new Error(msg) );
+            });
         });
     };
 }
