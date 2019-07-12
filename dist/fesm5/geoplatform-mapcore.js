@@ -2344,6 +2344,24 @@ var WMS = /** @class */ (function (_super) {
  * @param {?} layer
  * @return {?}
  */
+function determineWMSFormat(layer) {
+    /** @type {?} */
+    var formats = layer["formats"];
+    if (formats && formats.length) {
+        /** @type {?} */
+        var idx = Math.max(formats.indexOf('image/png'), formats.indexOf('image/png32'), formats.indexOf('image/png24'), formats.indexOf('image/png8'), formats.indexOf('image/jpeg'));
+        if (idx >= 0)
+            return formats[idx];
+    }
+    console.log("Layer '" + layer.label + "' has no formats specified, " +
+        "assuming a default of 'image/png'");
+    return 'image/png';
+}
+/**
+ * short-form function for instantiating a WMS-based Layer's Leaflet instance
+ * @param {?} layer
+ * @return {?}
+ */
 function wms(layer) {
     /** @type {?} */
     var service = layer["services"] && layer["services"].length ?
@@ -2359,9 +2377,7 @@ function wms(layer) {
         throw new Error("WMS layer's service does not defined a service url");
     }
     /** @type {?} */
-    var formats = layer.supportedFormats || [];
-    /** @type {?} */
-    var format = formats.length ? formats[0] : "image/png";
+    var format = determineWMSFormat(layer);
     /** @type {?} */
     var supportedCrs = layer["crs"] || [];
     if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {

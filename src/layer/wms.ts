@@ -4,7 +4,6 @@
 import * as jquery from "jquery";
 const jQuery = jquery;
 
-import * as Q from "q";
 import { Map, TileLayer, tileLayer, LatLng, Util, popup } from 'leaflet';
 
 import {
@@ -117,6 +116,28 @@ class WMS extends TileLayer.WMS {
 }
 
 
+function determineWMSFormat( layer : LayerModel ) : string {
+    let formats : string[] = layer.formats;
+    if(formats && formats.length) {
+        //look for common formats that make sense first...
+        let idx = Math.max(
+            formats.indexOf('image/png'),
+            formats.indexOf('image/png32'),
+            formats.indexOf('image/png24'),
+            formats.indexOf('image/png8'),
+            formats.indexOf('image/jpeg')
+        );
+        if(idx >= 0) return formats[idx];
+    }
+    console.log("Layer '" + layer.label + "' has no formats specified, " +
+        "assuming a default of 'image/png'");
+    return 'image/png';
+}
+
+
+/**
+ * short-form function for instantiating a WMS-based Layer's Leaflet instance
+ */
 function wms(layer : LayerModel) : WMS {
 
     let service : ServiceModel = layer.services && layer.services.length ?
@@ -132,12 +153,12 @@ function wms(layer : LayerModel) : WMS {
         throw new Error("WMS layer's service does not defined a service url");
     }
 
-    let formats : string[] = layer.supportedFormats || [];
-    let format : string  = formats.length ? formats[0] : "image/png";
+    //pick output format for the raster images
+    let format = determineWMSFormat(layer);
 
     let supportedCrs = layer.crs || [];
     if(supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
-        console.log("Layer '" + layer.label + "' does not support " + 
+        console.log("Layer '" + layer.label + "' does not support " +
             "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
     }
 

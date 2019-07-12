@@ -1,7 +1,7 @@
 import { Draw } from 'leaflet-draw';
 import 'leaflet.markercluster';
 import 'leaflet-timedimension/dist/leaflet.timedimension.src';
-import { FeatureManager, FeatureLayer, tiledMapLayer, imageMapLayer } from 'esri-leaflet';
+import { FeatureManager, tiledMapLayer, imageMapLayer, FeatureLayer } from 'esri-leaflet';
 import * as jquery from 'jquery';
 import * as L from 'leaflet';
 import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Layer, Point, LatLng, TimeDimension, featureGroup, geoJSON, LayerGroup } from 'leaflet';
@@ -2232,6 +2232,24 @@ class WMS extends TileLayer.WMS {
  * @param {?} layer
  * @return {?}
  */
+function determineWMSFormat(layer) {
+    /** @type {?} */
+    let formats = layer["formats"];
+    if (formats && formats.length) {
+        /** @type {?} */
+        let idx = Math.max(formats.indexOf('image/png'), formats.indexOf('image/png32'), formats.indexOf('image/png24'), formats.indexOf('image/png8'), formats.indexOf('image/jpeg'));
+        if (idx >= 0)
+            return formats[idx];
+    }
+    console.log("Layer '" + layer.label + "' has no formats specified, " +
+        "assuming a default of 'image/png'");
+    return 'image/png';
+}
+/**
+ * short-form function for instantiating a WMS-based Layer's Leaflet instance
+ * @param {?} layer
+ * @return {?}
+ */
 function wms(layer) {
     /** @type {?} */
     let service = layer["services"] && layer["services"].length ?
@@ -2247,9 +2265,7 @@ function wms(layer) {
         throw new Error("WMS layer's service does not defined a service url");
     }
     /** @type {?} */
-    let formats = layer.supportedFormats || [];
-    /** @type {?} */
-    let format = formats.length ? formats[0] : "image/png";
+    let format = determineWMSFormat(layer);
     /** @type {?} */
     let supportedCrs = layer["crs"] || [];
     if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
