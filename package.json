@@ -63,14 +63,13 @@
     "private": true,
     "peerDependencies": {
         "esri-leaflet": "2.2.3",
-        "geoplatform.client": "0.2.2",
+        "@geoplatform/client": "0.3.0",
         "jquery": "^3.3.1",
         "leaflet": "1.0.3",
         "leaflet-draw": "0.4.12",
         "leaflet-timedimension": "~1.1.0",
         "leaflet.markercluster": "1.1.0",
-        "leaflet.vectorgrid": "1.3.0",
-        "q": "1.5.1"
+        "leaflet.vectorgrid": "1.3.0"
     },
     "devDependencies": {
         "@angular/cli": "~1.7.4",
