@@ -2374,9 +2374,13 @@ This software has been approved for release by the U.S. Department of the Interi
         var formats = layer["formats"];
         if (formats && formats.length) {
             /** @type {?} */
-            var idx = Math.max(formats.indexOf('image/jpeg'), formats.indexOf('image/png'), formats.indexOf('image/png8'), formats.indexOf('image/png24'), formats.indexOf('image/png32'));
-            if (idx >= 0)
-                return formats[idx];
+            var idx = 0;
+            /** @type {?} */
+            var common = ['image/png32', 'image/png24', 'image/png8', 'image/png', 'image/jpeg'];
+            while (idx < common.length) {
+                if (formats.indexOf(common[idx]) >= 0)
+                    return common[idx];
+            }
         }
         console.log("Layer '" + layer.label + "' has no formats specified, " +
             "assuming a default of 'image/png'");

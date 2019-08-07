@@ -120,14 +120,11 @@ function determineWMSFormat( layer : LayerModel ) : string {
     let formats : string[] = layer.formats;
     if(formats && formats.length) {
         //look for common formats that make sense first...
-        let idx = Math.max(
-            formats.indexOf('image/jpeg'),
-            formats.indexOf('image/png'),
-            formats.indexOf('image/png8'),
-            formats.indexOf('image/png24'),
-            formats.indexOf('image/png32')
-        );
-        if(idx >= 0) return formats[idx];
+        let idx = 0;
+        let common = [ 'image/png32', 'image/png24', 'image/png8', 'image/png', 'image/jpeg' ];
+        while( idx < common.length) {
+            if( formats.indexOf( common[idx] ) >= 0 ) return common[idx];
+        }
     }
     console.log("Layer '" + layer.label + "' has no formats specified, " +
         "assuming a default of 'image/png'");

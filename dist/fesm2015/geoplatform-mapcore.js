@@ -1,7 +1,7 @@
 import { Draw } from 'leaflet-draw';
 import 'leaflet.markercluster';
 import 'leaflet-timedimension/dist/leaflet.timedimension.src';
-import { FeatureManager, FeatureLayer, tiledMapLayer, imageMapLayer } from 'esri-leaflet';
+import { FeatureManager, tiledMapLayer, imageMapLayer, FeatureLayer } from 'esri-leaflet';
 import * as jquery from 'jquery';
 import * as L from 'leaflet';
 import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Layer, Point, LatLng, TimeDimension, featureGroup, geoJSON, LayerGroup } from 'leaflet';
@@ -2237,9 +2237,13 @@ function determineWMSFormat(layer) {
     let formats = layer["formats"];
     if (formats && formats.length) {
         /** @type {?} */
-        let idx = Math.max(formats.indexOf('image/jpeg'), formats.indexOf('image/png'), formats.indexOf('image/png8'), formats.indexOf('image/png24'), formats.indexOf('image/png32'));
-        if (idx >= 0)
-            return formats[idx];
+        let idx = 0;
+        /** @type {?} */
+        let common = ['image/png32', 'image/png24', 'image/png8', 'image/png', 'image/jpeg'];
+        while (idx < common.length) {
+            if (formats.indexOf(common[idx]) >= 0)
+                return common[idx];
+        }
     }
     console.log("Layer '" + layer.label + "' has no formats specified, " +
         "assuming a default of 'image/png'");
