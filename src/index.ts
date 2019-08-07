@@ -31,7 +31,7 @@ import ServiceTypes from './service/types';
 
 import PopupTemplate from './shared/popup-template';
 import StyleResolver from './shared/style-resolver';
-
+// import parseMapBoxStyle from './shared/mapbox-style';
 
 
 
@@ -58,4 +58,6 @@ export {
     ServiceTypes,
     PopupTemplate,
     StyleResolver
+    // ,
+    // parseMapBoxStyle
 };

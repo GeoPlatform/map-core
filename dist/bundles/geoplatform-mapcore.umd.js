@@ -2374,7 +2374,7 @@ This software has been approved for release by the U.S. Department of the Interi
         var formats = layer["formats"];
         if (formats && formats.length) {
             /** @type {?} */
-            var idx = Math.max(formats.indexOf('image/png'), formats.indexOf('image/png32'), formats.indexOf('image/png24'), formats.indexOf('image/png8'), formats.indexOf('image/jpeg'));
+            var idx = Math.max(formats.indexOf('image/jpeg'), formats.indexOf('image/png'), formats.indexOf('image/png8'), formats.indexOf('image/png24'), formats.indexOf('image/png32'));
             if (idx >= 0)
                 return formats[idx];
         }

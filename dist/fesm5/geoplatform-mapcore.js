@@ -5,7 +5,7 @@ import { FeatureManager, FeatureLayer, tiledMapLayer, imageMapLayer } from 'esri
 import { __extends } from 'tslib';
 import * as jquery from 'jquery';
 import * as L from 'leaflet';
-import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Layer, TimeDimension, Browser, Point, LatLng, featureGroup, geoJSON, LayerGroup } from 'leaflet';
+import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Layer, Browser, TimeDimension, Point, LatLng, featureGroup, geoJSON, LayerGroup } from 'leaflet';
 import { QueryFactory, LayerService, XHRHttpClient, Config, ItemService, ItemTypes, ServiceFactory } from '@geoplatform/client';
 
 /**
@@ -2349,7 +2349,7 @@ function determineWMSFormat(layer) {
     var formats = layer["formats"];
     if (formats && formats.length) {
         /** @type {?} */
-        var idx = Math.max(formats.indexOf('image/png'), formats.indexOf('image/png32'), formats.indexOf('image/png24'), formats.indexOf('image/png8'), formats.indexOf('image/jpeg'));
+        var idx = Math.max(formats.indexOf('image/jpeg'), formats.indexOf('image/png'), formats.indexOf('image/png8'), formats.indexOf('image/png24'), formats.indexOf('image/png32'));
         if (idx >= 0)
             return formats[idx];
     }

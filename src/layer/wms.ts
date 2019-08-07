@@ -121,11 +121,11 @@ function determineWMSFormat( layer : LayerModel ) : string {
     if(formats && formats.length) {
         //look for common formats that make sense first...
         let idx = Math.max(
+            formats.indexOf('image/jpeg'),
             formats.indexOf('image/png'),
-            formats.indexOf('image/png32'),
-            formats.indexOf('image/png24'),
             formats.indexOf('image/png8'),
-            formats.indexOf('image/jpeg')
+            formats.indexOf('image/png24'),
+            formats.indexOf('image/png32')
         );
         if(idx >= 0) return formats[idx];
     }
