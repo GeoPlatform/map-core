@@ -124,6 +124,7 @@ function determineWMSFormat( layer : LayerModel ) : string {
         let common = [ 'image/png32', 'image/png24', 'image/png8', 'image/png', 'image/jpeg' ];
         while( idx < common.length) {
             if( formats.indexOf( common[idx] ) >= 0 ) return common[idx];
+            idx++;
         }
     }
     console.log("Layer '" + layer.label + "' has no formats specified, " +

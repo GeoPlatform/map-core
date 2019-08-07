@@ -2355,6 +2355,7 @@ function determineWMSFormat(layer) {
         while (idx < common.length) {
             if (formats.indexOf(common[idx]) >= 0)
                 return common[idx];
+            idx++;
         }
     }
     console.log("Layer '" + layer.label + "' has no formats specified, " +
