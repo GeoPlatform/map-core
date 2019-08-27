@@ -23,6 +23,7 @@ import {WMST, wmst} from './layer/wmst';
 import {WMTS, wmts} from './layer/wmts';
 import ESRITileLayer from './layer/esri-tile-layer';
 import OSM from './layer/osm';
+import { mapBoxVectorTileLayer } from './layer/mbvt';
 
 import MapInstance from './map/instance';
 import MapFactory from './map/factory';
@@ -31,7 +32,7 @@ import ServiceTypes from './service/types';
 
 import PopupTemplate from './shared/popup-template';
 import StyleResolver from './shared/style-resolver';
-// import parseMapBoxStyle from './shared/mapbox-style';
+import parseMapBoxStyle from './shared/mapbox-style';
 
 
 
@@ -53,11 +54,11 @@ export {
     WMTS, wmts,
     ESRITileLayer,
     OSM,
+    mapBoxVectorTileLayer,
     MapInstance,
     MapFactory,
     ServiceTypes,
     PopupTemplate,
-    StyleResolver
-    // ,
-    // parseMapBoxStyle
+    StyleResolver,
+    parseMapBoxStyle
 };

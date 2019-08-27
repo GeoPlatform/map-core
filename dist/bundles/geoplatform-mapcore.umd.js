@@ -1341,10 +1341,10 @@ This software has been approved for release by the U.S. Department of the Interi
     var WORLD_STREET_LAYER = '86a8babde086689e21248669ba4ed579';
     var ɵ0$3 = function (layerService) {
         if (!layerService) {
-            layerService = new client.LayerService(client.Config["ualUrl"], new client.XHRHttpClient());
+            layerService = new client.LayerService(client.Config.ualUrl, new client.XHRHttpClient());
         }
         /** @type {?} */
-        var baseLayerId = client.Config["defaultBaseLayerId"] || WORLD_STREET_LAYER;
+        var baseLayerId = client.Config.defaultBaseLayerId || WORLD_STREET_LAYER;
         return layerService.get(baseLayerId)
             .catch(function (e) {
             return OSM.get();
@@ -1357,7 +1357,7 @@ This software has been approved for release by the U.S. Department of the Interi
         else if (layer && typeof (layer) === 'string')
             id = layer;
         if (id) {
-            client.Config["configure"]({ 'defaultBaseLayerId': layer.id });
+            client.Config.configure({ 'defaultBaseLayerId': layer.id });
         }
     };
     /** @type {?} */
@@ -1476,7 +1476,7 @@ This software has been approved for release by the U.S. Department of the Interi
      */
     function updateList(service) {
         /** @type {?} */
-        var url = client.Config["ualUrl"];
+        var url = client.Config.ualUrl;
         if (!url) {
             console.log("WARN : ServiceTypes - no GeoPlatform API URL configured, unable to load service types");
         }
@@ -1686,29 +1686,36 @@ This software has been approved for release by the U.S. Department of the Interi
      * @fileoverview added by tsickle
      * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
      */
-    /** @type {?} */
-    var jQuery = jquery;
     /**
      * Fetches style information from GeoPlatform UAL
      * @param {?} id - identifier of layer to resolve style for
      * @return {?}
      */
     function featureStyleResolver(id) {
-        return new Promise(function (resolve, reject) {
-            if (!jQuery) {
-                reject(new Error("Unable to load feature layer style, jQuery is not installed"));
-            }
-            jQuery.ajax({
-                url: client.Config["ualUrl"] + '/api/layers/' + id + '/style',
-                dataType: 'json',
-                success: function (data) { resolve(data); },
-                error: function (xhr, status, message) {
-                    /** @type {?} */
-                    var em = "FeatureStyleResolver() -\n                   Error loading style information for layer " + id + " : " + message;
-                    reject(new Error(em));
-                }
-            });
+        /** @type {?} */
+        var service = new client.LayerService(client.Config.ualUrl, new client.XHRHttpClient());
+        return service.style(id).catch(function (e) {
+            /** @type {?} */
+            var err = new Error("Unable to download style for layer " + id + " because of an error; " + e.message);
+            return Promise.reject(err);
         });
+        // return new Promise<any>( (resolve, reject) => {
+        //
+        //     if(!jQuery) {
+        //         reject(new Error("Unable to load feature layer style, jQuery is not installed"));
+        //     }
+        //     jQuery.ajax({
+        //        url: Config.ualUrl + '/api/layers/' + id + '/style',
+        //        dataType: 'json',
+        //        success: function(data) { resolve(data); },
+        //        error: function(xhr, status, message) {
+        //            let em = `FeatureStyleResolver() -
+        //                Error loading style information for layer ${id} : ${message}`;
+        //            reject( new Error(em) );
+        //        }
+        //     });
+        //
+        // });
     }
 
     /**
@@ -1809,7 +1816,7 @@ This software has been approved for release by the U.S. Department of the Interi
      * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
      */
     /** @type {?} */
-    var jQuery$1 = jquery;
+    var jQuery = jquery;
     var ɵ0$6 = function (feature, latlng) {
         /** @type {?} */
         var style = feature && feature.properties ? feature.properties.style : null;
@@ -1847,8 +1854,8 @@ This software has been approved for release by the U.S. Department of the Interi
             });
             /** @type {?} */
             var mopts = { icon: icon };
-            if (client.Config["leafletPane"])
-                ( /** @type {?} */(mopts)).pane = client.Config["leafletPane"];
+            if (client.Config.leafletPane)
+                ( /** @type {?} */(mopts)).pane = client.Config.leafletPane;
             marker = L.marker(latlng, mopts);
         }
         else {
@@ -1866,8 +1873,8 @@ This software has been approved for release by the U.S. Department of the Interi
     }, ɵ2$4 = function (options) {
         var _this = this;
         options = options || {};
-        if (client.Config["leafletPane"])
-            options.pane = client.Config["leafletPane"];
+        if (client.Config.leafletPane)
+            options.pane = client.Config.leafletPane;
         options.pointToLayer = L.Util.bind(this.pointToLayerFn, this);
         options.onEachFeature = L.Util.bind(this.eachFeatureFn, this);
         // options.fields = ['FID', 'type', 'title', 'geometry'];
@@ -1883,8 +1890,8 @@ This software has been approved for release by the U.S. Department of the Interi
         }
         /** @type {?} */
         var svgOpts = {};
-        if (client.Config["leafletPane"])
-            ( /** @type {?} */(svgOpts)).pane = client.Config["leafletPane"];
+        if (client.Config.leafletPane)
+            ( /** @type {?} */(svgOpts)).pane = client.Config.leafletPane;
         /** @type {?} */
         var renderer = (L.SVG && L.svg(svgOpts)) || (L.Canvas && L.canvas());
         options.renderer = renderer;
@@ -1945,7 +1952,7 @@ This software has been approved for release by the U.S. Department of the Interi
                 var layer = this.cluster._featureGroup._layers[id];
                 if (layer._icon) {
                     /** @type {?} */
-                    var icon = jQuery$1(layer._icon);
+                    var icon = jQuery(layer._icon);
                     if (bool)
                         icon.removeClass('invisible');
                     else
@@ -1972,7 +1979,7 @@ This software has been approved for release by the U.S. Department of the Interi
                 /** @type {?} */
                 var layer = this.cluster._featureGroup._layers[id];
                 if (layer._icon) {
-                    jQuery$1(layer._icon).css({ opacity: opacity });
+                    jQuery(layer._icon).css({ opacity: opacity });
                 }
             }
         }
@@ -2044,7 +2051,7 @@ This software has been approved for release by the U.S. Department of the Interi
                 }
                 if (style.shape) {
                     /** @type {?} */
-                    var obj = jQuery$1.extend({}, style);
+                    var obj = jQuery.extend({}, style);
                     obj.style = style;
                     _this._gpStyle = style;
                     //setStyle on Cluster.FeatureLayer doesn't appear to work consistently for
@@ -2130,8 +2137,8 @@ This software has been approved for release by the U.S. Department of the Interi
             styleLoader: styleResolver,
             layerId: layer.id
         };
-        if (client.Config["leafletPane"])
-            ( /** @type {?} */(opts)).pane = client.Config["leafletPane"];
+        if (client.Config.leafletPane)
+            ( /** @type {?} */(opts)).pane = client.Config.leafletPane;
         if (options && options.leafletPane)
             ( /** @type {?} */(opts)).pane = options.leafletPane;
         return new ClusteredFeatureLayer(opts);
@@ -2164,10 +2171,10 @@ This software has been approved for release by the U.S. Department of the Interi
         var styleLoaderFactory = function (url) {
             return function (layerId) {
                 return new Promise(function (resolve, reject) {
-                    if (!jQuery$1) {
+                    if (!jQuery) {
                         reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
                     }
-                    jQuery$1.ajax(url, {
+                    jQuery.ajax(url, {
                         dataType: 'json',
                         success: function (data) { resolve(data); },
                         error: function (xhr, status, message) {
@@ -2188,8 +2195,8 @@ This software has been approved for release by the U.S. Department of the Interi
             //used by style loader
             styleLoader: styleLoaderFactory(styleUrl)
         };
-        if (client.Config["leafletPane"])
-            ( /** @type {?} */(opts)).pane = client.Config["leafletPane"];
+        if (client.Config.leafletPane)
+            ( /** @type {?} */(opts)).pane = client.Config.leafletPane;
         if (options && options.leafletPane)
             ( /** @type {?} */(opts)).pane = options.leafletPane;
         return new ClusteredFeatureLayer(opts);
@@ -2200,7 +2207,7 @@ This software has been approved for release by the U.S. Department of the Interi
      * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
      */
     /** @type {?} */
-    var jQuery$2 = jquery;
+    var jQuery$1 = jquery;
     var WMS = /** @class */ (function (_super) {
         __extends(WMS, _super);
         function WMS(url, opts) {
@@ -2267,7 +2274,7 @@ This software has been approved for release by the U.S. Department of the Interi
                 var url = this.getFeatureInfoUrl(evt.latlng);
                 /** @type {?} */
                 var parseGetFeatureInfo = this.parseGetFeatureInfo;
-                jQuery$2.ajax({
+                jQuery$1.ajax({
                     url: url,
                     success: /**
                      * @param {?} data
@@ -2320,7 +2327,7 @@ This software has been approved for release by the U.S. Department of the Interi
                 var wmvId = ( /** @type {?} */(this.wmsParams)).wmvId;
                 /** @type {?} */
                 var url = '/api/layers/' + wmvId + '/feature';
-                return client.Config["ualUrl"] + url + L.Util.getParamString(params, url, true);
+                return client.Config.ualUrl + url + L.Util.getParamString(params, url, true);
             };
         /**
          * @param {?} content
@@ -2371,7 +2378,7 @@ This software has been approved for release by the U.S. Department of the Interi
      */
     function determineWMSFormat(layer) {
         /** @type {?} */
-        var formats = layer["formats"];
+        var formats = layer.formats;
         if (formats && formats.length) {
             /** @type {?} */
             var idx = 0;
@@ -2394,8 +2401,8 @@ This software has been approved for release by the U.S. Department of the Interi
      */
     function wms(layer) {
         /** @type {?} */
-        var service = layer["services"] && layer["services"].length ?
-            layer["services"][0] : null;
+        var service = layer.services && layer.services.length ?
+            layer.services[0] : null;
         if (!service) {
             throw new Error("Cannot create leaflet layer for WMS Layer '" +
                 (layer.label || layer.id) +
@@ -2409,7 +2416,7 @@ This software has been approved for release by the U.S. Department of the Interi
         /** @type {?} */
         var format = determineWMSFormat(layer);
         /** @type {?} */
-        var supportedCrs = layer["crs"] || [];
+        var supportedCrs = layer.crs || [];
         if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
             console.log("Layer '" + layer.label + "' does not support " +
                 "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
@@ -2432,8 +2439,8 @@ This software has been approved for release by the U.S. Department of the Interi
             wmvId: layer.id,
             version: version
         };
-        if (client.Config["leafletPane"]) {
-            ( /** @type {?} */(opts)).pane = client.Config["leafletPane"];
+        if (client.Config.leafletPane) {
+            ( /** @type {?} */(opts)).pane = client.Config.leafletPane;
         }
         return new WMS(url, opts);
     }
@@ -2534,12 +2541,12 @@ This software has been approved for release by the U.S. Department of the Interi
             format: "image/png",
             wmvId: gpLayer.layerId
         };
-        if (client.Config["leafletPane"])
-            ( /** @type {?} */(opts)).pane = client.Config["leafletPane"];
+        if (client.Config.leafletPane)
+            ( /** @type {?} */(opts)).pane = client.Config.leafletPane;
         /** @type {?} */
         var leafletLayer = new WMS(url, opts);
         /** @type {?} */
-        var proxyUrl = client.Config["ualUrl"] + '/api/services/' +
+        var proxyUrl = client.Config.ualUrl + '/api/services/' +
             service.id + '/proxy/capabilities';
         /** @type {?} */
         var tdOpts = { times: null };
@@ -2794,8 +2801,8 @@ This software has been approved for release by the U.S. Department of the Interi
             tileMatrixSet: "default",
             format: "image/png"
         };
-        if (client.Config["leafletPane"])
-            ( /** @type {?} */(options)).pane = client.Config["leafletPane"];
+        if (client.Config.leafletPane)
+            ( /** @type {?} */(options)).pane = client.Config.leafletPane;
         /** @type {?} */
         var distro = (layer.distributions || []).find(function (dist) {
             //ensure dist isn't 'null'
@@ -3006,6 +3013,424 @@ This software has been approved for release by the U.S. Department of the Interi
      * @fileoverview added by tsickle
      * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
      */
+    /**
+     * Class representing an evaluatable expression associated with a layer style,
+     * following MapBox Style Spec format.
+     * Expressions are arrays of:
+     *   - operator key ('get', '==', 'has', etc)
+     *   - any number of parameters including nested expressions
+     *
+     *  Examples:
+     *
+     *  [ 'has', 'propertyName' ]   // simple expression checking for existance of a specific feature property
+     *
+     *  [
+     *    '=='                      // type of expression (equality comparison)
+     *    [ 'get', 'propertyA' ],   // nested expression to extract feature's property value
+     *    'expectedValue'           // value to compare against
+     *  ]
+     *
+     *  [
+     *    'match',                   // type of expression ('switch' statement)
+     *    [ 'get', 'propertyName' ], // first param is another expression to extract a feature's property value
+     *    'A', 'valueForA',          // next two params are first 'case' of "switch"
+     *    'B', 'valueForB',          // second 'case' for 'switch'
+     *    'fallbackValue'            // default 'case' for 'switch'
+     *  ]
+     *
+     */
+    var /**
+     * Class representing an evaluatable expression associated with a layer style,
+     * following MapBox Style Spec format.
+     * Expressions are arrays of:
+     *   - operator key ('get', '==', 'has', etc)
+     *   - any number of parameters including nested expressions
+     *
+     *  Examples:
+     *
+     *  [ 'has', 'propertyName' ]   // simple expression checking for existance of a specific feature property
+     *
+     *  [
+     *    '=='                      // type of expression (equality comparison)
+     *    [ 'get', 'propertyA' ],   // nested expression to extract feature's property value
+     *    'expectedValue'           // value to compare against
+     *  ]
+     *
+     *  [
+     *    'match',                   // type of expression ('switch' statement)
+     *    [ 'get', 'propertyName' ], // first param is another expression to extract a feature's property value
+     *    'A', 'valueForA',          // next two params are first 'case' of "switch"
+     *    'B', 'valueForB',          // second 'case' for 'switch'
+     *    'fallbackValue'            // default 'case' for 'switch'
+     *  ]
+     *
+     */ Expression = /** @class */ (function () {
+        function Expression(filter) {
+            /** @type {?} */
+            var arr = filter.slice(0);
+            this.operator = arr[0];
+            this.args = arr.splice(1).map(function (arg) {
+                return Array.isArray(arg) ? new Expression(arg) : arg;
+            });
+        }
+        /**
+         * @param properties - map of feature properties to use in evaluating the expression for a specific feature instance
+         * @param zoom - zoom level of the map
+         * @param geometryType - type of geometry for the specific feature instance being evaluated
+         * @return value result of the expression
+         */
+        /**
+         * @param {?} properties - map of feature properties to use in evaluating the expression for a specific feature instance
+         * @param {?} zoom - zoom level of the map
+         * @param {?} geometryType - type of geometry for the specific feature instance being evaluated
+         * @return {?} value result of the expression
+         */
+        Expression.prototype.evaluate = /**
+         * @param {?} properties - map of feature properties to use in evaluating the expression for a specific feature instance
+         * @param {?} zoom - zoom level of the map
+         * @param {?} geometryType - type of geometry for the specific feature instance being evaluated
+         * @return {?} value result of the expression
+         */
+            function (properties, zoom, geometryType) {
+                /** @type {?} */
+                var p1;
+                /** @type {?} */
+                var p2;
+                switch (this.operator) {
+                    case 'get':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        return properties[p1];
+                    case 'has':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        return p1 in properties;
+                    case '!has':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        return !(p1 in properties);
+                    case '==':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        p2 = this.getArg(1, properties, zoom, geometryType);
+                        // console.log(`Comparing ${p1} == ${p2}`);
+                        return p1 == p2;
+                    case '!=':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        p2 = this.getArg(1, properties, zoom, geometryType);
+                        // console.log(`Comparing ${p1} != ${p2}`);
+                        return p1 != p2;
+                    case '>':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        p2 = this.getArg(1, properties, zoom, geometryType);
+                        return p1 > p2;
+                    case '<':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        p2 = this.getArg(1, properties, zoom, geometryType);
+                        return p1 < p2;
+                    case '>=':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        p2 = this.getArg(1, properties, zoom, geometryType);
+                        return p1 >= p2;
+                    case '<=':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        p2 = this.getArg(1, properties, zoom, geometryType);
+                        return p1 <= p2;
+                    case 'array':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        return Array.isArray(p1);
+                    case 'at':
+                        p1 = this.getArg(0, properties, zoom, geometryType);
+                        p2 = this.getArg(1, properties, zoom, geometryType);
+                        return typeof (p1) === 'number' && Array.isArray(p2) &&
+                            p2.length >= p1 ? p2[p1] : null;
+                    case 'zoom': return zoom;
+                    case 'id': return properties.id;
+                    case 'geometry-type': return geometryType;
+                    case 'match': //works like a switch statement
+                        //works like a switch statement
+                        return this.findMatch(properties, zoom, geometryType);
+                }
+                return null;
+            };
+        /**
+         * @param properties - map of feature properties to use in evaluating the expression for a specific feature instance
+         * @param zoom - zoom level of the map
+         * @param geometryType - type of geometry for the specific feature instance being evaluated
+         * @return value of the argument (which may be result of an expression)
+         */
+        /**
+         * @param {?} index
+         * @param {?} properties - map of feature properties to use in evaluating the expression for a specific feature instance
+         * @param {?} zoom - zoom level of the map
+         * @param {?} geometryType - type of geometry for the specific feature instance being evaluated
+         * @return {?} value of the argument (which may be result of an expression)
+         */
+        Expression.prototype.getArg = /**
+         * @param {?} index
+         * @param {?} properties - map of feature properties to use in evaluating the expression for a specific feature instance
+         * @param {?} zoom - zoom level of the map
+         * @param {?} geometryType - type of geometry for the specific feature instance being evaluated
+         * @return {?} value of the argument (which may be result of an expression)
+         */
+            function (index, properties, zoom, geometryType) {
+                /** @type {?} */
+                var value = this.args[index];
+                if (value && typeof (value.evaluate) !== 'undefined') {
+                    return value.evaluate(properties, zoom, geometryType);
+                }
+                return value;
+            };
+        /**
+         * @param properties - map of feature properties to use in evaluating the expression for a specific feature instance
+         * @param zoom - zoom level of the map
+         * @param geometryType - type of geometry for the specific feature instance being evaluated
+         * @return value associated with matching condition of expression, or fallback value
+         */
+        /**
+         * @param {?} properties - map of feature properties to use in evaluating the expression for a specific feature instance
+         * @param {?} zoom - zoom level of the map
+         * @param {?} geometryType - type of geometry for the specific feature instance being evaluated
+         * @return {?} value associated with matching condition of expression, or fallback value
+         */
+        Expression.prototype.findMatch = /**
+         * @param {?} properties - map of feature properties to use in evaluating the expression for a specific feature instance
+         * @param {?} zoom - zoom level of the map
+         * @param {?} geometryType - type of geometry for the specific feature instance being evaluated
+         * @return {?} value associated with matching condition of expression, or fallback value
+         */
+            function (properties, zoom, geometryType) {
+                var _this = this;
+                /** @type {?} */
+                var result = null;
+                /** @type {?} */
+                var end = this.args.length - 1;
+                /** @type {?} */
+                var value = this.getArg(0, properties, zoom, geometryType);
+                // console.log("Expression.match - " + JSON.stringify(value) );
+                //find value inside remaining args to assign style associated with that value
+                this.args.forEach(function (arg, i) {
+                    // ignore first arg (see above) and last arg (it's the fallback value)
+                    // also skip if we've already found a match
+                    if (result !== null || i === 0 || i === end)
+                        return;
+                    if (Array.isArray(arg)) { //array of literal values
+                        //array of literal values
+                        if (~arg.indexOf(value)) {
+                            result = _this.args[i + 1]; //match, return next value in array
+                        }
+                    }
+                    else if (arg == value) { //literal value
+                        //literal value
+                        result = _this.args[i + 1]; //match, return next value in array
+                    }
+                });
+                if (!result)
+                    result = this.args[end]; //last arg is always fallback value
+                // console.log("Match returned: " + result);
+                return result;
+            };
+        /**
+         * @return {?}
+         */
+        Expression.prototype.toString = /**
+         * @return {?}
+         */
+            function () {
+                return [this.operator].concat(this.args.map(function (arg) {
+                    return (typeof (arg.evaluate) !== 'undefined') ? arg.toString() : arg;
+                })).join(',');
+            };
+        return Expression;
+    }());
+    /**
+     * @param {?} style MapBox Style definition
+     * @return {?} object associating Leaflet styles with layer ids
+     */
+    function parseMapBoxStyle(style) {
+        //TODO validate style.version to make sure we are parsing something we understand
+        // console.log("Parsing MapBox Style");
+        // console.log(JSON.stringify(style, null, ' '));
+        // console.log("--------------------");
+        if (!style.layers || !Array.isArray(style.layers) || !style.layers.length) {
+            console.log("Style has no layer definitions");
+            return {}; //empty styles
+        }
+        /** @type {?} */
+        var result = {};
+        style.layers.forEach(function (layer) {
+            result[layer.id] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
+        });
+        return result;
+    }
+    var ɵ0$7 = function (layerStyle) {
+        /** *
+         *
+          @type {?} */
+        var parseValue = function (value, fallback) {
+            if (value && Array.isArray(value) && value.length) {
+                return new Expression(value);
+            }
+            else if (value !== null && typeof (value) !== 'undefined')
+                return value;
+            else
+                return fallback || null;
+        };
+        /** @type {?} */
+        var layerPaint = layerStyle.paint;
+        /** @type {?} */
+        var lineWidth = parseValue(layerPaint['line-width'], 1);
+        /** @type {?} */
+        var opacity = parseValue(layerPaint['line-opacity'], 1.0);
+        /** @type {?} */
+        var color = parseValue(layerPaint['line-color'] || layerPaint['fill-outline-color'] || layerPaint['fill-color'], '#000');
+        /** @type {?} */
+        var fillOpacity = parseValue(layerPaint['fill-opacity'] || layerPaint['background-opacity'], 1.0);
+        /** @type {?} */
+        var fillColor = parseValue(layerPaint['fill-color'] || layerPaint['background-color'], '#000');
+        /** @type {?} */
+        var style = {
+            color: color,
+            //stroke color
+            opacity: opacity,
+            //stroke opacity
+            weight: lineWidth,
+            //stroke size
+            fillOpacity: fillOpacity,
+            //fill opacity
+            fillColor: fillColor //fill color
+        };
+        return function (properties, zoom, geomType) {
+            /** @type {?} */
+            var result = {};
+            Object.keys(style).forEach(function (key) {
+                /** @type {?} */
+                var styleVal = style[key];
+                if (styleVal && typeof (styleVal.evaluate) !== 'undefined')
+                    result[key] = styleVal.evaluate(properties, zoom, geomType);
+                else
+                    result[key] = styleVal;
+            });
+            return result;
+        };
+    };
+    /** *
+     * \@param layer MapBox Style Spec Layer definition
+     * \@return Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
+      @type {?} */
+    var styleFunctionFactory = (ɵ0$7);
+
+    /**
+     * @fileoverview added by tsickle
+     * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+     */
+    /** @type {?} */
+    var STYLE_CONCEPT = {
+        "id": "78ad3ecc883de444c8a0684087a61753",
+        "uri": "http://www.geoplatform.gov/def/OnlineFunction/styling",
+        "type": "skos:Concept",
+        "label": "styling"
+    };
+    /** @type {?} */
+    var DEFAULT_STYLE_CONCEPT = {
+        "id": "53983c42978cd510a5f844ec0a0c6c2b",
+        "uri": "http://www.geoplatform.gov/def/OnlineFunction/default_styling",
+        "type": "skos:Concept",
+        "label": "default styling"
+    };
+    /**
+     * @param {?} layer
+     * @return {?}
+     */
+    function mapBoxVectorTileLayer(layer) {
+        /** @type {?} */
+        var href = layer.href;
+        if (!href || href.indexOf(".pbf") < 0) {
+            console.log("LayerFactory - Layer does not define an Access URL");
+            return null; //missing URL
+        }
+        /** @type {?} */
+        var Leaflet = /** @type {?} */ (L);
+        //if Leaflet vector grid plugin is not installed, can't render VT Layers
+        if (typeof (Leaflet.vectorGrid) === 'undefined' &&
+            typeof (Leaflet.vectorGrid.protobuf) === 'undefined') {
+            console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
+            return null;
+        }
+        /** @type {?} */
+        var opts = {
+            rendererFactory: ( /** @type {?} */(L.canvas)).tile
+        };
+        if (client.Config.leafletPane)
+            opts.pane = client.Config.leafletPane;
+        /** @type {?} */
+        var result = Leaflet.vectorGrid.protobuf(href, opts);
+        /** @type {?} */
+        var style = null;
+        /** @type {?} */
+        var styles = (layer.related || []).map(function (rel) {
+            if (!rel.role)
+                return false;
+            if (rel.role.uri === DEFAULT_STYLE_CONCEPT.uri) {
+                style = rel;
+                return false;
+            }
+            return rel.role.uri === STYLE_CONCEPT.uri;
+        });
+        style = style || (styles.length ? styles[0] : null);
+        if (style) {
+            applyVectorTileStyle(layer, result, style);
+        }
+        return result;
+    }
+    /**
+     * @param {?} layer GeoPlatform Layer object
+     * @param {?} leafletLayer GridLayer instance representing the GP Layer object specified
+     * @param {?} styleResource GP Auxillary Resource object
+     * @return {?}
+     */
+    function applyVectorTileStyle(layer, leafletLayer, styleResource) {
+        if (!leafletLayer.hasOwnProperty('options')) {
+            console.log("Warn: Could not apply style to layer; layer is not a VectorGrid instance");
+            return;
+        }
+        //fetch clob definition of style to use...
+        fetchStyleDefinition(layer.id, styleResource)
+            .then(function (styleDef) {
+            /** @type {?} */
+            var layerInst = ( /** @type {?} */(leafletLayer));
+            layerInst.options.vectorTileLayerStyles = parseMapBoxStyle(styleDef);
+            layerInst.redraw();
+        })
+            .catch(function (e) {
+            console.log("An error occurred fetching the style definition for layer '" +
+                layer.label + "'. " + e.message + ". Using default Leaflet style.");
+        });
+    }
+    /**
+     * @param {?} layerId string identifier of GeoPlatform Layer object
+     * @param {?} resource - auxillary resource referencing style definition to fetch
+     * @return {?} Promise resolving style definition
+     */
+    function fetchStyleDefinition(layerId, resource) {
+        if (!layerId || !resource || !resource.contentId) {
+            /** @type {?} */
+            var err = new Error("Unable to fetch style definition, one or more parameters were invalid");
+            return Promise.reject(err);
+        }
+        /** @type {?} */
+        var client$$1 = new client.XHRHttpClient();
+        /** @type {?} */
+        var request = client$$1.createRequestOpts({
+            method: "GET",
+            url: client.Config.ualUrl + '/api/layers/' + layerId + '/styles/' + resource.contentId,
+            timeout: 5000,
+            json: true
+        });
+        return client$$1.execute(request);
+        // return Promise.resolve(resource.content);   //TODO remove this
+    }
+
+    /**
+     * @fileoverview added by tsickle
+     * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+     */
     /*
      * Extend base Leaflet layer class to ensure there's always a function
      * available for modifying zindex and opacity, even if nothing actually
@@ -3131,7 +3556,7 @@ This software has been approved for release by the U.S. Department of the Interi
          */
             function () {
                 if (!this.service || typeof (this.service.style) === 'undefined') {
-                    this.service = new client.LayerService(client.Config["ualUrl"], new client.XHRHttpClient());
+                    this.service = new client.LayerService(client.Config.ualUrl, new client.XHRHttpClient());
                 }
                 return styleResolverFactory(this.service);
             };
@@ -3179,10 +3604,10 @@ This software has been approved for release by the U.S. Department of the Interi
                 });
                 // ESRI factory
                 this.register(function (layer) {
-                    if (!layer || !layer["services"] || !layer["services"].length)
+                    if (!layer || !layer.services || !layer.services.length)
                         return null;
                     /** @type {?} */
-                    var service = layer["services"][0];
+                    var service = layer.services[0];
                     /** @type {?} */
                     var url = service.href;
                     /** @type {?} */
@@ -3212,13 +3637,13 @@ This software has been approved for release by the U.S. Department of the Interi
                             format: format || "png32"
                         });
                         /** @type {?} */
-                        var supportedCrs = layer["crs"] || [];
+                        var supportedCrs = layer.crs || [];
                         if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
                             console.log("Layer '" + layer.label + "' does not support " +
                                 "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
                         }
-                        if (client.Config["leafletPane"])
-                            opts.pane = client.Config["leafletPane"];
+                        if (client.Config.leafletPane)
+                            opts.pane = client.Config.leafletPane;
                         return new EsriTileLayer(url, opts);
                     }
                     else if (types.ESRI_FEATURE_SERVER &&
@@ -3232,25 +3657,25 @@ This software has been approved for release by the U.S. Department of the Interi
                         types.ESRI_TILE_SERVER.uri === typeUri) {
                         checkUrl(url);
                         opts = { url: url, useCors: true };
-                        if (client.Config["leafletPane"])
-                            opts.pane = client.Config["leafletPane"];
+                        if (client.Config.leafletPane)
+                            opts.pane = client.Config.leafletPane;
                         return esri.tiledMapLayer(opts);
                     }
                     else if (types.ESRI_IMAGE_SERVER &&
                         types.ESRI_IMAGE_SERVER.uri === typeUri) {
                         opts = { url: url, useCors: true };
-                        if (client.Config["leafletPane"])
-                            opts.pane = client.Config["leafletPane"];
+                        if (client.Config.leafletPane)
+                            opts.pane = client.Config.leafletPane;
                         return esri.imageMapLayer(opts);
                     }
                     return null;
                 });
                 // OGC factory
                 this.register(function (layer) {
-                    if (!layer || !layer["services"] || !layer["services"].length)
+                    if (!layer || !layer.services || !layer.services.length)
                         return null;
                     /** @type {?} */
-                    var service = layer["services"][0];
+                    var service = layer.services[0];
                     /** @type {?} */
                     var svcType = service.serviceType;
                     /** @type {?} */
@@ -3267,10 +3692,10 @@ This software has been approved for release by the U.S. Department of the Interi
                     return null;
                 });
                 this.register(function (layer) {
-                    if (!layer || !layer["services"] || !layer["services"].length)
+                    if (!layer || !layer.services || !layer.services.length)
                         return null;
                     /** @type {?} */
-                    var service = layer["services"][0];
+                    var service = layer.services[0];
                     /** @type {?} */
                     var svcType = service.serviceType;
                     /** @type {?} */
@@ -3291,27 +3716,28 @@ This software has been approved for release by the U.S. Department of the Interi
                         //not tagged as VT layer
                         return null;
                     }
-                    /** @type {?} */
-                    var href = layer.href;
-                    if (!href || href.indexOf(".pbf") < 0) {
-                        console.log("LayerFactory - Layer does not define an Access URL");
-                        return null; //missing URL
-                    }
-                    /** @type {?} */
-                    var Leaflet = /** @type {?} */ (L);
-                    //if Leaflet vector grid plugin is not installed, can't render VT Layers
-                    if (typeof (Leaflet.vectorGrid) === 'undefined' &&
-                        typeof (Leaflet.vectorGrid.protobuf) === 'undefined') {
-                        console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
-                        return null;
-                    }
-                    /** @type {?} */
-                    var opts = {
-                        rendererFactory: ( /** @type {?} */(L.canvas)).tile
-                    };
-                    if (client.Config["leafletPane"])
-                        opts.pane = client.Config["leafletPane"];
-                    return Leaflet.vectorGrid.protobuf(href, opts);
+                    return mapBoxVectorTileLayer(layer);
+                    // let href = layer.href;
+                    // if(!href || href.indexOf(".pbf") < 0) {
+                    //     console.log("LayerFactory - Layer does not define an Access URL");
+                    //     return null;  //missing URL
+                    // }
+                    //
+                    // const Leaflet = L as any;
+                    //
+                    // //if Leaflet vector grid plugin is not installed, can't render VT Layers
+                    // if( typeof(Leaflet.vectorGrid) === 'undefined' &&
+                    //     typeof(Leaflet.vectorGrid.protobuf) === 'undefined') {
+                    //     console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
+                    //     return null;
+                    // }
+                    //
+                    // let opts : any = { rendererFactory: ( L.canvas as any ).tile };
+                    // if( (layer as any).styles ) {
+                    //     opts.vectorTileLayerStyles = (layer as any).styles;
+                    // }
+                    // if(Config.leafletPane) opts.pane = Config.leafletPane;
+                    // return Leaflet.vectorGrid.protobuf(href, opts);
                 });
             };
         return LayerFactory;
@@ -3323,10 +3749,10 @@ This software has been approved for release by the U.S. Department of the Interi
      * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
      */
     /** @type {?} */
-    var jQuery$3 = jquery;
+    var jQuery$2 = jquery;
     /** @type {?} */
     var EsriFeatureLayer = esri.FeatureLayer;
-    var ɵ0$7 = function (feature, latlng) {
+    var ɵ0$8 = function (feature, latlng) {
         /** @type {?} */
         var style = feature && feature.properties ? feature.properties.style : null;
         if (!style && typeof this.options.style === 'function') {
@@ -3356,8 +3782,8 @@ This software has been approved for release by the U.S. Department of the Interi
             });
             /** @type {?} */
             var mopts = { icon: icon };
-            if (client.Config["leafletPane"])
-                ( /** @type {?} */(mopts)).pane = client.Config["leafletPane"];
+            if (client.Config.leafletPane)
+                ( /** @type {?} */(mopts)).pane = client.Config.leafletPane;
             marker = L.marker(latlng, mopts);
         }
         else {
@@ -3382,15 +3808,15 @@ This software has been approved for release by the U.S. Department of the Interi
     }, ɵ2$5 = function (options) {
         var _this = this;
         options = options || {};
-        if (client.Config["leafletPane"])
-            options.pane = client.Config["leafletPane"];
+        if (client.Config.leafletPane)
+            options.pane = client.Config.leafletPane;
         /** @type {?} */
         var getGPStyle = function () { return _this._gpStyle; };
         options.style = options.style || getGPStyle();
         /** @type {?} */
         var svgOpts = {};
-        if (client.Config["leafletPane"])
-            ( /** @type {?} */(svgOpts)).pane = client.Config["leafletPane"];
+        if (client.Config.leafletPane)
+            ( /** @type {?} */(svgOpts)).pane = client.Config.leafletPane;
         /** @type {?} */
         var renderer = (L.SVG && L.svg(svgOpts)) || (L.Canvas && L.canvas());
         options.renderer = renderer;
@@ -3472,7 +3898,7 @@ This software has been approved for release by the U.S. Department of the Interi
                 }
                 if (style.shape) {
                     /** @type {?} */
-                    var obj = jQuery$3.extend({}, style);
+                    var obj = jQuery$2.extend({}, style);
                     obj.style = style;
                     _this._gpStyle = style;
                     //setStyle on Cluster.FeatureLayer doesn't appear to work consistently for
@@ -3501,7 +3927,7 @@ This software has been approved for release by the U.S. Department of the Interi
              * @param {L.LatLng} latlng
              * @return {L.Marker}
              */
-        pointToLayerFn: ɵ0$7,
+        pointToLayerFn: ɵ0$8,
         /**
              * for all non-point features, bind a popup
              * @param {object} feature - GeoJSON feature
@@ -3520,7 +3946,7 @@ This software has been approved for release by the U.S. Department of the Interi
      * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
      */
     /** @type {?} */
-    var jQuery$4 = jquery;
+    var jQuery$3 = jquery;
     var Listener = /** @class */ (function () {
         function Listener() {
             //listeners to be unregistered upon destroy
@@ -3773,7 +4199,7 @@ This software has been approved for release by the U.S. Department of the Interi
          */
             function (type) {
                 if (!this.svcCache[type])
-                    this.svcCache[type] = this.serviceFactory(type, client.Config["ualUrl"], this.httpClient);
+                    this.svcCache[type] = this.serviceFactory(type, client.Config.ualUrl, this.httpClient);
                 return this.svcCache[type];
             };
         /**
@@ -4608,7 +5034,7 @@ This software has been approved for release by the U.S. Department of the Interi
                 }
                 else if (( /** @type {?} */(layerInstance))._container) {
                     /** @type {?} */
-                    var el = jQuery$4(( /** @type {?} */(layerInstance))._container);
+                    var el = jQuery$3(( /** @type {?} */(layerInstance))._container);
                     // if(visible) el.removeClass("invisible");
                     // else el.addClass('invisible');
                     el.css({ 'display': visible ? '' : 'none' });
@@ -4723,11 +5149,11 @@ This software has been approved for release by the U.S. Department of the Interi
                     if (typeof (layerInstance.enableGetFeatureInfo) !== 'undefined') {
                         if (layerInstance.isGetFeatureInfoEnabled()) {
                             layerInstance.disableGetFeatureInfo();
-                            jQuery$4(( /** @type {?} */(this._mapInstance))._container).removeClass('selectable-cursor');
+                            jQuery$3(( /** @type {?} */(this._mapInstance))._container).removeClass('selectable-cursor');
                         }
                         else {
                             layerInstance.enableGetFeatureInfo();
-                            jQuery$4(( /** @type {?} */(this._mapInstance))._container).addClass('selectable-cursor');
+                            jQuery$3(( /** @type {?} */(this._mapInstance))._container).addClass('selectable-cursor');
                         }
                     }
                 }
@@ -4802,7 +5228,7 @@ This software has been approved for release by the U.S. Department of the Interi
                     this._featureLayer = L.featureGroup().addTo(this._mapInstance);
                 }
                 /** @type {?} */
-                var opts = jQuery$4.extend({}, this._geoJsonLayerOpts);
+                var opts = jQuery$3.extend({}, this._geoJsonLayerOpts);
                 L.geoJSON(json, opts).eachLayer(function (l) { return _this.addFeatureLayer(l); });
                 if (typeof (fireEvent) === 'undefined' || fireEvent === true)
                     this.touch('features:changed');
@@ -5136,7 +5562,7 @@ This software has been approved for release by the U.S. Department of the Interi
                         if (!_this._mapId)
                             _this._mapId = result.id;
                         _this._mapDef = result;
-                        _this._defaultExtent = result["extent"];
+                        _this._defaultExtent = result.extent;
                         _this.clean();
                         resolve(result);
                     })
@@ -5205,7 +5631,7 @@ This software has been approved for release by the U.S. Department of the Interi
                                 mapId + "'): " + ( /** @type {?} */(map)).message);
                         }
                         //loading a map by its ID, so we need to increment it's view count
-                        if ('development' !== client.Config["env"]) {
+                        if ('development' !== client.Config.env) {
                             setTimeout(function (map) {
                                 /** @type {?} */
                                 var views = map.statistics ? (map.statistics.numViews || 0) : 0;
@@ -5213,7 +5639,7 @@ This software has been approved for release by the U.S. Department of the Interi
                                 var patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
                                 _this.getService(client.ItemTypes.MAP).patch(map.id, patch)
                                     // this.mapService.patch(map.id, patch)
-                                    .then(function (updated) { map.statistics = updated["statistics"]; })
+                                    .then(function (updated) { map.statistics = updated.statistics; })
                                     .catch(function (e) {
                                     console.log("MapInstance.saveMap() - Error updating view " +
                                         "count for map ('" + mapId + "'): " + e);
@@ -5511,11 +5937,13 @@ This software has been approved for release by the U.S. Department of the Interi
     exports.wmts = wmts;
     exports.ESRITileLayer = EsriTileLayer;
     exports.OSM = OSM;
+    exports.mapBoxVectorTileLayer = mapBoxVectorTileLayer;
     exports.MapInstance = MapInstance;
     exports.MapFactory = factory;
     exports.ServiceTypes = types;
     exports.PopupTemplate = featurePopupTemplate;
     exports.StyleResolver = featureStyleResolver;
+    exports.parseMapBoxStyle = parseMapBoxStyle;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

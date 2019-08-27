@@ -56,7 +56,7 @@ export default class MapInstance extends Listener {
     getLayerStateIndex(layerId: any): number;
     getLayerState(layerId: any): any;
     initializeMapDefinition(): {
-        type: string;
+        type: any;
         title: string;
         label: string;
         description: string;

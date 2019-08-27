@@ -1228,10 +1228,10 @@ var OSM = {
 const WORLD_STREET_LAYER = '86a8babde086689e21248669ba4ed579';
 const ɵ0$3 = function (layerService) {
     if (!layerService) {
-        layerService = new LayerService(Config["ualUrl"], new XHRHttpClient());
+        layerService = new LayerService(Config.ualUrl, new XHRHttpClient());
     }
     /** @type {?} */
-    let baseLayerId = Config["defaultBaseLayerId"] || WORLD_STREET_LAYER;
+    let baseLayerId = Config.defaultBaseLayerId || WORLD_STREET_LAYER;
     return layerService.get(baseLayerId)
         .catch((e) => {
         return OSM.get();
@@ -1244,7 +1244,7 @@ const ɵ0$3 = function (layerService) {
     else if (layer && typeof (layer) === 'string')
         id = layer;
     if (id) {
-        Config["configure"]({ 'defaultBaseLayerId': layer.id });
+        Config.configure({ 'defaultBaseLayerId': layer.id });
     }
 };
 /** @type {?} */
@@ -1363,7 +1363,7 @@ var types = {
  */
 function updateList(service) {
     /** @type {?} */
-    let url = Config["ualUrl"];
+    let url = Config.ualUrl;
     if (!url) {
         console.log("WARN : ServiceTypes - no GeoPlatform API URL configured, unable to load service types");
     }
@@ -1573,30 +1573,36 @@ var BaseClusteredFeatureLayer = FeatureManager.extend({
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
-/** @type {?} */
-const jQuery = jquery;
 /**
  * Fetches style information from GeoPlatform UAL
  * @param {?} id - identifier of layer to resolve style for
  * @return {?}
  */
 function featureStyleResolver(id) {
-    return new Promise((resolve, reject) => {
-        if (!jQuery) {
-            reject(new Error("Unable to load feature layer style, jQuery is not installed"));
-        }
-        jQuery.ajax({
-            url: Config["ualUrl"] + '/api/layers/' + id + '/style',
-            dataType: 'json',
-            success: function (data) { resolve(data); },
-            error: function (xhr, status, message) {
-                /** @type {?} */
-                let em = `FeatureStyleResolver() -
-                   Error loading style information for layer ${id} : ${message}`;
-                reject(new Error(em));
-            }
-        });
+    /** @type {?} */
+    let service = new LayerService(Config.ualUrl, new XHRHttpClient());
+    return service.style(id).catch((e) => {
+        /** @type {?} */
+        let err = new Error(`Unable to download style for layer ${id} because of an error; ${e.message}`);
+        return Promise.reject(err);
     });
+    // return new Promise<any>( (resolve, reject) => {
+    //
+    //     if(!jQuery) {
+    //         reject(new Error("Unable to load feature layer style, jQuery is not installed"));
+    //     }
+    //     jQuery.ajax({
+    //        url: Config.ualUrl + '/api/layers/' + id + '/style',
+    //        dataType: 'json',
+    //        success: function(data) { resolve(data); },
+    //        error: function(xhr, status, message) {
+    //            let em = `FeatureStyleResolver() -
+    //                Error loading style information for layer ${id} : ${message}`;
+    //            reject( new Error(em) );
+    //        }
+    //     });
+    //
+    // });
 }
 
 /**
@@ -1697,7 +1703,7 @@ function featurePopupTemplate(feature) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /** @type {?} */
-const jQuery$1 = jquery;
+const jQuery = jquery;
 const ɵ0$6 = function (feature, latlng) {
     /** @type {?} */
     var style = feature && feature.properties ? feature.properties.style : null;
@@ -1735,8 +1741,8 @@ const ɵ0$6 = function (feature, latlng) {
         });
         /** @type {?} */
         let mopts = { icon: icon$$1 };
-        if (Config["leafletPane"])
-            (/** @type {?} */ (mopts)).pane = Config["leafletPane"];
+        if (Config.leafletPane)
+            (/** @type {?} */ (mopts)).pane = Config.leafletPane;
         marker$$1 = marker(latlng, mopts);
     }
     else {
@@ -1753,8 +1759,8 @@ const ɵ0$6 = function (feature, latlng) {
     layer.bindPopup(featurePopupTemplate(feature));
 }, ɵ2$4 = function (options) {
     options = options || {};
-    if (Config["leafletPane"])
-        options.pane = Config["leafletPane"];
+    if (Config.leafletPane)
+        options.pane = Config.leafletPane;
     options.pointToLayer = Util.bind(this.pointToLayerFn, this);
     options.onEachFeature = Util.bind(this.eachFeatureFn, this);
     // options.fields = ['FID', 'type', 'title', 'geometry'];
@@ -1770,8 +1776,8 @@ const ɵ0$6 = function (feature, latlng) {
     }
     /** @type {?} */
     let svgOpts = {};
-    if (Config["leafletPane"])
-        (/** @type {?} */ (svgOpts)).pane = Config["leafletPane"];
+    if (Config.leafletPane)
+        (/** @type {?} */ (svgOpts)).pane = Config.leafletPane;
     /** @type {?} */
     var renderer = (SVG && svg(svgOpts)) || (Canvas && canvas());
     options.renderer = renderer;
@@ -1832,7 +1838,7 @@ const ɵ0$6 = function (feature, latlng) {
             let layer = this.cluster._featureGroup._layers[id];
             if (layer._icon) {
                 /** @type {?} */
-                var icon$$1 = jQuery$1(layer._icon);
+                var icon$$1 = jQuery(layer._icon);
                 if (bool)
                     icon$$1.removeClass('invisible');
                 else
@@ -1859,7 +1865,7 @@ const ɵ0$6 = function (feature, latlng) {
             /** @type {?} */
             let layer = this.cluster._featureGroup._layers[id];
             if (layer._icon) {
-                jQuery$1(layer._icon).css({ opacity: opacity });
+                jQuery(layer._icon).css({ opacity: opacity });
             }
         }
     }
@@ -1930,7 +1936,7 @@ const ɵ0$6 = function (feature, latlng) {
             }
             if (style.shape) {
                 /** @type {?} */
-                var obj = jQuery$1.extend({}, style);
+                var obj = jQuery.extend({}, style);
                 obj.style = style;
                 this._gpStyle = style;
                 //setStyle on Cluster.FeatureLayer doesn't appear to work consistently for
@@ -2018,8 +2024,8 @@ function clusteredFeatures(layer, options) {
         styleLoader: styleResolver,
         layerId: layer.id
     };
-    if (Config["leafletPane"])
-        (/** @type {?} */ (opts)).pane = Config["leafletPane"];
+    if (Config.leafletPane)
+        (/** @type {?} */ (opts)).pane = Config.leafletPane;
     if (options && options.leafletPane)
         (/** @type {?} */ (opts)).pane = options.leafletPane;
     return new ClusteredFeatureLayer(opts);
@@ -2054,10 +2060,10 @@ function geoJsonFeed(layer, options) {
     let styleLoaderFactory = function (url) {
         return function (layerId) {
             return new Promise((resolve, reject) => {
-                if (!jQuery$1) {
+                if (!jQuery) {
                     reject(new Error("Unable to load GeoJSON feed style, jQuery is not installed"));
                 }
-                jQuery$1.ajax(url, {
+                jQuery.ajax(url, {
                     dataType: 'json',
                     success: function (data) { resolve(data); },
                     error: function (xhr, status, message) {
@@ -2079,8 +2085,8 @@ function geoJsonFeed(layer, options) {
         //used by style loader
         styleLoader: styleLoaderFactory(styleUrl)
     };
-    if (Config["leafletPane"])
-        (/** @type {?} */ (opts)).pane = Config["leafletPane"];
+    if (Config.leafletPane)
+        (/** @type {?} */ (opts)).pane = Config.leafletPane;
     if (options && options.leafletPane)
         (/** @type {?} */ (opts)).pane = options.leafletPane;
     return new ClusteredFeatureLayer(opts);
@@ -2091,7 +2097,7 @@ function geoJsonFeed(layer, options) {
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /** @type {?} */
-const jQuery$2 = jquery;
+const jQuery$1 = jquery;
 class WMS extends TileLayer.WMS {
     /**
      * @param {?} url
@@ -2143,7 +2149,7 @@ class WMS extends TileLayer.WMS {
         var url = this.getFeatureInfoUrl(evt.latlng);
         /** @type {?} */
         var parseGetFeatureInfo = this.parseGetFeatureInfo;
-        jQuery$2.ajax({
+        jQuery$1.ajax({
             url: url,
             /**
              * @param {?} data
@@ -2194,7 +2200,7 @@ class WMS extends TileLayer.WMS {
         let wmvId = (/** @type {?} */ (this.wmsParams)).wmvId;
         /** @type {?} */
         var url = '/api/layers/' + wmvId + '/feature';
-        return Config["ualUrl"] + url + Util.getParamString(params, url, true);
+        return Config.ualUrl + url + Util.getParamString(params, url, true);
     }
     /**
      * @param {?} content
@@ -2234,7 +2240,7 @@ class WMS extends TileLayer.WMS {
  */
 function determineWMSFormat(layer) {
     /** @type {?} */
-    let formats = layer["formats"];
+    let formats = layer.formats;
     if (formats && formats.length) {
         /** @type {?} */
         let idx = 0;
@@ -2257,8 +2263,8 @@ function determineWMSFormat(layer) {
  */
 function wms(layer) {
     /** @type {?} */
-    let service = layer["services"] && layer["services"].length ?
-        layer["services"][0] : null;
+    let service = layer.services && layer.services.length ?
+        layer.services[0] : null;
     if (!service) {
         throw new Error("Cannot create leaflet layer for WMS Layer '" +
             (layer.label || layer.id) +
@@ -2272,7 +2278,7 @@ function wms(layer) {
     /** @type {?} */
     let format = determineWMSFormat(layer);
     /** @type {?} */
-    let supportedCrs = layer["crs"] || [];
+    let supportedCrs = layer.crs || [];
     if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
         console.log("Layer '" + layer.label + "' does not support " +
             "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
@@ -2295,8 +2301,8 @@ function wms(layer) {
         wmvId: layer.id,
         version: version
     };
-    if (Config["leafletPane"]) {
-        (/** @type {?} */ (opts)).pane = Config["leafletPane"];
+    if (Config.leafletPane) {
+        (/** @type {?} */ (opts)).pane = Config.leafletPane;
     }
     return new WMS(url, opts);
 }
@@ -2389,12 +2395,12 @@ function wmst(gpLayer) {
         format: "image/png",
         wmvId: gpLayer.layerId
     };
-    if (Config["leafletPane"])
-        (/** @type {?} */ (opts)).pane = Config["leafletPane"];
+    if (Config.leafletPane)
+        (/** @type {?} */ (opts)).pane = Config.leafletPane;
     /** @type {?} */
     let leafletLayer = new WMS(url, opts);
     /** @type {?} */
-    let proxyUrl = Config["ualUrl"] + '/api/services/' +
+    let proxyUrl = Config.ualUrl + '/api/services/' +
         service.id + '/proxy/capabilities';
     /** @type {?} */
     let tdOpts = { times: null };
@@ -2626,8 +2632,8 @@ function wmts(layer) {
         tileMatrixSet: "default",
         format: "image/png"
     };
-    if (Config["leafletPane"])
-        (/** @type {?} */ (options)).pane = Config["leafletPane"];
+    if (Config.leafletPane)
+        (/** @type {?} */ (options)).pane = Config.leafletPane;
     /** @type {?} */
     let distro = (layer.distributions || []).find(dist => {
         //ensure dist isn't 'null'
@@ -2818,6 +2824,360 @@ function OSMLayerFactory() {
  * @fileoverview added by tsickle
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
+/**
+ * Class representing an evaluatable expression associated with a layer style,
+ * following MapBox Style Spec format.
+ * Expressions are arrays of:
+ *   - operator key ('get', '==', 'has', etc)
+ *   - any number of parameters including nested expressions
+ *
+ *  Examples:
+ *
+ *  [ 'has', 'propertyName' ]   // simple expression checking for existance of a specific feature property
+ *
+ *  [
+ *    '=='                      // type of expression (equality comparison)
+ *    [ 'get', 'propertyA' ],   // nested expression to extract feature's property value
+ *    'expectedValue'           // value to compare against
+ *  ]
+ *
+ *  [
+ *    'match',                   // type of expression ('switch' statement)
+ *    [ 'get', 'propertyName' ], // first param is another expression to extract a feature's property value
+ *    'A', 'valueForA',          // next two params are first 'case' of "switch"
+ *    'B', 'valueForB',          // second 'case' for 'switch'
+ *    'fallbackValue'            // default 'case' for 'switch'
+ *  ]
+ *
+ */
+class Expression {
+    /**
+     * @param {?} filter
+     */
+    constructor(filter) {
+        /** @type {?} */
+        let arr = filter.slice(0);
+        this.operator = arr[0];
+        this.args = arr.splice(1).map(arg => {
+            return Array.isArray(arg) ? new Expression(arg) : arg;
+        });
+    }
+    /**
+     * @param {?} properties - map of feature properties to use in evaluating the expression for a specific feature instance
+     * @param {?} zoom - zoom level of the map
+     * @param {?} geometryType - type of geometry for the specific feature instance being evaluated
+     * @return {?} value result of the expression
+     */
+    evaluate(properties, zoom, geometryType) {
+        /** @type {?} */
+        let p1;
+        /** @type {?} */
+        let p2;
+        switch (this.operator) {
+            case 'get':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                return properties[p1];
+            case 'has':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                return p1 in properties;
+            case '!has':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                return !(p1 in properties);
+            case '==':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                p2 = this.getArg(1, properties, zoom, geometryType);
+                // console.log(`Comparing ${p1} == ${p2}`);
+                return p1 == p2;
+            case '!=':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                p2 = this.getArg(1, properties, zoom, geometryType);
+                // console.log(`Comparing ${p1} != ${p2}`);
+                return p1 != p2;
+            case '>':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                p2 = this.getArg(1, properties, zoom, geometryType);
+                return p1 > p2;
+            case '<':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                p2 = this.getArg(1, properties, zoom, geometryType);
+                return p1 < p2;
+            case '>=':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                p2 = this.getArg(1, properties, zoom, geometryType);
+                return p1 >= p2;
+            case '<=':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                p2 = this.getArg(1, properties, zoom, geometryType);
+                return p1 <= p2;
+            case 'array':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                return Array.isArray(p1);
+            case 'at':
+                p1 = this.getArg(0, properties, zoom, geometryType);
+                p2 = this.getArg(1, properties, zoom, geometryType);
+                return typeof (p1) === 'number' && Array.isArray(p2) &&
+                    p2.length >= p1 ? p2[p1] : null;
+            case 'zoom': return zoom;
+            case 'id': return properties.id;
+            case 'geometry-type': return geometryType;
+            case 'match': //works like a switch statement
+                //works like a switch statement
+                return this.findMatch(properties, zoom, geometryType);
+        }
+        return null;
+    }
+    /**
+     * @param {?} index
+     * @param {?} properties - map of feature properties to use in evaluating the expression for a specific feature instance
+     * @param {?} zoom - zoom level of the map
+     * @param {?} geometryType - type of geometry for the specific feature instance being evaluated
+     * @return {?} value of the argument (which may be result of an expression)
+     */
+    getArg(index, properties, zoom, geometryType) {
+        /** @type {?} */
+        let value = this.args[index];
+        if (value && typeof (value.evaluate) !== 'undefined') {
+            return value.evaluate(properties, zoom, geometryType);
+        }
+        return value;
+    }
+    /**
+     * @param {?} properties - map of feature properties to use in evaluating the expression for a specific feature instance
+     * @param {?} zoom - zoom level of the map
+     * @param {?} geometryType - type of geometry for the specific feature instance being evaluated
+     * @return {?} value associated with matching condition of expression, or fallback value
+     */
+    findMatch(properties, zoom, geometryType) {
+        /** @type {?} */
+        let result = null;
+        /** @type {?} */
+        let end = this.args.length - 1;
+        /** @type {?} */
+        let value = this.getArg(0, properties, zoom, geometryType);
+        // console.log("Expression.match - " + JSON.stringify(value) );
+        //find value inside remaining args to assign style associated with that value
+        this.args.forEach((arg, i) => {
+            // ignore first arg (see above) and last arg (it's the fallback value)
+            // also skip if we've already found a match
+            if (result !== null || i === 0 || i === end)
+                return;
+            if (Array.isArray(arg)) { //array of literal values
+                //array of literal values
+                if (~arg.indexOf(value)) {
+                    result = this.args[i + 1]; //match, return next value in array
+                }
+            }
+            else if (arg == value) { //literal value
+                //literal value
+                result = this.args[i + 1]; //match, return next value in array
+            }
+        });
+        if (!result)
+            result = this.args[end]; //last arg is always fallback value
+        // console.log("Match returned: " + result);
+        return result;
+    }
+    /**
+     * @return {?}
+     */
+    toString() {
+        return [this.operator].concat(this.args.map(arg => {
+            return (typeof (arg.evaluate) !== 'undefined') ? arg.toString() : arg;
+        })).join(',');
+    }
+}
+/**
+ * @param {?} style MapBox Style definition
+ * @return {?} object associating Leaflet styles with layer ids
+ */
+function parseMapBoxStyle(style) {
+    //TODO validate style.version to make sure we are parsing something we understand
+    // console.log("Parsing MapBox Style");
+    // console.log(JSON.stringify(style, null, ' '));
+    // console.log("--------------------");
+    if (!style.layers || !Array.isArray(style.layers) || !style.layers.length) {
+        console.log("Style has no layer definitions");
+        return {}; //empty styles
+    }
+    /** @type {?} */
+    let result = {};
+    style.layers.forEach(layer => {
+        result[layer.id] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
+    });
+    return result;
+}
+const ɵ0$7 = function (layerStyle) {
+    /** *
+     *
+      @type {?} */
+    let parseValue = function (value, fallback) {
+        if (value && Array.isArray(value) && value.length) {
+            return new Expression(value);
+        }
+        else if (value !== null && typeof (value) !== 'undefined')
+            return value;
+        else
+            return fallback || null;
+    };
+    /** @type {?} */
+    let layerPaint = layerStyle.paint;
+    /** @type {?} */
+    let lineWidth = parseValue(layerPaint['line-width'], 1);
+    /** @type {?} */
+    let opacity = parseValue(layerPaint['line-opacity'], 1.0);
+    /** @type {?} */
+    let color = parseValue(layerPaint['line-color'] || layerPaint['fill-outline-color'] || layerPaint['fill-color'], '#000');
+    /** @type {?} */
+    let fillOpacity = parseValue(layerPaint['fill-opacity'] || layerPaint['background-opacity'], 1.0);
+    /** @type {?} */
+    let fillColor = parseValue(layerPaint['fill-color'] || layerPaint['background-color'], '#000');
+    /** @type {?} */
+    let style = {
+        color: color,
+        //stroke color
+        opacity: opacity,
+        //stroke opacity
+        weight: lineWidth,
+        //stroke size
+        fillOpacity: fillOpacity,
+        //fill opacity
+        fillColor: fillColor //fill color
+    };
+    return function (properties, zoom, geomType) {
+        /** @type {?} */
+        let result = {};
+        Object.keys(style).forEach(key => {
+            /** @type {?} */
+            let styleVal = style[key];
+            if (styleVal && typeof (styleVal.evaluate) !== 'undefined')
+                result[key] = styleVal.evaluate(properties, zoom, geomType);
+            else
+                result[key] = styleVal;
+        });
+        return result;
+    };
+};
+/** *
+ * \@param layer MapBox Style Spec Layer definition
+ * \@return Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
+  @type {?} */
+var styleFunctionFactory = (ɵ0$7);
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
+/** @type {?} */
+const STYLE_CONCEPT = {
+    "id": "78ad3ecc883de444c8a0684087a61753",
+    "uri": "http://www.geoplatform.gov/def/OnlineFunction/styling",
+    "type": "skos:Concept",
+    "label": "styling"
+};
+/** @type {?} */
+const DEFAULT_STYLE_CONCEPT = {
+    "id": "53983c42978cd510a5f844ec0a0c6c2b",
+    "uri": "http://www.geoplatform.gov/def/OnlineFunction/default_styling",
+    "type": "skos:Concept",
+    "label": "default styling"
+};
+/**
+ * @param {?} layer
+ * @return {?}
+ */
+function mapBoxVectorTileLayer(layer) {
+    /** @type {?} */
+    let href = layer.href;
+    if (!href || href.indexOf(".pbf") < 0) {
+        console.log("LayerFactory - Layer does not define an Access URL");
+        return null; //missing URL
+    }
+    /** @type {?} */
+    const Leaflet = /** @type {?} */ (L);
+    //if Leaflet vector grid plugin is not installed, can't render VT Layers
+    if (typeof (Leaflet.vectorGrid) === 'undefined' &&
+        typeof (Leaflet.vectorGrid.protobuf) === 'undefined') {
+        console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
+        return null;
+    }
+    /** @type {?} */
+    let opts = {
+        rendererFactory: (/** @type {?} */ (canvas)).tile
+    };
+    if (Config.leafletPane)
+        opts.pane = Config.leafletPane;
+    /** @type {?} */
+    let result = Leaflet.vectorGrid.protobuf(href, opts);
+    /** @type {?} */
+    let style = null;
+    /** @type {?} */
+    let styles = (layer.related || []).map(rel => {
+        if (!rel.role)
+            return false;
+        if (rel.role.uri === DEFAULT_STYLE_CONCEPT.uri) {
+            style = rel;
+            return false;
+        }
+        return rel.role.uri === STYLE_CONCEPT.uri;
+    });
+    style = style || (styles.length ? styles[0] : null);
+    if (style) {
+        applyVectorTileStyle(layer, result, style);
+    }
+    return result;
+}
+/**
+ * @param {?} layer GeoPlatform Layer object
+ * @param {?} leafletLayer GridLayer instance representing the GP Layer object specified
+ * @param {?} styleResource GP Auxillary Resource object
+ * @return {?}
+ */
+function applyVectorTileStyle(layer, leafletLayer, styleResource) {
+    if (!leafletLayer.hasOwnProperty('options')) {
+        console.log("Warn: Could not apply style to layer; layer is not a VectorGrid instance");
+        return;
+    }
+    //fetch clob definition of style to use...
+    fetchStyleDefinition(layer.id, styleResource)
+        .then((styleDef) => {
+        /** @type {?} */
+        let layerInst = (/** @type {?} */ (leafletLayer));
+        layerInst.options.vectorTileLayerStyles = parseMapBoxStyle(styleDef);
+        layerInst.redraw();
+    })
+        .catch(e => {
+        console.log("An error occurred fetching the style definition for layer '" +
+            layer.label + "'. " + e.message + ". Using default Leaflet style.");
+    });
+}
+/**
+ * @param {?} layerId string identifier of GeoPlatform Layer object
+ * @param {?} resource - auxillary resource referencing style definition to fetch
+ * @return {?} Promise resolving style definition
+ */
+function fetchStyleDefinition(layerId, resource) {
+    if (!layerId || !resource || !resource.contentId) {
+        /** @type {?} */
+        let err = new Error("Unable to fetch style definition, one or more parameters were invalid");
+        return Promise.reject(err);
+    }
+    /** @type {?} */
+    let client = new XHRHttpClient();
+    /** @type {?} */
+    let request = client.createRequestOpts({
+        method: "GET",
+        url: Config.ualUrl + '/api/layers/' + layerId + '/styles/' + resource.contentId,
+        timeout: 5000,
+        json: true
+    });
+    return client.execute(request);
+    // return Promise.resolve(resource.content);   //TODO remove this
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ */
 /*
  * Extend base Leaflet layer class to ensure there's always a function
  * available for modifying zindex and opacity, even if nothing actually
@@ -2905,7 +3265,7 @@ class LayerFactory {
      */
     getStyleResolver() {
         if (!this.service || typeof (this.service.style) === 'undefined') {
-            this.service = new LayerService(Config["ualUrl"], new XHRHttpClient());
+            this.service = new LayerService(Config.ualUrl, new XHRHttpClient());
         }
         return styleResolverFactory(this.service);
     }
@@ -2941,10 +3301,10 @@ class LayerFactory {
         });
         // ESRI factory
         this.register((layer) => {
-            if (!layer || !layer["services"] || !layer["services"].length)
+            if (!layer || !layer.services || !layer.services.length)
                 return null;
             /** @type {?} */
-            let service = layer["services"][0];
+            let service = layer.services[0];
             /** @type {?} */
             let url = service.href;
             /** @type {?} */
@@ -2974,13 +3334,13 @@ class LayerFactory {
                     format: format || "png32"
                 });
                 /** @type {?} */
-                let supportedCrs = layer["crs"] || [];
+                let supportedCrs = layer.crs || [];
                 if (supportedCrs && supportedCrs.length > 0 && ~supportedCrs.indexOf("ESPG:3857")) {
                     console.log("Layer '" + layer.label + "' does not support " +
                         "EPSG:3857 Spherical Mercator projection and may not render appropriately or at all.");
                 }
-                if (Config["leafletPane"])
-                    opts.pane = Config["leafletPane"];
+                if (Config.leafletPane)
+                    opts.pane = Config.leafletPane;
                 return new EsriTileLayer(url, opts);
             }
             else if (types.ESRI_FEATURE_SERVER &&
@@ -2994,25 +3354,25 @@ class LayerFactory {
                 types.ESRI_TILE_SERVER.uri === typeUri) {
                 checkUrl(url);
                 opts = { url: url, useCors: true };
-                if (Config["leafletPane"])
-                    opts.pane = Config["leafletPane"];
+                if (Config.leafletPane)
+                    opts.pane = Config.leafletPane;
                 return tiledMapLayer(opts);
             }
             else if (types.ESRI_IMAGE_SERVER &&
                 types.ESRI_IMAGE_SERVER.uri === typeUri) {
                 opts = { url: url, useCors: true };
-                if (Config["leafletPane"])
-                    opts.pane = Config["leafletPane"];
+                if (Config.leafletPane)
+                    opts.pane = Config.leafletPane;
                 return imageMapLayer(opts);
             }
             return null;
         });
         // OGC factory
         this.register((layer) => {
-            if (!layer || !layer["services"] || !layer["services"].length)
+            if (!layer || !layer.services || !layer.services.length)
                 return null;
             /** @type {?} */
-            let service = layer["services"][0];
+            let service = layer.services[0];
             /** @type {?} */
             let svcType = service.serviceType;
             /** @type {?} */
@@ -3029,10 +3389,10 @@ class LayerFactory {
             return null;
         });
         this.register((layer) => {
-            if (!layer || !layer["services"] || !layer["services"].length)
+            if (!layer || !layer.services || !layer.services.length)
                 return null;
             /** @type {?} */
-            let service = layer["services"][0];
+            let service = layer.services[0];
             /** @type {?} */
             let svcType = service.serviceType;
             /** @type {?} */
@@ -3053,27 +3413,28 @@ class LayerFactory {
                 //not tagged as VT layer
                 return null;
             }
-            /** @type {?} */
-            let href = layer.href;
-            if (!href || href.indexOf(".pbf") < 0) {
-                console.log("LayerFactory - Layer does not define an Access URL");
-                return null; //missing URL
-            }
-            /** @type {?} */
-            const Leaflet = /** @type {?} */ (L);
-            //if Leaflet vector grid plugin is not installed, can't render VT Layers
-            if (typeof (Leaflet.vectorGrid) === 'undefined' &&
-                typeof (Leaflet.vectorGrid.protobuf) === 'undefined') {
-                console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
-                return null;
-            }
-            /** @type {?} */
-            var opts = {
-                rendererFactory: (/** @type {?} */ (canvas)).tile
-            };
-            if (Config["leafletPane"])
-                opts.pane = Config["leafletPane"];
-            return Leaflet.vectorGrid.protobuf(href, opts);
+            return mapBoxVectorTileLayer(layer);
+            // let href = layer.href;
+            // if(!href || href.indexOf(".pbf") < 0) {
+            //     console.log("LayerFactory - Layer does not define an Access URL");
+            //     return null;  //missing URL
+            // }
+            //
+            // const Leaflet = L as any;
+            //
+            // //if Leaflet vector grid plugin is not installed, can't render VT Layers
+            // if( typeof(Leaflet.vectorGrid) === 'undefined' &&
+            //     typeof(Leaflet.vectorGrid.protobuf) === 'undefined') {
+            //     console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
+            //     return null;
+            // }
+            //
+            // let opts : any = { rendererFactory: ( L.canvas as any ).tile };
+            // if( (layer as any).styles ) {
+            //     opts.vectorTileLayerStyles = (layer as any).styles;
+            // }
+            // if(Config.leafletPane) opts.pane = Config.leafletPane;
+            // return Leaflet.vectorGrid.protobuf(href, opts);
         });
     }
 }
@@ -3084,10 +3445,10 @@ var LayerFactory$1 = new LayerFactory();
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /** @type {?} */
-const jQuery$3 = jquery;
+const jQuery$2 = jquery;
 /** @type {?} */
 var EsriFeatureLayer = FeatureLayer;
-const ɵ0$7 = function (feature, latlng) {
+const ɵ0$8 = function (feature, latlng) {
     /** @type {?} */
     var style = feature && feature.properties ? feature.properties.style : null;
     if (!style && typeof this.options.style === 'function') {
@@ -3117,8 +3478,8 @@ const ɵ0$7 = function (feature, latlng) {
         });
         /** @type {?} */
         let mopts = { icon: icon$$1 };
-        if (Config["leafletPane"])
-            (/** @type {?} */ (mopts)).pane = Config["leafletPane"];
+        if (Config.leafletPane)
+            (/** @type {?} */ (mopts)).pane = Config.leafletPane;
         marker$$1 = marker(latlng, mopts);
     }
     else {
@@ -3142,15 +3503,15 @@ const ɵ0$7 = function (feature, latlng) {
     layer.bindPopup(featurePopupTemplate(feature));
 }, ɵ2$5 = function (options) {
     options = options || {};
-    if (Config["leafletPane"])
-        options.pane = Config["leafletPane"];
+    if (Config.leafletPane)
+        options.pane = Config.leafletPane;
     /** @type {?} */
     let getGPStyle = () => { return this._gpStyle; };
     options.style = options.style || getGPStyle();
     /** @type {?} */
     let svgOpts = {};
-    if (Config["leafletPane"])
-        (/** @type {?} */ (svgOpts)).pane = Config["leafletPane"];
+    if (Config.leafletPane)
+        (/** @type {?} */ (svgOpts)).pane = Config.leafletPane;
     /** @type {?} */
     var renderer = (SVG && svg(svgOpts)) || (Canvas && canvas());
     options.renderer = renderer;
@@ -3231,7 +3592,7 @@ const ɵ0$7 = function (feature, latlng) {
             }
             if (style.shape) {
                 /** @type {?} */
-                var obj = jQuery$3.extend({}, style);
+                var obj = jQuery$2.extend({}, style);
                 obj.style = style;
                 this._gpStyle = style;
                 //setStyle on Cluster.FeatureLayer doesn't appear to work consistently for
@@ -3260,7 +3621,7 @@ var FeatureLayer$2 = EsriFeatureLayer.extend({
          * @param {L.LatLng} latlng
          * @return {L.Marker}
          */
-    pointToLayerFn: ɵ0$7,
+    pointToLayerFn: ɵ0$8,
     /**
          * for all non-point features, bind a popup
          * @param {object} feature - GeoJSON feature
@@ -3279,7 +3640,7 @@ var FeatureLayer$2 = EsriFeatureLayer.extend({
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /** @type {?} */
-const jQuery$4 = jquery;
+const jQuery$3 = jquery;
 class Listener {
     constructor() {
         //listeners to be unregistered upon destroy
@@ -3462,7 +3823,7 @@ class MapInstance extends Listener {
      */
     getService(type) {
         if (!this.svcCache[type])
-            this.svcCache[type] = this.serviceFactory(type, Config["ualUrl"], this.httpClient);
+            this.svcCache[type] = this.serviceFactory(type, Config.ualUrl, this.httpClient);
         return this.svcCache[type];
     }
     /**
@@ -4056,7 +4417,7 @@ class MapInstance extends Listener {
         }
         else if ((/** @type {?} */ (layerInstance))._container) {
             /** @type {?} */
-            let el = jQuery$4((/** @type {?} */ (layerInstance))._container);
+            let el = jQuery$3((/** @type {?} */ (layerInstance))._container);
             // if(visible) el.removeClass("invisible");
             // else el.addClass('invisible');
             el.css({ 'display': visible ? '' : 'none' });
@@ -4128,11 +4489,11 @@ class MapInstance extends Listener {
             if (typeof (layerInstance.enableGetFeatureInfo) !== 'undefined') {
                 if (layerInstance.isGetFeatureInfoEnabled()) {
                     layerInstance.disableGetFeatureInfo();
-                    jQuery$4((/** @type {?} */ (this._mapInstance))._container).removeClass('selectable-cursor');
+                    jQuery$3((/** @type {?} */ (this._mapInstance))._container).removeClass('selectable-cursor');
                 }
                 else {
                     layerInstance.enableGetFeatureInfo();
-                    jQuery$4((/** @type {?} */ (this._mapInstance))._container).addClass('selectable-cursor');
+                    jQuery$3((/** @type {?} */ (this._mapInstance))._container).addClass('selectable-cursor');
                 }
             }
         }
@@ -4182,7 +4543,7 @@ class MapInstance extends Listener {
             this._featureLayer = featureGroup().addTo(this._mapInstance);
         }
         /** @type {?} */
-        var opts = jQuery$4.extend({}, this._geoJsonLayerOpts);
+        var opts = jQuery$3.extend({}, this._geoJsonLayerOpts);
         geoJSON(json, opts).eachLayer((l) => this.addFeatureLayer(l));
         if (typeof (fireEvent) === 'undefined' || fireEvent === true)
             this.touch('features:changed');
@@ -4403,7 +4764,7 @@ class MapInstance extends Listener {
                 if (!this._mapId)
                     this._mapId = result.id;
                 this._mapDef = result;
-                this._defaultExtent = result["extent"];
+                this._defaultExtent = result.extent;
                 this.clean();
                 resolve(result);
             })
@@ -4449,7 +4810,7 @@ class MapInstance extends Listener {
                         mapId + "'): " + (/** @type {?} */ (map)).message);
                 }
                 //loading a map by its ID, so we need to increment it's view count
-                if ('development' !== Config["env"]) {
+                if ('development' !== Config.env) {
                     setTimeout((map) => {
                         /** @type {?} */
                         let views = map.statistics ? (map.statistics.numViews || 0) : 0;
@@ -4457,7 +4818,7 @@ class MapInstance extends Listener {
                         let patch = [{ op: 'replace', path: '/statistics/numViews', value: views + 1 }];
                         this.getService(ItemTypes.MAP).patch(map.id, patch)
                             // this.mapService.patch(map.id, patch)
-                            .then(updated => { map.statistics = updated["statistics"]; })
+                            .then(updated => { map.statistics = updated.statistics; })
                             .catch(e => {
                             console.log("MapInstance.saveMap() - Error updating view " +
                                 "count for map ('" + mapId + "'): " + e);
@@ -4669,6 +5030,6 @@ Polyfills();
  * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 
-export { loadingControl as LoadingControl, measureControl as MeasureControl, positionControl as MousePositionControl, FeatureEditor, DefaultBaseLayer, LayerFactory$1 as LayerFactory, OSMLayerFactory, BaseClusteredFeatureLayer, ClusteredFeatureLayer, clusteredFeatures, geoJsonFeed, FeatureLayer$2 as FeatureLayer, WMS, wms, WMST, wmst, WMTS, wmts, EsriTileLayer as ESRITileLayer, OSM, MapInstance, factory as MapFactory, types as ServiceTypes, featurePopupTemplate as PopupTemplate, featureStyleResolver as StyleResolver };
+export { loadingControl as LoadingControl, measureControl as MeasureControl, positionControl as MousePositionControl, FeatureEditor, DefaultBaseLayer, LayerFactory$1 as LayerFactory, OSMLayerFactory, BaseClusteredFeatureLayer, ClusteredFeatureLayer, clusteredFeatures, geoJsonFeed, FeatureLayer$2 as FeatureLayer, WMS, wms, WMST, wmst, WMTS, wmts, EsriTileLayer as ESRITileLayer, OSM, mapBoxVectorTileLayer, MapInstance, factory as MapFactory, types as ServiceTypes, featurePopupTemplate as PopupTemplate, featureStyleResolver as StyleResolver, parseMapBoxStyle };
 
 //# sourceMappingURL=geoplatform-mapcore.js.map
