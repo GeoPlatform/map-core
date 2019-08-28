@@ -3003,10 +3003,14 @@ This software has been approved for release by the U.S. Department of the Interi
      * @return {?}
      */
     function OSMLayerFactory() {
-        return new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        /** @type {?} */
+        var opts = {
             minZoom: 1, maxZoom: 19,
             attribution: 'Map data (c) <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
-        });
+        };
+        if (client.Config.leafletPane)
+            opts.pane = client.Config.leafletPane;
+        return new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', opts);
     }
 
     /**

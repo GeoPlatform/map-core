@@ -1,7 +1,7 @@
 import { Draw } from 'leaflet-draw';
 import 'leaflet.markercluster';
 import 'leaflet-timedimension/dist/leaflet.timedimension.src';
-import { FeatureManager, tiledMapLayer, imageMapLayer, FeatureLayer } from 'esri-leaflet';
+import { FeatureManager, FeatureLayer, tiledMapLayer, imageMapLayer } from 'esri-leaflet';
 import * as jquery from 'jquery';
 import * as L from 'leaflet';
 import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Layer, Point, LatLng, TimeDimension, featureGroup, geoJSON, LayerGroup } from 'leaflet';
@@ -2814,10 +2814,14 @@ if ((/** @type {?} */ (window)).L) {
  * @return {?}
  */
 function OSMLayerFactory() {
-    return new TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    /** @type {?} */
+    let opts = {
         minZoom: 1, maxZoom: 19,
         attribution: 'Map data (c) <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
-    });
+    };
+    if (Config.leafletPane)
+        opts.pane = Config.leafletPane;
+    return new TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', opts);
 }
 
 /**
