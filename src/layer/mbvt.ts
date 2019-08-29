@@ -51,7 +51,7 @@ function mapBoxVectorTileLayer( layer : GeoPlatformLayer ) : LeafletLayer {
 
     //If the layer object defines styles to use, resolve them and apply the style(s)
     let style = null;
-    let styles = (layer.related || []).map( rel => {
+    let styles = (layer.related || []).filter( rel => {
         if(!rel.role) return false;
         if(rel.role.uri === DEFAULT_STYLE_CONCEPT.uri) {
             style = rel;

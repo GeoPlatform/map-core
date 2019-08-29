@@ -1252,7 +1252,7 @@ export default class MapInstance extends Listener {
                         // this.mapService.patch(map.id, patch)
                         .then( updated => { map.statistics = updated.statistics; })
                         .catch( e => {
-                            console.log("MapInstance.saveMap() - Error updating view " +
+                            console.log("MapInstance.loadMap() - Error updating view " +
                                 "count for map ('" + mapId + "'): " + e);
                         });
                     }, 1000, map);

@@ -3115,7 +3115,7 @@ function mapBoxVectorTileLayer(layer) {
     /** @type {?} */
     let style = null;
     /** @type {?} */
-    let styles = (layer.related || []).map(rel => {
+    let styles = (layer.related || []).filter(rel => {
         if (!rel.role)
             return false;
         if (rel.role.uri === DEFAULT_STYLE_CONCEPT.uri) {
@@ -4824,7 +4824,7 @@ class MapInstance extends Listener {
                             // this.mapService.patch(map.id, patch)
                             .then(updated => { map.statistics = updated.statistics; })
                             .catch(e => {
-                            console.log("MapInstance.saveMap() - Error updating view " +
+                            console.log("MapInstance.loadMap() - Error updating view " +
                                 "count for map ('" + mapId + "'): " + e);
                         });
                     }, 1000, map);

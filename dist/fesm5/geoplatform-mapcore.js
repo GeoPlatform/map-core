@@ -3344,7 +3344,7 @@ function mapBoxVectorTileLayer(layer) {
     /** @type {?} */
     var style = null;
     /** @type {?} */
-    var styles = (layer.related || []).map(function (rel) {
+    var styles = (layer.related || []).filter(function (rel) {
         if (!rel.role)
             return false;
         if (rel.role.uri === DEFAULT_STYLE_CONCEPT.uri) {
@@ -5622,7 +5622,7 @@ var MapInstance = /** @class */ (function (_super) {
                             // this.mapService.patch(map.id, patch)
                             .then(function (updated) { map.statistics = updated.statistics; })
                             .catch(function (e) {
-                            console.log("MapInstance.saveMap() - Error updating view " +
+                            console.log("MapInstance.loadMap() - Error updating view " +
                                 "count for map ('" + mapId + "'): " + e);
                         });
                     }, 1000, map);
