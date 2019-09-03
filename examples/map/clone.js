@@ -1,6 +1,6 @@
 
 //configure geoplatform env variables needed to interact with the API
-GeoPlatformClient.Config.configure({
+geoplatform.client.Config.configure({
     ualUrl : 'https://ual.geoplatform.gov'
 });
 
@@ -33,7 +33,7 @@ mapInstance.setMap(leafletMap);
 
 //---------------------------------------------------------
 //Necessary to save a map using authorized endpoints in UAL
-let httpClient = new GeoPlatformClient.JQueryHttpClient();
+let httpClient = new geoplatform.client.JQueryHttpClient();
 httpClient.setAuthToken(function() {
     return null;    //SHOULD return valid auth token
 });
@@ -42,7 +42,7 @@ mapInstance.setHttpClient(httpClient);
 
 
 //get map service used by map instance
-let mapService = mapInstance.getService(GeoPlatformClient.ItemTypes.MAP);
+let mapService = mapInstance.getService(geoplatform.client.ItemTypes.MAP);
 mapService.search().then( response => {
     if(response.results.length) {
 

@@ -1,0 +1,394 @@
+{
+"_score": 1,
+"_modified": 1543268653156,
+"_versionId": 3,
+"_status": "current",
+"type": "Layer",
+"id": "5122a8c9a8f47fea06559a2a0e14248d",
+"uri": "http://www.geoplatform.gov/id/layer/1bc31048521dcfbbd9a2fd37c0bcf736",
+"modified": 1543268509935,
+"label": "Land Domain Index RUCC4 by County, 2000-2005",
+"title": "Land Domain Index RUCC4 by County, 2000-2005",
+"description": "Land Domain Index in RUCC4. This map layer is based on data from the Environmental Protection Agency’s Environmental Quality Index (EQI) project. The US Environmental Protection Agency's (EPA) National Health and Environmental Effects Research Laboratory (NHEERL) in the Environmental Public Health Division (EPHD) is currently engaged in research aimed at developing a measure that estimates overall environmental quality at the county level for the United States. A better way to calculate overall environmental quality is needed for researchers who study the environment and its effects on human health. The EQI was developed for all counties in the United States for the period 2000-2005. The EQI represents five areas (called “domains”) of the environment: [1] air, [2] water, [3] land, [4] built, and [5] sociodemographic. In addition to the EQI, there is an index for each of the five domains. The EQI accounts for environmental differences between urban and rural areas by grouping counties into one of four rural-urban continuum codes (RUCCs), ranging from highly urban to rural-isolated areas. NOTE: low EQI scores represent better environmental quality while higher EQI scores represent poorer environmental quality. For more information on the development of the EQI, there is an overview report as well as a more detailed technical report at https://edg.epa.gov/data/Public/ORD/NHEERL/EQI\n\nThe four RUCC groups were used to account for differences in rural versus urban areas. There were originally nine RUCC codes. Those nine were combined to make four RUCCs for the EQI: (1) RUCC1 represents metropolitan-urbanized = codes 1+2+3; (2) RUCC2 nonmetropolitan-urbanized = 4+5; (3) RUCC3 less urbanized = 6+7; and (4) RUCC4 thinly populated (rural) =8+9",
+"servicedBy": [
+"459c1a7e8fc487a0c917de27a80f70a7"
+],
+"services": [
+{
+"_score": 0.0016515281,
+"_modified": 1557489786216,
+"_versionId": 3,
+"_status": "current",
+"type": "regp:Service",
+"id": "459c1a7e8fc487a0c917de27a80f70a7",
+"uri": "http://www.geoplatform.gov/id/service/fa4edd82ef08e513f20609ad2a6f0ec2",
+"modified": 1553798537664,
+"label": "ORD/EnvironmentalQualityIndex (MapServer)",
+"title": "ORD/EnvironmentalQualityIndex (MapServer)",
+"description": "serviceDescription: <a href=''>Full Metadata</a> The US Environmental Protection Agency's (EPA) National Health and Environmental Effects Research Laboratory (NHEERL) in the Environmental Public Health Division (EPHD) is currently engaged in research aimed at developing a measure that estimates overall environmental quality at the county level for the United States. This work is being conducted as an effort to learn more about how various environmental factors simultaneously contribute to health disparities in low-income and minority populations, and to better estimate the total environmental and social context to which humans are exposed. This dataset contains the finalized Environmental Quality Index (EQI), and an index for each of the associated domains (air, water, land, built, and sociodemographic environment). Indices are at the county level for all counties in the United States. More information about the EQI can be found at <a href=''>https://edg.epa.gov/data/Public/ORD/NHEERL/EQI</a>.\n\n1) The data used to create the index attempted to balance quality measurement with geographic breadth of coverage -  index does reasonable job estimating the general environment, but less useful for estimating specific environments. 2) Not all relevant environmental exposures are necessarily  included in the index. Data inclusion is dependent on data collection and coverage; if relevant data are not being collected, the exposure will not be captured in the EQI. 3) In areas where little data collection occurs the data may be over representing the environmental profile of those areas. For example, a county that contains a national park without data collected and a town with data collection will be solely represented by the town area, though that may be inaccurate for the entire county. 4) Focused solely on the outside environment, which may not be the most relevant exposure in relation to human health and disease. 5) Population-level analyses offer little predictive utility for individual-level risk. Therefore, while the index may be useful at identifying less healthy environments, it will not be useful for predicting adverse outcomes. \n\nAccess constraints: None. Use constraints: None. Please check sources, scale, accuracy, currency and other available information. Please confirm that you are using the most recent copy of both data and metadata. Acknowledgement of the EPA would be appreciated.\n\ndescription: <A href=\"https://edg.epa.gov/metadata/catalog/search/resource/details.page?uuid=%7B53AE6A65-E2C4-4B84-B012-66BC473F5C04%7D\">Full Metadata</A> The US Environmental Protection Agency's (EPA) National Health and Environmental Effects Research Laboratory (NHEERL) in the Environmental Public Health Division (EPHD) is currently engaged in research aimed at developing a measure that estimates overall environmental quality at the county level for the United States. This work is being conducted as an effort to learn more about how various environmental factors simultaneously contribute to health disparities in low-income and minority populations, and to better estimate the total environmental and social context to which humans are exposed. This dataset contains the finalized Environmental Quality Index (EQI), and an index for each of the associated domains (air, water, land, built, and sociodemographic environment). Indices are at the county level for all counties in the United States. More information about the EQI can be found at <A href=\"https://edg.epa.gov/data/Public/ORD/NHEERL/EQI\">https://edg.epa.gov/data/Public/ORD/NHEERL/EQI</A>.\n\n1) The data used to create the index attempted to balance quality measurement with geographic breadth of coverage -  index does reasonable job estimating the general environment, but less useful for estimating specific environments. 2) Not all relevant environmental exposures are necessarily  included in the index. Data inclusion is dependent on data collection and coverage; if relevant data are not being collected, the exposure will not be captured in the EQI. 3) In areas where little data collection occurs the data may be over representing the environmental profile of those areas. For example, a county that contains a national park without data collected and a town with data collection will be solely represented by the town area, though that may be inaccurate for the entire county. 4) Focused solely on the outside environment, which may not be the most relevant exposure in relation to human health and disease. 5) Population-level analyses offer little predictive utility for individual-level risk. Therefore, while the index may be useful at identifying less healthy environments, it will not be useful for predicting adverse outcomes. \n\nAccess constraints: None. Use constraints: None. Please check sources, scale, accuracy, currency and other available information. Please confirm that you are using the most recent copy of both data and metadata. Acknowledgement of the EPA would be appreciated.\ndocumentInfo.Comments: This map service is based on data from the Environmental Protection Agency’s Environmental Quality Index (EQI) project. The US Environmental Protection Agency's (EPA) National Health and Environmental Effects Research Laboratory (NHEERL) in the Environmental Public Health Division (EPHD) is currently engaged in research aimed at developing a measure that estimates overall environmental quality at the county level for the United States. A better way to calculate overall environmental quality is needed for researchers who study the environment and its effects on human health. The EQI was developed for all counties in the United States for the period 2000-2005. The EQI represents five areas (called “domains”) of the environment: [1] air, [2] water, [3] land, [4] built, and [5] sociodemographic. In addition to the EQI, there is an index for each of the five domains. The EQI accounts for environmental differences between urban and rural areas by grouping counties into one of four rural-urban continuum codes (RUCCs), ranging from highly urban to rural-isolated areas. NOTE: low EQI scores represent better environmental quality while higher EQI scores represent poorer environmental quality. For more information on the development of the EQI, there is an overview report as well as a more detailed technical report at https://edg.epa.gov/data/Public/ORD/NHEERL/EQI\n\nAccess constraints: None. Use constraints: None. Please check sources, scale, accuracy, currency and other available information. Please confirm that you are using the most recent copy of both data and metadata. Acknowledgement of the EPA would be appreciated.\ndocumentInfo.Subject: This map service is based on data from the Environmental Protection Agency’s Environmental Quality Index (EQI) project.\ndocumentInfo.Title: USEPA Environmental Quality Index (EQI) and Associated Domain Indices by County for the United States\n",
+"status": "submitted",
+"statistics": {
+"timestamp": 1557489617801,
+"online": false,
+"compliant": false,
+"days_online": 0,
+"days_in_service": 0,
+"percent_uptime": 0,
+"percent_uptime_7": 0,
+"speed": 0,
+"score": 0,
+"average_speed": 0,
+"average_speed_7": 0,
+"reliability": 0,
+"trend_7": 0
+},
+"temporal": {},
+"operatesOn": [
+"dc03dcb75344dda806baacb7d5bcab56",
+"2ee51ebebad2f1963e0cdc24078e83e0",
+"323231d872cf6d2b19659454e83b5174",
+"5e7bc603bb18a0e70fdbeb54dd9d6209",
+"42986b75ff647f98e15cf44b637cbecc",
+"beb8c39243c0fd3699931552b43918fa",
+"bc3d4924066be61a9dfc7a9399614f54",
+"e7a23fd2fcb53fd83068c4f826683588",
+"96850dd75c2b25881a487beb18645930",
+"0c159381854a2e9d932b1113f12cd728",
+"ecb7b1e6513ab899eafe377cef5a5aa1",
+"1971aebcb0deceb699a8481e38f4a893",
+"1502dac26e4da125ff9b03214bfa12b3",
+"033422b3855370998581a24fd34469d8",
+"31d04ac031fbe239f5fff079cd9fc851",
+"dea6f6fd5da81241f5e31809780f7159",
+"b628f3e0885a1d81e8f2634566ff706d",
+"6741bbcd6931e6892b7c6df424444b97",
+"cebf274bb7c6e7fbf288709c7372e090",
+"83405d0ab456910a77a26e0e86390690",
+"c2f34f6aa0df7cc7523d6849bdf29e53",
+"5122a8c9a8f47fea06559a2a0e14248d",
+"ceda1fcf21be204e2b006f6cd813edb6",
+"202506d09fd0e78a418259a8d3c061b0",
+"5fb11dd7f31d762048b5f8814c58c3fc",
+"81768c8b6fd6351c35d47d8b216e412f",
+"ba0320ce9f8f8e1c9ccbf1a2feb87243",
+"862b3ad781f20069bd3a5a3204bc49b6",
+"0b65e0df1a7788514bf913f8cbfcd830",
+"25f51b833628c8b65a2fd4c9a91973b9",
+"05c305908e367a85a27a0474ef4bfe8f",
+"557d7ce2b82cfad84701993f9636da91",
+"b52ff3cc1c97989b47bfb7cb86f8c205",
+"37090abbbd65eda8c71cbc7f1a9dea4c",
+"588a4cf2965e65fd334a2aec79d8dabf",
+"be31a46adbed9194c23b539d5cdb23bc",
+"93657b0d8e0b9b7c9996df9f3ff5a495"
+],
+"_analyzed": false,
+"alternateTitles": [
+"USEPA Environmental Quality Index (EQI) and Associated Domain Indices by County for the United States"
+],
+"created": 1543268509161,
+"createdBy": "Resilience Community Curator A",
+"extent": {
+"minx": -178.2278219996928,
+"maxx": -66.95000501969898,
+"miny": 19.029081916862523,
+"maxy": 71.50644533624468
+},
+"href": "https://gispub.epa.gov/arcgis/rest/services/ORD/EnvironmentalQualityIndex/MapServer",
+"identifiers": [
+"ngp:85335b5f-7123-48a6-b71a-9bdad01b0465"
+],
+"keywords": [
+"EQI ORD-NHEERL USEPA"
+],
+"lastModifiedBy": "Resilience Community Curator A",
+"visibility": "public",
+"serviceType": {
+"id": "370cf6ca5d91c07b63329b8384fe76c7",
+"uri": "http://www.geoplatform.gov/spec/esri-map-rest",
+"type": "dct:Standard",
+"title": "Esri REST Map Service",
+"description": "Esri ArcGIS Map Server REST API",
+"label": "Esri REST Map Service",
+"resourceType": [
+"ServiceType"
+],
+"_created": 1553797726679,
+"modified": 1553797726679,
+"_modified": 1553797726679,
+"_status": "current",
+"_createdBy": "gp-admin",
+"_lastModifiedBy": "gp-admin",
+"_versionId": 1
+}
+}
+],
+"statistics": {
+"timestamp": 1557489617801,
+"online": false,
+"compliant": false,
+"days_online": 0,
+"days_in_service": 0,
+"percent_uptime": 0,
+"percent_uptime_7": 0,
+"speed": 0,
+"score": 0,
+"average_speed": 0,
+"average_speed_7": 0,
+"reliability": 0,
+"trend_7": 0
+},
+"layerName": "25",
+"layerType": "RasterLayer",
+"legend": {
+"title": "Land Domain Index RUCC4 by County, 2000-2005",
+"description": "Land Domain Index RUCC4 by County, 2000-2005",
+"items": [
+{
+"label": "0 - 5th Percentile",
+"description": "0 - 5th Percentile",
+"url": "https://gispub.epa.gov/arcgis/rest/services/ORD/EnvironmentalQualityIndex/MapServer/legend?f=json",
+"contentData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADFJREFUOI1jYaAyYKGZgYf+H/pPiUF2jHaMKAZSC4waOGrgqIGjBtLZQFh5RjUDqQUA2sMEz/ldjeMAAAAASUVORK5CYII=",
+"mediaType": "image/png",
+"width": 20,
+"height": 20,
+"values": [
+"-1.51178"
+]
+},
+{
+"label": "5th - 20th Percentile",
+"description": "5th - 20th Percentile",
+"url": "https://gispub.epa.gov/arcgis/rest/services/ORD/EnvironmentalQualityIndex/MapServer/legend?f=json",
+"contentData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADFJREFUOI1jYaAyYKGZgXOezvpPiUEp0mmMKAZSC4waOGrgqIGjBtLZQFh5RjUDqQUA/oEFN1HytKcAAAAASUVORK5CYII=",
+"mediaType": "image/png",
+"width": 20,
+"height": 20,
+"values": [
+"-0.43384115"
+]
+},
+{
+"label": "20th - 40th Percentile",
+"description": "20th - 40th Percentile",
+"url": "https://gispub.epa.gov/arcgis/rest/services/ORD/EnvironmentalQualityIndex/MapServer/legend?f=json",
+"contentData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADFJREFUOI1jYaAyYKGZgWVniv9TYlCXSS8jioHUAqMGjho4auCogXQ2EFaeUc1AagEAIZ8FnS6yRH4AAAAASUVORK5CYII=",
+"mediaType": "image/png",
+"width": 20,
+"height": 20,
+"values": [
+"0.03912675"
+]
+},
+{
+"label": "40th - 60th Percentile",
+"description": "40th - 60th Percentile",
+"url": "https://gispub.epa.gov/arcgis/rest/services/ORD/EnvironmentalQualityIndex/MapServer/legend?f=json",
+"contentData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADFJREFUOI1jYaAyYKGZgaFbA/9TYtBq7/WMKAZSC4waOGrgqIGjBtLZQFh5RjUDqQUAQI4F9w3saJoAAAAASUVORK5CYII=",
+"mediaType": "image/png",
+"width": 20,
+"height": 20,
+"values": [
+"0.39606035"
+]
+},
+{
+"label": "60th - 80th Percentile",
+"description": "60th - 80th Percentile",
+"url": "https://gispub.epa.gov/arcgis/rest/services/ORD/EnvironmentalQualityIndex/MapServer/legend?f=json",
+"contentData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADFJREFUOI1jYaAyYKGZgQ4zrf5TYtCB9GOMKAZSC4waOGrgqIGjBtLZQFh5RjUDqQUAWUwGP+nqp3cAAAAASUVORK5CYII=",
+"mediaType": "image/png",
+"width": 20,
+"height": 20,
+"values": [
+"0.67185955"
+]
+},
+{
+"label": "80th - 95th Percentile",
+"description": "80th - 95th Percentile",
+"url": "https://gispub.epa.gov/arcgis/rest/services/ORD/EnvironmentalQualityIndex/MapServer/legend?f=json",
+"contentData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADFJREFUOI1jYaAyYKGZgXr1Wv8pMehS4zVGFAOpBUYNHDVw1MBRA+lsIKw8o5qB1AIAbe4Ge1miDyAAAAAASUVORK5CYII=",
+"mediaType": "image/png",
+"width": 20,
+"height": 20,
+"values": [
+"0.9236422"
+]
+},
+{
+"label": "95th - 100th Percentile",
+"description": "95th - 100th Percentile",
+"url": "https://gispub.epa.gov/arcgis/rest/services/ORD/EnvironmentalQualityIndex/MapServer/legend?f=json",
+"contentData": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADFJREFUOI1jYaAyYKGZgdLpIv8pMejpzDeMKAZSC4waOGrgqIGjBtLZQFh5RjUDqQUAhEMGvB3PnFIAAAAASUVORK5CYII=",
+"mediaType": "image/png",
+"width": 20,
+"height": 20,
+"values": [
+"1.553682"
+]
+}
+]
+},
+"parentLayer": {
+"_score": 1,
+"_modified": 1543268653190,
+"_versionId": 3,
+"_status": "current",
+"type": "Layer",
+"id": "ceda1fcf21be204e2b006f6cd813edb6",
+"uri": "http://www.geoplatform.gov/id/layer/3d9e34a7ae508a6c71e6addcc6309a05",
+"modified": 1543268651425,
+"label": "Land Domain Index Stratified by Rural Urban Continuum Codes by County, 2000-2005",
+"title": "Land Domain Index Stratified by Rural Urban Continuum Codes by County, 2000-2005",
+"description": "This map group of the Land Domain Index is based on data from the Environmental Protection Agency’s Environmental Quality Index (EQI) project. The US Environmental Protection Agency's (EPA) National Health and Environmental Effects Research Laboratory (NHEERL) in the Environmental Public Health Division (EPHD) is currently engaged in research aimed at developing a measure that estimates overall environmental quality at the county level for the United States. A better way to calculate overall environmental quality is needed for researchers who study the environment and its effects on human health. The EQI was developed for all counties in the United States for the period 2000-2005. The EQI represents five areas (called “domains”) of the environment: [1] air, [2] water, [3] land, [4] built, and [5] sociodemographic. In addition to the EQI, there is an index for each of the five domains. The EQI accounts for environmental differences between urban and rural areas by grouping counties into one of four rural-urban continuum codes (RUCCs), ranging from highly urban to rural-isolated areas. NOTE: low EQI scores represent better environmental quality while higher EQI scores represent poorer environmental quality. For more information on the development of the EQI, there is an overview report as well as a more detailed technical report at https://edg.epa.gov/data/Public/ORD/NHEERL/EQI\n\nThe four RUCC groups were used to account for differences in rural versus urban areas. There were originally nine RUCC codes. Those nine were combined to make four RUCCs for the EQI: (1) RUCC1 represents metropolitan-urbanized = codes 1+2+3; (2) RUCC2 nonmetropolitan-urbanized = 4+5; (3) RUCC3 less urbanized = 6+7; and (4) RUCC4 thinly populated (rural) =8+9",
+"servicedBy": [
+"459c1a7e8fc487a0c917de27a80f70a7"
+],
+"layerName": "21",
+"layerType": "RasterLayer",
+"subLayer_id": [
+"bc3d4924066be61a9dfc7a9399614f54",
+"2ee51ebebad2f1963e0cdc24078e83e0",
+"31d04ac031fbe239f5fff079cd9fc851",
+"5122a8c9a8f47fea06559a2a0e14248d"
+],
+"_analyzed": false,
+"created": 1543268509936,
+"createdBy": "Resilience Community Curator A",
+"extent": {
+"minx": -178.2278219996928,
+"maxx": -66.95000501969898,
+"miny": 19.029081916862523,
+"maxy": 71.50644533624468
+},
+"keywords": [
+"EQI ORD-NHEERL USEPA"
+],
+"lastModifiedBy": "Resilience Community Curator A",
+"minScale": 0,
+"maxScale": 0,
+"formats": [
+"PNG24",
+"JPG",
+"PNG32",
+"PS",
+"BMP",
+"GIF",
+"SVG",
+"PNG",
+"SVGZ",
+"TIFF",
+"PDF",
+"DIB",
+"EMF"
+]
+},
+"usedBy": [
+{
+"_score": 0.001549187,
+"id": "4eebc494059beab9fda54cb078927ddc",
+"uri": "http://www.geoplatform.gov/id/community/c3262ebffab78cac6b72a63ed8137c4f",
+"type": "Community",
+"label": "Resilience",
+"title": "Resilience",
+"status": "submitted",
+"statistics": {},
+"modified": 1553798537664,
+"_modified": 1553798537664,
+"landingPage": "https://communities.geoplatform.gov/resilience/",
+"_analyzed": true,
+"_status": "current",
+"_versionId": 2,
+"created": 1527169946056,
+"createdBy": "laraduffy",
+"lastModifiedBy": "Resilience Community Curator D",
+"related": [
+{
+"type": "AuxiliaryResource",
+"href": "https://www.data.gov/climate/",
+"label": "Data.gov/climate",
+"description": "Here you can find data related to climate change that can help inform and prepare America’s communities, businesses, and citizens."
+}
+],
+"resourceTypes": [
+"foaf:Group",
+"foaf:Agent",
+"Community"
+],
+"visibility": "public"
+}
+],
+"parentLayer_id": "ceda1fcf21be204e2b006f6cd813edb6",
+"_analyzed": false,
+"created": 1543268509935,
+"createdBy": "Resilience Community Curator A",
+"extent": {
+"minx": -178.2278219996928,
+"maxx": -66.95000501969898,
+"miny": 19.029081916862523,
+"maxy": 71.50644533624468
+},
+"keywords": [
+"EQI ORD-NHEERL USEPA"
+],
+"lastModifiedBy": "Resilience Community Curator A",
+"publishers": [
+{
+"_modified": 1543268509161,
+"id": "ceef73dd22be7568b09a82ae845ab202",
+"uri": "http://www.geoplatform.gov/id/organization/b64675219b8d504469c37dc048fa792d",
+"type": "org:Organization",
+"label": "EQI ORD-NHEERL USEPA",
+"name": "EQI ORD-NHEERL USEPA",
+"modified": 1543268509161,
+"_analyzed": false,
+"_status": "current",
+"_versionId": 1,
+"created": 1543268509161,
+"createdBy": "Resilience Community Curator A",
+"lastModifiedBy": "unknown",
+"resourceTypes": [
+"foaf:Agent",
+"org:Organization"
+]
+}
+],
+"themes": [
+{
+"_modified": 1541079328092,
+"id": "1473456c14c8d8fad888226ead372046",
+"uri": "http://www.geoplatform.gov/id/metadata-codelists/d41d8cd98f00b204e9800998ecf8427e/ef5d05428873e136d4dae5a1628aecc9",
+"type": "skos:Concept",
+"label": "Human Health",
+"prefLabel": "Human Health",
+"status": "submitted",
+"path": "http://www.geoplatform.gov/id/metadata-codelists/d41d8cd98f00b204e9800998ecf8427e/ef5d05428873e136d4dae5a1628aecc9",
+"modified": 1540404888586,
+"_enriched": true,
+"_status": "current",
+"_versionId": 2,
+"created": 1540404885608,
+"visibility": "public",
+"createdBy": "Resilience Community Curator D",
+"lastModifiedBy": "unknown"
+}
+],
+"minScale": 0,
+"maxScale": 0,
+"formats": [
+"PNG24",
+"JPG",
+"PNG32",
+"PS",
+"BMP",
+"GIF",
+"SVG",
+"PNG",
+"SVGZ",
+"TIFF",
+"PDF",
+"DIB",
+"EMF"
+]
+}
