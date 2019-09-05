@@ -288,7 +288,8 @@ export default class MapInstance extends Listener {
                 layer: {
                     id: state.layer.id,
                     uri: state.layer.uri,
-                    label: state.layer.label
+                    label: state.layer.label,
+                    type: state.layer.type
                 }
             };
             return result;
@@ -297,7 +298,8 @@ export default class MapInstance extends Listener {
         metadata.baseLayer = {
             id: this._baseLayerDef.id,
             uri: this._baseLayerDef.uri,
-            label: this._baseLayerDef.label
+            label: this._baseLayerDef.label,
+            type: this._baseLayerDef.type
         };
 
         metadata.annotations = this._featureLayer ?
