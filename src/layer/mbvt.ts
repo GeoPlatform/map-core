@@ -88,8 +88,14 @@ function applyVectorTileStyle(
     fetchStyleDefinition( layer.id, styleResource )
     .then( (styleDef : any) => {
         let layerInst = (leafletLayer as any);
-        layerInst.options.vectorTileLayerStyles = parseMapBoxStyle( styleDef );
-        layerInst.redraw();
+        let style = parseMapBoxStyle( styleDef );
+        if(style && typeof(style) !== 'undefined') {
+            layerInst.options.vectorTileLayerStyles = style;
+            layerInst.redraw();
+        } else {
+            console.log("[WARN] Unable to parse MapBox-style Style definitions from: ");
+            console.log(JSON.stringify(styleResource, null, ' '));
+        }
     })
     .catch( e => {
         console.log("An error occurred fetching the style definition for layer '" +
@@ -105,20 +111,31 @@ function applyVectorTileStyle(
  * @return Promise resolving style definition
  */
 function fetchStyleDefinition( layerId : string, resource : any ) : Promise<any> {
-    if(!layerId || !resource || !resource.contentId) {
+    if(!layerId || !resource) {
         let err = new Error("Unable to fetch style definition, one or more parameters were invalid");
         return Promise.reject(err);
     }
+
+    if(!resource.contentId && !resource.href) {
+        let err = new Error("Unable to fetch style definition, missing id or url to style");
+        return Promise.reject(err);
+    }
+
+    let url = null;
+    if(resource.contentId) {
+        url = Config.ualUrl + '/api/layers/' + layerId + '/styles/' + resource.contentId;
+    } else if(resource.href) {
+        url = resource.href;
+    }
+
     let client = new XHRHttpClient();
     let request = client.createRequestOpts({
         method : "GET",
-        url    : Config.ualUrl + '/api/layers/' + layerId + '/styles/' + resource.contentId,
+        url    : url,
         timeout: 5000,
         json   : true
     });
     return client.execute(request);
-
-    // return Promise.resolve(resource.content);   //TODO remove this
 }
 
 

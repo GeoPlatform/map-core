@@ -47,14 +47,33 @@ geoplatform.mapcore.OSM.get().then(osm => {
     // 	accessToken: 'pk.eyJ1IjoidXNhY2UiLCJhIjoiY2o1MDZscms4MDI4MjMycG1wa3puc212MCJ9.CW7edZMtlx5vFLNF5P-zTA'
     // }).addTo(leafletMap);
 
+    // let vtLayer = {
+    //     id: "f41290dac72ecad35b5a039847edb44f",
+    //     type: "Layer",
+    //     label: "Wetlands Vector Tiles",
+    //     layerType: "TileLayer",
+    //     resourceTypes: ['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
+    //     href: "https://s3.amazonaws.com/usace-maptiles-tests/wetlands-gz/{z}/{x}/{y}.pbf"
+    // };
+
     let vtLayer = {
-        id: "f41290dac72ecad35b5a039847edb44f",
-        type: "Layer",
-        label: "Wetlands Vector Tiles",
-        layerType: "TileLayer",
-        resourceTypes: ['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
-        href: "https://s3.amazonaws.com/usace-maptiles-tests/wetlands-gz/{z}/{x}/{y}.pbf"
-    };
+        "_modified":1567791162355,"_versionId":2,"_status":"current","type":"Layer",
+        "id":"c07d196dbd72012056c88014c63766c2",
+        "uri":"http://www.geoplatform.gov/id/layer/189ea273b3514bd0feaf854b7c8e22c3",
+        "modified":1567791162355,"label":"test esri vt layer",
+        "title":"test esri vt layer","description":"test","classifiers":{},
+        "status":"submitted","thumbnail":{"mediaType":"image/png"},
+        "layerName":"1","layerType":"TileLayer","legend":{},"temporal":{},
+        "created":1567791140919,"createdBy":"patrickn","extent":{"minx":0,"maxx":0,"miny":0,"maxy":0},
+        "href":"https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Protected_Areas_By_Manager/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+        "lastModifiedBy":"patrickn","visibility":"public",
+        "resourceTypes":['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
+        "related": [{
+            role: { uri: "http://www.geoplatform.gov/def/OnlineFunction/default_styling" },
+            label: "default style",
+            "href": 'https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Protected_Areas_By_Manager/VectorTileServer/resources/styles'
+        }]
+    }
     mapInstance.addLayers(vtLayer);
 
 

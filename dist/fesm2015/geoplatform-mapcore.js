@@ -3043,14 +3043,12 @@ class Expression {
         let p2;
         switch (this.operator) {
             case 'get':
-                p1 = this.getArg(0, properties, zoom, geometryType);
-                return properties[p1];
+                return this.getArg(0, properties, zoom, geometryType);
             case 'has':
-                p1 = this.getArg(0, properties, zoom, geometryType);
-                return p1 in properties;
+                return this.getArg(0, properties, zoom, geometryType);
             case '!has':
                 p1 = this.getArg(0, properties, zoom, geometryType);
-                return !(p1 in properties);
+                return !(typeof (p1) !== 'undefined' && p1 in properties);
             case '==':
                 p1 = this.getArg(0, properties, zoom, geometryType);
                 p2 = this.getArg(1, properties, zoom, geometryType);
@@ -3104,7 +3102,12 @@ class Expression {
         /** @type {?} */
         let value = this.args[index];
         if (value && typeof (value.evaluate) !== 'undefined') {
+            //arg is a nested expression...
             return value.evaluate(properties, zoom, geometryType);
+        }
+        else if (value && typeof (value) === 'string' && properties.hasOwnProperty(value)) {
+            //arg is a property name instead of a nested expression...
+            return properties[value];
         }
         return value;
     }
@@ -3175,16 +3178,94 @@ function parseMapBoxStyle(style) {
         console.log("Style has no layer definitions");
         return {}; //empty styles
     }
+    //have to group layers with same id but with different filters under the same style function
     /** @type {?} */
-    let result = {};
+    let layers = {};
     style.layers.forEach((/**
      * @param {?} layer
      * @return {?}
      */
     layer => {
-        result[layer.id] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
+        //use source-layer key first, fallback to layer id
+        /** @type {?} */
+        let id = (layer['source-layer'] || layer.id).trim();
+        if (layers[id])
+            layers[id].push(layer); //layer already exists
+        else
+            layers[id] = [layer]; //new layer's style
     }));
+    // console.log(JSON.stringify(layers, null, ' '));
+    /** @type {?} */
+    let result = {};
+    Object.keys(layers).forEach((/**
+     * @param {?} id
+     * @return {?}
+     */
+    id => {
+        /** @type {?} */
+        let styles = layers[id];
+        result[id] = doThis(styles);
+    }));
+    // style.layers.forEach( layer => {
+    //     result[ layer.id ] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
+    // });
     return result;
+}
+/**
+ * @param {?} layerStyles
+ * @return {?}
+ */
+function doThis(layerStyles) {
+    /** @type {?} */
+    let styles = layerStyles.map((/**
+     * @param {?} layerStyle
+     * @return {?}
+     */
+    layerStyle => styleFunctionFactory(layerStyle)));
+    return (/**
+     * @param {?} properties
+     * @param {?} zoom
+     * @param {?} geomType
+     * @return {?}
+     */
+    function (properties, zoom, geomType) {
+        /** @type {?} */
+        let match = styles.find((/**
+         * @param {?} style
+         * @return {?}
+         */
+        style => {
+            if (style.filter && typeof (style.filter.evaluate) !== 'undefined') {
+                // console.log("Style has a filter... " + style.filter.toString());
+                /** @type {?} */
+                let found = style.filter.evaluate(properties, zoom, geomType);
+                // if(!found) console.log("Filter does not match");
+                // else console.log("Filter matches");
+                return found;
+            }
+            return true;
+        }));
+        /** @type {?} */
+        let result = {};
+        if (match) {
+            Object.keys(match.style).forEach((/**
+             * @param {?} key
+             * @return {?}
+             */
+            key => {
+                /** @type {?} */
+                let styleVal = match.style[key];
+                if (styleVal && typeof (styleVal.evaluate) !== 'undefined')
+                    result[key] = styleVal.evaluate(properties, zoom, geomType);
+                else
+                    result[key] = styleVal;
+            }));
+        }
+        else {
+            console.log("Warning, no style found");
+        }
+        return result;
+    });
 }
 const ɵ0$7 = /**
  * @param {?} layerStyle
@@ -3210,6 +3291,8 @@ function (layerStyle) {
             return fallback || null;
     });
     /** @type {?} */
+    let filter = parseValue(layerStyle.filter);
+    /** @type {?} */
     let layerPaint = layerStyle.paint;
     /** @type {?} */
     let lineWidth = parseValue(layerPaint['line-width'], 1);
@@ -3233,29 +3316,30 @@ function (layerStyle) {
         //fill opacity
         fillColor: fillColor //fill color
     };
-    return (/**
-     * @param {?} properties
-     * @param {?} zoom
-     * @param {?} geomType
-     * @return {?}
-     */
-    function (properties, zoom, geomType) {
-        /** @type {?} */
-        let result = {};
-        Object.keys(style).forEach((/**
-         * @param {?} key
-         * @return {?}
-         */
-        key => {
-            /** @type {?} */
-            let styleVal = style[key];
-            if (styleVal && typeof (styleVal.evaluate) !== 'undefined')
-                result[key] = styleVal.evaluate(properties, zoom, geomType);
-            else
-                result[key] = styleVal;
-        }));
-        return result;
-    });
+    return {
+        filter: filter,
+        style: style
+    };
+    // return function( properties : any, zoom: number, geomType : string ) {
+    //     let result = {};
+    //
+    //     if(filter && typeof(filter.evaluate)) {
+    //         console.log("Style has a filter... " + filter.toString());
+    //         if(!filter.evaluate(properties, zoom, geomType)) {
+    //             console.log("Filter does not match");
+    //             return false;
+    //         }
+    //         console.log("Filter matches");
+    //     }
+    //
+    //     Object.keys(style).forEach( key => {
+    //         let styleVal = style[key];
+    //         if( styleVal && typeof(styleVal.evaluate) !== 'undefined')
+    //             result[key] = styleVal.evaluate(properties, zoom, geomType);
+    //         else result[key] = styleVal;
+    //     });
+    //     return result;
+    // };
 };
 /**
  * \@param layer MapBox Style Spec Layer definition
@@ -3354,8 +3438,16 @@ function applyVectorTileStyle(layer, leafletLayer, styleResource) {
     (styleDef) => {
         /** @type {?} */
         let layerInst = ((/** @type {?} */ (leafletLayer)));
-        layerInst.options.vectorTileLayerStyles = parseMapBoxStyle(styleDef);
-        layerInst.redraw();
+        /** @type {?} */
+        let style = parseMapBoxStyle(styleDef);
+        if (style && typeof (style) !== 'undefined') {
+            layerInst.options.vectorTileLayerStyles = style;
+            layerInst.redraw();
+        }
+        else {
+            console.log("[WARN] Unable to parse MapBox-style Style definitions from: ");
+            console.log(JSON.stringify(styleResource, null, ' '));
+        }
     }))
         .catch((/**
      * @param {?} e
@@ -3372,22 +3464,34 @@ function applyVectorTileStyle(layer, leafletLayer, styleResource) {
  * @return {?} Promise resolving style definition
  */
 function fetchStyleDefinition(layerId, resource) {
-    if (!layerId || !resource || !resource.contentId) {
+    if (!layerId || !resource) {
         /** @type {?} */
         let err = new Error("Unable to fetch style definition, one or more parameters were invalid");
         return Promise.reject(err);
+    }
+    if (!resource.contentId && !resource.href) {
+        /** @type {?} */
+        let err = new Error("Unable to fetch style definition, missing id or url to style");
+        return Promise.reject(err);
+    }
+    /** @type {?} */
+    let url = null;
+    if (resource.contentId) {
+        url = Config.ualUrl + '/api/layers/' + layerId + '/styles/' + resource.contentId;
+    }
+    else if (resource.href) {
+        url = resource.href;
     }
     /** @type {?} */
     let client = new XHRHttpClient();
     /** @type {?} */
     let request = client.createRequestOpts({
         method: "GET",
-        url: Config.ualUrl + '/api/layers/' + layerId + '/styles/' + resource.contentId,
+        url: url,
         timeout: 5000,
         json: true
     });
     return client.execute(request);
-    // return Promise.resolve(resource.content);   //TODO remove this
 }
 
 /**

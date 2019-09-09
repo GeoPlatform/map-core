@@ -126,14 +126,12 @@ class Expression {
         let p1, p2;
         switch(this.operator) {
             case 'get':
-                p1 = this.getArg(0, properties, zoom, geometryType);
-                return properties[p1];
+                return this.getArg(0, properties, zoom, geometryType);
             case 'has':
-                p1 = this.getArg(0, properties, zoom, geometryType);
-                return p1 in properties;
+                return this.getArg(0, properties, zoom, geometryType);
             case '!has':
                 p1 = this.getArg(0, properties, zoom, geometryType);
-                return !(p1 in properties);
+                return !( typeof(p1) !== 'undefined' && p1 in properties);
             case '==':
                 p1 = this.getArg(0, properties, zoom, geometryType);
                 p2 = this.getArg(1, properties, zoom, geometryType);
@@ -187,7 +185,12 @@ class Expression {
     getArg(index : number, properties : any, zoom : number, geometryType : string) : any {
         let value = this.args[index];
         if(value && typeof(value.evaluate) !== 'undefined') {
+            //arg is a nested expression...
             return value.evaluate(properties, zoom, geometryType);
+
+        } else if(value && typeof(value) === 'string' && properties.hasOwnProperty(value)) {
+            //arg is a property name instead of a nested expression...
+            return properties[value];
         }
         return value;
     }
@@ -254,13 +257,61 @@ export default function parseMapBoxStyle( style : MapBoxStyle ) : { [key:string]
         return {};   //empty styles
     }
 
-    let result = {};
+    //have to group layers with same id but with different filters under the same style function
+    let layers = {};
     style.layers.forEach( layer => {
-        result[ layer.id ] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
+        //use source-layer key first, fallback to layer id
+        let id = (layer['source-layer'] || layer.id).trim();
+        if(layers[id]) layers[id].push(layer);  //layer already exists
+        else layers[id] = [layer];              //new layer's style
     });
+    // console.log(JSON.stringify(layers, null, ' '));
+
+    let result = {};
+    Object.keys(layers).forEach( id => {
+        let styles = layers[id];    //array of 1 or more for given id (differentiated by filters)
+        result[id] = doThis(styles);
+    })
+    // style.layers.forEach( layer => {
+    //     result[ layer.id ] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
+    // });
     return result;
 }
 
+
+
+function doThis( layerStyles : MapBoxStyleLayer[] ) : Function {
+
+    let styles = layerStyles.map( layerStyle => styleFunctionFactory(layerStyle) );
+
+    return function( properties : any, zoom: number, geomType : string ) {
+
+        let match : any = styles.find( style => {
+            if(style.filter && typeof(style.filter.evaluate) !== 'undefined') {
+                // console.log("Style has a filter... " + style.filter.toString());
+                let found = style.filter.evaluate(properties, zoom, geomType);
+                // if(!found) console.log("Filter does not match");
+                // else console.log("Filter matches");
+                return found;
+            }
+            return true;
+        });
+
+        let result = {};
+        if(match) {
+            Object.keys(match.style).forEach( key => {
+                let styleVal = match.style[key];
+                if( styleVal && typeof(styleVal.evaluate) !== 'undefined')
+                    result[key] = styleVal.evaluate(properties, zoom, geomType);
+                else result[key] = styleVal;
+            });
+        } else {
+            console.log("Warning, no style found");
+        }
+        return result;
+    };
+
+}
 
 
 
@@ -281,6 +332,8 @@ var styleFunctionFactory = ( function( layerStyle : MapBoxStyleLayer ) {
         else return fallback || null;
     }
 
+    let filter : any = parseValue(layerStyle.filter);
+
     let layerPaint : MapBoxPaint  = layerStyle.paint;
 
     let lineWidth   = parseValue( layerPaint['line-width'], 1);
@@ -297,14 +350,29 @@ var styleFunctionFactory = ( function( layerStyle : MapBoxStyleLayer ) {
         fillColor  : fillColor      //fill color
     };
 
-    return function( properties : any, zoom: number, geomType : string ) {
-        let result = {};
-        Object.keys(style).forEach( key => {
-            let styleVal = style[key];
-            if( styleVal && typeof(styleVal.evaluate) !== 'undefined')
-                result[key] = styleVal.evaluate(properties, zoom, geomType);
-            else result[key] = styleVal;
-        });
-        return result;
+    return {
+        filter: filter,
+        style: style
     };
+
+    // return function( properties : any, zoom: number, geomType : string ) {
+    //     let result = {};
+    //
+    //     if(filter && typeof(filter.evaluate)) {
+    //         console.log("Style has a filter... " + filter.toString());
+    //         if(!filter.evaluate(properties, zoom, geomType)) {
+    //             console.log("Filter does not match");
+    //             return false;
+    //         }
+    //         console.log("Filter matches");
+    //     }
+    //
+    //     Object.keys(style).forEach( key => {
+    //         let styleVal = style[key];
+    //         if( styleVal && typeof(styleVal.evaluate) !== 'undefined')
+    //             result[key] = styleVal.evaluate(properties, zoom, geomType);
+    //         else result[key] = styleVal;
+    //     });
+    //     return result;
+    // };
 });
