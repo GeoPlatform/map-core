@@ -40,6 +40,7 @@ declare class LayerFactory {
      */
     create(layer: LayerModel): Layer;
     init(): void;
+    isVectorTile(layer: any): boolean;
 }
 declare const _default: LayerFactory;
 export default _default;

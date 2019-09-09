@@ -3894,7 +3894,9 @@ This software has been approved for release by the U.S. Department of the Interi
                         });
                     }
                     else if (types.ESRI_TILE_SERVER &&
-                        types.ESRI_TILE_SERVER.uri === typeUri) {
+                        types.ESRI_TILE_SERVER.uri === typeUri &&
+                        !_this.isVectorTile(layer) //don't use Esri library for vector tile layers
+                    ) {
                         checkUrl(url);
                         opts = { url: url, useCors: true };
                         if (client.Config.leafletPane)
@@ -3953,6 +3955,9 @@ This software has been approved for release by the U.S. Department of the Interi
                     }
                     return null;
                 }));
+                /**
+                 * Register factory function for Protobuf Vector Tile layers
+                 */
                 this.register(( /**
                  * @param {?} layer
                  * @return {?}
@@ -3965,28 +3970,20 @@ This software has been approved for release by the U.S. Department of the Interi
                         return null;
                     }
                     return mapBoxVectorTileLayer(layer);
-                    // let href = layer.href;
-                    // if(!href || href.indexOf(".pbf") < 0) {
-                    //     console.log("LayerFactory - Layer does not define an Access URL");
-                    //     return null;  //missing URL
-                    // }
-                    //
-                    // const Leaflet = L as any;
-                    //
-                    // //if Leaflet vector grid plugin is not installed, can't render VT Layers
-                    // if( typeof(Leaflet.vectorGrid) === 'undefined' &&
-                    //     typeof(Leaflet.vectorGrid.protobuf) === 'undefined') {
-                    //     console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
-                    //     return null;
-                    // }
-                    //
-                    // let opts : any = { rendererFactory: ( L.canvas as any ).tile };
-                    // if( (layer as any).styles ) {
-                    //     opts.vectorTileLayerStyles = (layer as any).styles;
-                    // }
-                    // if(Config.leafletPane) opts.pane = Config.leafletPane;
-                    // return Leaflet.vectorGrid.protobuf(href, opts);
                 }));
+            };
+        /**
+         * @param {?} layer
+         * @return {?}
+         */
+        LayerFactory.prototype.isVectorTile = /**
+         * @param {?} layer
+         * @return {?}
+         */
+            function (layer) {
+                /** @type {?} */
+                var resourceTypes = (layer && layer.resourceTypes) || [];
+                return resourceTypes.indexOf(LayerResourceTypes.MapBoxVectorTile) >= 0;
             };
         return LayerFactory;
     }());

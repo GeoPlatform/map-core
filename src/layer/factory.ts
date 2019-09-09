@@ -184,8 +184,10 @@ class LayerFactory {
                 if(!url) throw new Error("Layer's service does not define a service url");
             }
 
-            if(ServiceTypes.ESRI_MAP_SERVER &&
-                ServiceTypes.ESRI_MAP_SERVER.uri === typeUri) {
+            if(
+                ServiceTypes.ESRI_MAP_SERVER &&
+                ServiceTypes.ESRI_MAP_SERVER.uri === typeUri
+            ) {
                 checkUrl(url);
                 opts = {
                     layers: layer.layerName,
@@ -204,23 +206,30 @@ class LayerFactory {
                     opts.pane = Config.leafletPane;
                 return new ESRITileLayer(url, opts);
 
-            } else if(ServiceTypes.ESRI_FEATURE_SERVER &&
-                ServiceTypes.ESRI_FEATURE_SERVER.uri === typeUri) {
+            } else if(
+                ServiceTypes.ESRI_FEATURE_SERVER &&
+                ServiceTypes.ESRI_FEATURE_SERVER.uri === typeUri
+            ) {
                 checkUrl(url);
                 return clusteredFeatures(layer, {
                     styleResolver: this.getStyleResolver()
                 });
 
-            } else if(ServiceTypes.ESRI_TILE_SERVER &&
-                ServiceTypes.ESRI_TILE_SERVER.uri === typeUri) {
+            } else if(
+                ServiceTypes.ESRI_TILE_SERVER &&
+                ServiceTypes.ESRI_TILE_SERVER.uri === typeUri &&
+                !this.isVectorTile(layer)   //don't use Esri library for vector tile layers
+            ) {
                 checkUrl(url);
                 opts = { url: url, useCors: true };
                 if(Config.leafletPane)
                     opts.pane = Config.leafletPane;
                 return esri.tiledMapLayer(opts);
 
-            } else if(ServiceTypes.ESRI_IMAGE_SERVER &&
-                ServiceTypes.ESRI_IMAGE_SERVER.uri === typeUri) {
+            } else if(
+                ServiceTypes.ESRI_IMAGE_SERVER &&
+                ServiceTypes.ESRI_IMAGE_SERVER.uri === typeUri
+            ) {
                 opts = { url: url, useCors: true };
                 if(Config.leafletPane)
                     opts.pane = Config.leafletPane;
@@ -263,7 +272,9 @@ class LayerFactory {
 
 
 
-
+        /**
+         * Register factory function for Protobuf Vector Tile layers
+         */
         this.register( (layer : LayerModel) => {
             if(!layer) return null;
             let resourceTypes = layer.resourceTypes || [];
@@ -271,36 +282,14 @@ class LayerFactory {
                 return null;
             }
             return mapBoxVectorTileLayer(layer);
-
-
-
-
-            // let href = layer.href;
-            // if(!href || href.indexOf(".pbf") < 0) {
-            //     console.log("LayerFactory - Layer does not define an Access URL");
-            //     return null;  //missing URL
-            // }
-            //
-            // const Leaflet = L as any;
-            //
-            // //if Leaflet vector grid plugin is not installed, can't render VT Layers
-            // if( typeof(Leaflet.vectorGrid) === 'undefined' &&
-            //     typeof(Leaflet.vectorGrid.protobuf) === 'undefined') {
-            //     console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
-            //     return null;
-            // }
-            //
-            // let opts : any = { rendererFactory: ( L.canvas as any ).tile };
-            // if( (layer as any).styles ) {
-            //     opts.vectorTileLayerStyles = (layer as any).styles;
-            // }
-            // if(Config.leafletPane) opts.pane = Config.leafletPane;
-        	// return Leaflet.vectorGrid.protobuf(href, opts);
-
         });
 
+    }
 
 
+    isVectorTile(layer) {
+        let resourceTypes = (layer && layer.resourceTypes) || [];
+        return resourceTypes.indexOf(LayerResourceTypes.MapBoxVectorTile)>=0;
     }
 }
 

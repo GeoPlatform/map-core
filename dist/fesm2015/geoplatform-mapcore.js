@@ -1,10 +1,10 @@
 import { Draw } from 'leaflet-draw';
 import 'leaflet.markercluster';
 import 'leaflet-timedimension/dist/leaflet.timedimension.src';
-import { FeatureManager, FeatureLayer, tiledMapLayer, imageMapLayer } from 'esri-leaflet';
+import { FeatureManager, tiledMapLayer, imageMapLayer, FeatureLayer } from 'esri-leaflet';
 import * as jquery from 'jquery';
 import * as L from 'leaflet';
-import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Point, LatLng, Layer, TimeDimension, featureGroup, geoJSON, LayerGroup } from 'leaflet';
+import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Layer, Point, LatLng, TimeDimension, featureGroup, geoJSON, LayerGroup } from 'leaflet';
 import { QueryFactory, LayerService, XHRHttpClient, Config, ItemService, ItemTypes, ServiceFactory } from '@geoplatform/client';
 
 /**
@@ -3705,7 +3705,9 @@ class LayerFactory {
                 });
             }
             else if (types.ESRI_TILE_SERVER &&
-                types.ESRI_TILE_SERVER.uri === typeUri) {
+                types.ESRI_TILE_SERVER.uri === typeUri &&
+                !this.isVectorTile(layer) //don't use Esri library for vector tile layers
+            ) {
                 checkUrl(url);
                 opts = { url: url, useCors: true };
                 if (Config.leafletPane)
@@ -3766,6 +3768,9 @@ class LayerFactory {
             }
             return null;
         }));
+        /**
+         * Register factory function for Protobuf Vector Tile layers
+         */
         this.register((/**
          * @param {?} layer
          * @return {?}
@@ -3779,28 +3784,16 @@ class LayerFactory {
                 return null;
             }
             return mapBoxVectorTileLayer(layer);
-            // let href = layer.href;
-            // if(!href || href.indexOf(".pbf") < 0) {
-            //     console.log("LayerFactory - Layer does not define an Access URL");
-            //     return null;  //missing URL
-            // }
-            //
-            // const Leaflet = L as any;
-            //
-            // //if Leaflet vector grid plugin is not installed, can't render VT Layers
-            // if( typeof(Leaflet.vectorGrid) === 'undefined' &&
-            //     typeof(Leaflet.vectorGrid.protobuf) === 'undefined') {
-            //     console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
-            //     return null;
-            // }
-            //
-            // let opts : any = { rendererFactory: ( L.canvas as any ).tile };
-            // if( (layer as any).styles ) {
-            //     opts.vectorTileLayerStyles = (layer as any).styles;
-            // }
-            // if(Config.leafletPane) opts.pane = Config.leafletPane;
-            // return Leaflet.vectorGrid.protobuf(href, opts);
         }));
+    }
+    /**
+     * @param {?} layer
+     * @return {?}
+     */
+    isVectorTile(layer) {
+        /** @type {?} */
+        let resourceTypes = (layer && layer.resourceTypes) || [];
+        return resourceTypes.indexOf(LayerResourceTypes.MapBoxVectorTile) >= 0;
     }
 }
 var LayerFactory$1 = new LayerFactory();
