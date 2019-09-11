@@ -1,6 +1,6 @@
 
 import * as L                        from 'leaflet';
-import { Layer as LeafletLayer }     from "leaflet";
+import { Layer as LeafletLayer, SVG }     from "leaflet";
 import {
     Layer as GeoPlatformLayer, Config, XHRHttpClient
 } from '@geoplatform/client';
@@ -40,8 +40,10 @@ function mapBoxVectorTileLayer( layer : GeoPlatformLayer ) : LeafletLayer {
         return null;
     }
 
+    augmentSVGTile();
+
     let opts : any = {
-        rendererFactory: ( L.canvas as any ).tile
+        rendererFactory: ( L.svg as any ).tile //( L.canvas as any ).tile
         // ,
         // getFeatureId: function( feature : any ) { return feature.properties.id; }
     };
@@ -129,14 +131,174 @@ function fetchStyleDefinition( layerId : string, resource : any ) : Promise<any>
     }
 
     let client = new XHRHttpClient();
-    let request = client.createRequestOpts({
-        method : "GET",
-        url    : url,
-        timeout: 5000,
-        json   : true
+    let request = client.createRequestOpts({ method: "GET", url: url, timeout: 5000, json: true });
+    return client.execute(request).then( (styleDef : any) => {
+        if(styleDef.sprite) {
+            let spriteUrl = resolveRelativeUrl(url + '/', styleDef.sprite);
+
+            return fetchSpriteInfo(spriteUrl + '.json', client)
+            .then( (spriteDef : any) => {
+                styleDef.spriteJSON = spriteDef;
+                styleDef.spriteURL = spriteUrl + '.png';
+                return styleDef;
+            });
+        }
+        return styleDef;
     });
+}
+
+/**
+ * load sprite JSON and embed inline...
+ */
+function fetchSpriteInfo(spriteUrl, client) : Promise<any> {
+    let request = client.createRequestOpts({method: "GET", url: spriteUrl, timeout: 5000, json: true});
     return client.execute(request);
 }
+
+/**
+ *
+ */
+function resolveRelativeUrl(baseUrl, url) {
+    if(!url) return baseUrl;
+    return new URL(url, baseUrl).href;  //won't work in IE11 but fine elsewhere
+}
+
+
+
+
+function augmentSVGTile() {
+    const Tile = (SVG as any).Tile;
+    if(Tile && !Tile._augmented) {
+        console.log("Augmenting Tile Layer");
+        Tile.include({
+
+            _augmented : true,
+
+        	_addPath: function (layer) {
+
+                let options = layer.options;
+                let hasFillColor = !options.fillPattern && options.fillColor &&
+                    options.fillColor !== 'transparent';
+
+                if( this._rootGroup.firstChild && hasFillColor ) {
+                    //move a non-fill pattern path to the front of its siblings so it
+                    // is rendered BEFORE any fill patterns are.  SVG does not support
+                    // z-index within it's elements and ordering is front to back (bottom to top).
+                    this._rootGroup.insertBefore(layer._path, this._rootGroup.firstChild);
+                } else {
+                    this._rootGroup.appendChild(layer._path);
+                }
+        		this._layers[ (L as any).stamp(layer) ] = layer;
+        	}
+        });
+    }
+}
+
+
+
+
+
+
+
+SVG.include({
+
+    _updateStyle: function (layer) {
+        var path = layer._path, options = layer.options;
+
+        if (!path) { return; }
+
+        if (options.stroke) {
+            path.setAttribute('stroke',         options.color);
+            path.setAttribute('stroke-opacity', options.opacity);
+            path.setAttribute('stroke-width',   options.weight);
+            path.setAttribute('stroke-linecap', options.lineCap);
+            path.setAttribute('stroke-linejoin',options.lineJoin);
+
+            if (options.dashArray) {
+                path.setAttribute('stroke-dasharray', options.dashArray);
+            } else {
+                path.removeAttribute('stroke-dasharray');
+            }
+
+            if (options.dashOffset) {
+                path.setAttribute('stroke-dashoffset', options.dashOffset);
+            } else {
+                path.removeAttribute('stroke-dashoffset');
+            }
+        } else {
+            path.setAttribute('stroke', 'none');
+        }
+
+        if (options.fillPattern || (options.fillColor && options.fillColor !== 'transparent')) {
+            if ( options.fillPattern && typeof(options.fillPattern) === "object" ) {
+                this.__fillPattern(layer);
+            } else {
+                path.setAttribute('fill', options.fillColor || options.color);
+            }
+            path.setAttribute('fill-opacity', options.fillOpacity);
+            path.setAttribute('fill-rule', options.fillRule || 'evenodd');
+        } else {
+            path.setAttribute('fill', 'none');
+        }
+    },
+
+    __fillPattern: function(layer) {
+        var path = layer._path, options = layer.options;
+
+        if (!this._defs) {
+            this._defs = SVG.create('defs');
+            this._container.appendChild(this._defs);
+        }
+
+        var imgUrl = options.fillPattern.url;
+        var patternId = options.fillPattern.id + this._tileCoord.z + this._tileCoord.x + this._tileCoord.y;
+        var patternEl : any = document.getElementById(patternId);
+        if (!patternEl) {
+
+            var imgObj = new Image();
+            imgObj.src = imgUrl;
+
+            patternEl = SVG.create('pattern');
+            patternEl.setAttribute('id', patternId);
+            patternEl.setAttribute('x', options.fillPattern.x);
+            patternEl.setAttribute('y', options.fillPattern.y);
+            patternEl.setAttribute('patternUnits', 'userSpaceOnUse');
+            patternEl.setAttribute('width', options.fillPattern.width);
+            patternEl.setAttribute('height', options.fillPattern.height);
+
+            this._defs.appendChild(patternEl);
+
+            var imgEl = SVG.create('image');
+            imgEl.setAttribute('x', '0');
+            imgEl.setAttribute('y', '0');
+            imgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', imgUrl);
+            imgEl.setAttribute('width', options.fillPattern.width);
+            imgEl.setAttribute('height', options.fillPattern.height);
+            let tx = options.fillPattern.x > 0 ? ('-'+options.fillPattern.x) : 0;
+            let ty = options.fillPattern.y > 0 ? ('-'+options.fillPattern.y) : 0;
+            imgEl.setAttribute("transform", "translate(" + tx + " " + ty + ")")
+            patternEl.appendChild(imgEl);
+
+            imgObj.onload = function() {
+                imgEl.setAttribute('width', imgObj.width+'');
+                imgEl.setAttribute('height', imgObj.height+'');
+            };
+        }
+
+        path.setAttribute('fill', "url(#"+patternId+")");
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 

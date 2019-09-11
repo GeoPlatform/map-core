@@ -1,4 +1,4 @@
-{
+const MAPBOX_STYLE = {
     "from": "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Public_Access/VectorTileServer/resources/styles",
     "spriteJSON": "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Public_Access/VectorTileServer/resources/sprites/sprite.json",
     "spriteIMG": "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Public_Access/VectorTileServer/resources/sprites/sprite.png",

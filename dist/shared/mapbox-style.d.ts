@@ -5,6 +5,7 @@ interface LeafletStyle {
     dashArray?: number[];
     fillOpacity?: number;
     fillColor?: string;
+    fillPattern?: any;
 }
 interface LeafletStyleMap {
     [key: string]: Function | LeafletStyle;
@@ -23,6 +24,8 @@ interface MapBoxStyle {
     glyphs?: string;
     transition?: any;
     layers?: MapBoxStyleLayer[];
+    spriteJSON?: any;
+    spriteURL?: string;
 }
 interface MapBoxStyleLayer {
     id: string;
@@ -68,7 +71,7 @@ interface MapBoxPaint {
  * @param style MapBox Style definition
  * @return object associating Leaflet styles with layer ids
  */
-export default function parseMapBoxStyle(style: MapBoxStyle): {
+export default function parseMapBoxStyle(styleDef: MapBoxStyle): {
     [key: string]: LeafletStyleMap;
 };
 export {};

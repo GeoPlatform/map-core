@@ -3324,22 +3324,22 @@ This software has been approved for release by the U.S. Department of the Interi
         return Expression;
     }());
     /**
-     * @param {?} style MapBox Style definition
+     * @param {?} styleDef
      * @return {?} object associating Leaflet styles with layer ids
      */
-    function parseMapBoxStyle(style) {
-        //TODO validate style.version to make sure we are parsing something we understand
+    function parseMapBoxStyle(styleDef) {
+        //TODO validate styleDef.version to make sure we are parsing something we understand
         // console.log("Parsing MapBox Style");
-        // console.log(JSON.stringify(style, null, ' '));
+        // console.log(JSON.stringify(styleDef, null, ' '));
         // console.log("--------------------");
-        if (!style.layers || !Array.isArray(style.layers) || !style.layers.length) {
+        if (!styleDef.layers || !Array.isArray(styleDef.layers) || !styleDef.layers.length) {
             console.log("Style has no layer definitions");
             return {}; //empty styles
         }
         //have to group layers with same id but with different filters under the same style function
         /** @type {?} */
         var layers = {};
-        style.layers.forEach(( /**
+        styleDef.layers.forEach(( /**
          * @param {?} layer
          * @return {?}
          */function (layer) {
@@ -3360,23 +3360,21 @@ This software has been approved for release by the U.S. Department of the Interi
          */function (id) {
             /** @type {?} */
             var styles = layers[id];
-            result[id] = doThis(styles);
+            result[id] = styleFunctionFactory(styles, styleDef);
         }));
-        // style.layers.forEach( layer => {
-        //     result[ layer.id ] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
-        // });
         return result;
     }
     /**
      * @param {?} layerStyles
+     * @param {?} styleDef
      * @return {?}
      */
-    function doThis(layerStyles) {
+    function styleFunctionFactory(layerStyles, styleDef) {
         /** @type {?} */
         var styles = layerStyles.map(( /**
          * @param {?} layerStyle
          * @return {?}
-         */function (layerStyle) { return styleFunctionFactory(layerStyle); }));
+         */function (layerStyle) { return getLayerStyle(layerStyle, styleDef); }));
         return ( /**
          * @param {?} properties
          * @param {?} zoom
@@ -3419,14 +3417,13 @@ This software has been approved for release by the U.S. Department of the Interi
             return result;
         });
     }
-    var ɵ0$7 = /**
-     * @param {?} layerStyle
-     * @return {?}
-     */ function (layerStyle) {
-        /**
-         *
-         * @type {?}
-         */
+    /**
+     * @param {?} layerStyle MapBox Style Spec Layer definition
+     * @param {?} styleDef MapBox Style document
+     * @return {?} Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
+     */
+    function getLayerStyle(layerStyle, styleDef) {
+        /** @type {?} */
         var parseValue = ( /**
          * @param {?} value
          * @param {?=} fallback
@@ -3441,8 +3438,6 @@ This software has been approved for release by the U.S. Department of the Interi
                 return fallback || null;
         });
         /** @type {?} */
-        var filter = parseValue(layerStyle.filter);
-        /** @type {?} */
         var layerPaint = layerStyle.paint;
         /** @type {?} */
         var lineWidth = parseValue(layerPaint['line-width'], 1);
@@ -3453,7 +3448,18 @@ This software has been approved for release by the U.S. Department of the Interi
         /** @type {?} */
         var fillOpacity = parseValue(layerPaint['fill-opacity'] || layerPaint['background-opacity'], 1.0);
         /** @type {?} */
-        var fillColor = parseValue(layerPaint['fill-color'] || layerPaint['background-color'], '#000');
+        var fillColor = parseValue(layerPaint['fill-color'] || layerPaint['background-color'], 'transparent');
+        /** @type {?} */
+        var fillPattern = parseValue(layerPaint['fill-pattern']);
+        if (fillPattern && styleDef.spriteJSON && styleDef.spriteJSON[fillPattern]) {
+            /** @type {?} */
+            var pid = fillPattern.toLowerCase().replace(/\-/g, '').replace(/\\/g, '').replace(/\//g, '').replace(/\s+/g, '');
+            //fill uses sprite referenced by the style doc
+            // (fillPattern value is the key of the sprite entry)
+            /** @type {?} */
+            var pattern = styleDef.spriteJSON[fillPattern];
+            fillPattern = Object.assign({ id: pid, url: styleDef.spriteURL }, pattern);
+        }
         /** @type {?} */
         var style = {
             color: color,
@@ -3464,39 +3470,15 @@ This software has been approved for release by the U.S. Department of the Interi
             //stroke size
             fillOpacity: fillOpacity,
             //fill opacity
-            fillColor: fillColor //fill color
+            fillColor: fillColor,
+            //fill color
+            fillPattern: fillPattern
         };
         return {
-            filter: filter,
+            filter: parseValue(layerStyle.filter),
             style: style
         };
-        // return function( properties : any, zoom: number, geomType : string ) {
-        //     let result = {};
-        //
-        //     if(filter && typeof(filter.evaluate)) {
-        //         console.log("Style has a filter... " + filter.toString());
-        //         if(!filter.evaluate(properties, zoom, geomType)) {
-        //             console.log("Filter does not match");
-        //             return false;
-        //         }
-        //         console.log("Filter matches");
-        //     }
-        //
-        //     Object.keys(style).forEach( key => {
-        //         let styleVal = style[key];
-        //         if( styleVal && typeof(styleVal.evaluate) !== 'undefined')
-        //             result[key] = styleVal.evaluate(properties, zoom, geomType);
-        //         else result[key] = styleVal;
-        //     });
-        //     return result;
-        // };
-    };
-    /**
-     * \@param layer MapBox Style Spec Layer definition
-     * \@return Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
-     * @type {?}
-     */
-    var styleFunctionFactory = ((ɵ0$7));
+    }
 
     /**
      * @fileoverview added by tsickle
@@ -3535,9 +3517,10 @@ This software has been approved for release by the U.S. Department of the Interi
             console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
             return null;
         }
+        augmentSVGTile();
         /** @type {?} */
         var opts = {
-            rendererFactory: (( /** @type {?} */(L.canvas))).tile
+            rendererFactory: (( /** @type {?} */(L.svg))).tile //( L.canvas as any ).tile
             // ,
             // getFeatureId: function( feature : any ) { return feature.properties.id; }
         };
@@ -3632,14 +3615,183 @@ This software has been approved for release by the U.S. Department of the Interi
         /** @type {?} */
         var client$$1 = new client.XHRHttpClient();
         /** @type {?} */
-        var request = client$$1.createRequestOpts({
-            method: "GET",
-            url: url,
-            timeout: 5000,
-            json: true
-        });
+        var request = client$$1.createRequestOpts({ method: "GET", url: url, timeout: 5000, json: true });
+        return client$$1.execute(request).then(( /**
+         * @param {?} styleDef
+         * @return {?}
+         */function (styleDef) {
+            if (styleDef.sprite) {
+                /** @type {?} */
+                var spriteUrl_1 = resolveRelativeUrl(url + '/', styleDef.sprite);
+                return fetchSpriteInfo(spriteUrl_1 + '.json', client$$1)
+                    .then(( /**
+             * @param {?} spriteDef
+             * @return {?}
+             */function (spriteDef) {
+                    styleDef.spriteJSON = spriteDef;
+                    styleDef.spriteURL = spriteUrl_1 + '.png';
+                    return styleDef;
+                }));
+            }
+            return styleDef;
+        }));
+    }
+    /**
+     * load sprite JSON and embed inline...
+     * @param {?} spriteUrl
+     * @param {?} client
+     * @return {?}
+     */
+    function fetchSpriteInfo(spriteUrl, client$$1) {
+        /** @type {?} */
+        var request = client$$1.createRequestOpts({ method: "GET", url: spriteUrl, timeout: 5000, json: true });
         return client$$1.execute(request);
     }
+    /**
+     *
+     * @param {?} baseUrl
+     * @param {?} url
+     * @return {?}
+     */
+    function resolveRelativeUrl(baseUrl, url) {
+        if (!url)
+            return baseUrl;
+        return new URL(url, baseUrl).href; //won't work in IE11 but fine elsewhere
+    }
+    /**
+     * @return {?}
+     */
+    function augmentSVGTile() {
+        /** @type {?} */
+        var Tile = (( /** @type {?} */(L.SVG))).Tile;
+        if (Tile && !Tile._augmented) {
+            console.log("Augmenting Tile Layer");
+            Tile.include({
+                _augmented: true,
+                _addPath: ( /**
+                 * @param {?} layer
+                 * @return {?}
+                 */function (layer) {
+                    /** @type {?} */
+                    var options = layer.options;
+                    /** @type {?} */
+                    var hasFillColor = !options.fillPattern && options.fillColor &&
+                        options.fillColor !== 'transparent';
+                    if (this._rootGroup.firstChild && hasFillColor) {
+                        //move a non-fill pattern path to the front of its siblings so it
+                        // is rendered BEFORE any fill patterns are.  SVG does not support
+                        // z-index within it's elements and ordering is front to back (bottom to top).
+                        this._rootGroup.insertBefore(layer._path, this._rootGroup.firstChild);
+                    }
+                    else {
+                        this._rootGroup.appendChild(layer._path);
+                    }
+                    this._layers[L.stamp(layer)] = layer;
+                })
+            });
+        }
+    }
+    L.SVG.include({
+        _updateStyle: ( /**
+         * @param {?} layer
+         * @return {?}
+         */function (layer) {
+            /** @type {?} */
+            var path = layer._path;
+            /** @type {?} */
+            var options = layer.options;
+            if (!path) {
+                return;
+            }
+            if (options.stroke) {
+                path.setAttribute('stroke', options.color);
+                path.setAttribute('stroke-opacity', options.opacity);
+                path.setAttribute('stroke-width', options.weight);
+                path.setAttribute('stroke-linecap', options.lineCap);
+                path.setAttribute('stroke-linejoin', options.lineJoin);
+                if (options.dashArray) {
+                    path.setAttribute('stroke-dasharray', options.dashArray);
+                }
+                else {
+                    path.removeAttribute('stroke-dasharray');
+                }
+                if (options.dashOffset) {
+                    path.setAttribute('stroke-dashoffset', options.dashOffset);
+                }
+                else {
+                    path.removeAttribute('stroke-dashoffset');
+                }
+            }
+            else {
+                path.setAttribute('stroke', 'none');
+            }
+            if (options.fillPattern || (options.fillColor && options.fillColor !== 'transparent')) {
+                if (options.fillPattern && typeof (options.fillPattern) === "object") {
+                    this.__fillPattern(layer);
+                }
+                else {
+                    path.setAttribute('fill', options.fillColor || options.color);
+                }
+                path.setAttribute('fill-opacity', options.fillOpacity);
+                path.setAttribute('fill-rule', options.fillRule || 'evenodd');
+            }
+            else {
+                path.setAttribute('fill', 'none');
+            }
+        }),
+        __fillPattern: ( /**
+         * @param {?} layer
+         * @return {?}
+         */function (layer) {
+            /** @type {?} */
+            var path = layer._path;
+            /** @type {?} */
+            var options = layer.options;
+            if (!this._defs) {
+                this._defs = L.SVG.create('defs');
+                this._container.appendChild(this._defs);
+            }
+            /** @type {?} */
+            var imgUrl = options.fillPattern.url;
+            /** @type {?} */
+            var patternId = options.fillPattern.id + this._tileCoord.z + this._tileCoord.x + this._tileCoord.y;
+            /** @type {?} */
+            var patternEl = document.getElementById(patternId);
+            if (!patternEl) {
+                /** @type {?} */
+                var imgObj = new Image();
+                imgObj.src = imgUrl;
+                patternEl = L.SVG.create('pattern');
+                patternEl.setAttribute('id', patternId);
+                patternEl.setAttribute('x', options.fillPattern.x);
+                patternEl.setAttribute('y', options.fillPattern.y);
+                patternEl.setAttribute('patternUnits', 'userSpaceOnUse');
+                patternEl.setAttribute('width', options.fillPattern.width);
+                patternEl.setAttribute('height', options.fillPattern.height);
+                this._defs.appendChild(patternEl);
+                /** @type {?} */
+                var imgEl = L.SVG.create('image');
+                imgEl.setAttribute('x', '0');
+                imgEl.setAttribute('y', '0');
+                imgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', imgUrl);
+                imgEl.setAttribute('width', options.fillPattern.width);
+                imgEl.setAttribute('height', options.fillPattern.height);
+                /** @type {?} */
+                var tx = options.fillPattern.x > 0 ? ('-' + options.fillPattern.x) : 0;
+                /** @type {?} */
+                var ty = options.fillPattern.y > 0 ? ('-' + options.fillPattern.y) : 0;
+                imgEl.setAttribute("transform", "translate(" + tx + " " + ty + ")");
+                patternEl.appendChild(imgEl);
+                imgObj.onload = ( /**
+                 * @return {?}
+                 */function () {
+                    imgEl.setAttribute('width', imgObj.width + '');
+                    imgEl.setAttribute('height', imgObj.height + '');
+                });
+            }
+            path.setAttribute('fill', "url(#" + patternId + ")");
+        })
+    });
 
     /**
      * @fileoverview added by tsickle
@@ -3997,7 +4149,7 @@ This software has been approved for release by the U.S. Department of the Interi
     var jQuery$2 = jquery;
     /** @type {?} */
     var EsriFeatureLayer = esri.FeatureLayer;
-    var ɵ0$8 = /**
+    var ɵ0$7 = /**
      * @param {?} feature
      * @param {?} latlng
      * @return {?}
@@ -4217,7 +4369,7 @@ This software has been approved for release by the U.S. Department of the Interi
          * @param latlng - L.LatLng
          * @return L.Marker
          */
-        pointToLayerFn: (ɵ0$8),
+        pointToLayerFn: (ɵ0$7),
         /**
          * for all non-point features, bind a popup
          * @param feature - GeoJSON feature

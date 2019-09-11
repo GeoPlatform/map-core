@@ -4,7 +4,7 @@ import 'leaflet-timedimension/dist/leaflet.timedimension.src';
 import { FeatureManager, tiledMapLayer, imageMapLayer, FeatureLayer } from 'esri-leaflet';
 import * as jquery from 'jquery';
 import * as L from 'leaflet';
-import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Layer, Point, LatLng, TimeDimension, featureGroup, geoJSON, LayerGroup } from 'leaflet';
+import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Layer, Point, LatLng, TimeDimension, stamp, featureGroup, geoJSON, LayerGroup } from 'leaflet';
 import { QueryFactory, LayerService, XHRHttpClient, Config, ItemService, ItemTypes, ServiceFactory } from '@geoplatform/client';
 
 /**
@@ -3166,22 +3166,22 @@ class Expression {
     }
 }
 /**
- * @param {?} style MapBox Style definition
+ * @param {?} styleDef
  * @return {?} object associating Leaflet styles with layer ids
  */
-function parseMapBoxStyle(style) {
-    //TODO validate style.version to make sure we are parsing something we understand
+function parseMapBoxStyle(styleDef) {
+    //TODO validate styleDef.version to make sure we are parsing something we understand
     // console.log("Parsing MapBox Style");
-    // console.log(JSON.stringify(style, null, ' '));
+    // console.log(JSON.stringify(styleDef, null, ' '));
     // console.log("--------------------");
-    if (!style.layers || !Array.isArray(style.layers) || !style.layers.length) {
+    if (!styleDef.layers || !Array.isArray(styleDef.layers) || !styleDef.layers.length) {
         console.log("Style has no layer definitions");
         return {}; //empty styles
     }
     //have to group layers with same id but with different filters under the same style function
     /** @type {?} */
     let layers = {};
-    style.layers.forEach((/**
+    styleDef.layers.forEach((/**
      * @param {?} layer
      * @return {?}
      */
@@ -3204,24 +3204,22 @@ function parseMapBoxStyle(style) {
     id => {
         /** @type {?} */
         let styles = layers[id];
-        result[id] = doThis(styles);
+        result[id] = styleFunctionFactory(styles, styleDef);
     }));
-    // style.layers.forEach( layer => {
-    //     result[ layer.id ] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
-    // });
     return result;
 }
 /**
  * @param {?} layerStyles
+ * @param {?} styleDef
  * @return {?}
  */
-function doThis(layerStyles) {
+function styleFunctionFactory(layerStyles, styleDef) {
     /** @type {?} */
     let styles = layerStyles.map((/**
      * @param {?} layerStyle
      * @return {?}
      */
-    layerStyle => styleFunctionFactory(layerStyle)));
+    layerStyle => getLayerStyle(layerStyle, styleDef)));
     return (/**
      * @param {?} properties
      * @param {?} zoom
@@ -3267,15 +3265,13 @@ function doThis(layerStyles) {
         return result;
     });
 }
-const ɵ0$7 = /**
- * @param {?} layerStyle
- * @return {?}
+/**
+ * @param {?} layerStyle MapBox Style Spec Layer definition
+ * @param {?} styleDef MapBox Style document
+ * @return {?} Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
  */
-function (layerStyle) {
-    /**
-     *
-     * @type {?}
-     */
+function getLayerStyle(layerStyle, styleDef) {
+    /** @type {?} */
     let parseValue = (/**
      * @param {?} value
      * @param {?=} fallback
@@ -3291,8 +3287,6 @@ function (layerStyle) {
             return fallback || null;
     });
     /** @type {?} */
-    let filter = parseValue(layerStyle.filter);
-    /** @type {?} */
     let layerPaint = layerStyle.paint;
     /** @type {?} */
     let lineWidth = parseValue(layerPaint['line-width'], 1);
@@ -3303,7 +3297,18 @@ function (layerStyle) {
     /** @type {?} */
     let fillOpacity = parseValue(layerPaint['fill-opacity'] || layerPaint['background-opacity'], 1.0);
     /** @type {?} */
-    let fillColor = parseValue(layerPaint['fill-color'] || layerPaint['background-color'], '#000');
+    let fillColor = parseValue(layerPaint['fill-color'] || layerPaint['background-color'], 'transparent');
+    /** @type {?} */
+    let fillPattern = parseValue(layerPaint['fill-pattern']);
+    if (fillPattern && styleDef.spriteJSON && styleDef.spriteJSON[fillPattern]) {
+        /** @type {?} */
+        let pid = fillPattern.toLowerCase().replace(/\-/g, '').replace(/\\/g, '').replace(/\//g, '').replace(/\s+/g, '');
+        //fill uses sprite referenced by the style doc
+        // (fillPattern value is the key of the sprite entry)
+        /** @type {?} */
+        let pattern = styleDef.spriteJSON[fillPattern];
+        fillPattern = Object.assign({ id: pid, url: styleDef.spriteURL }, pattern);
+    }
     /** @type {?} */
     let style = {
         color: color,
@@ -3314,39 +3319,15 @@ function (layerStyle) {
         //stroke size
         fillOpacity: fillOpacity,
         //fill opacity
-        fillColor: fillColor //fill color
+        fillColor: fillColor,
+        //fill color
+        fillPattern: fillPattern
     };
     return {
-        filter: filter,
+        filter: parseValue(layerStyle.filter),
         style: style
     };
-    // return function( properties : any, zoom: number, geomType : string ) {
-    //     let result = {};
-    //
-    //     if(filter && typeof(filter.evaluate)) {
-    //         console.log("Style has a filter... " + filter.toString());
-    //         if(!filter.evaluate(properties, zoom, geomType)) {
-    //             console.log("Filter does not match");
-    //             return false;
-    //         }
-    //         console.log("Filter matches");
-    //     }
-    //
-    //     Object.keys(style).forEach( key => {
-    //         let styleVal = style[key];
-    //         if( styleVal && typeof(styleVal.evaluate) !== 'undefined')
-    //             result[key] = styleVal.evaluate(properties, zoom, geomType);
-    //         else result[key] = styleVal;
-    //     });
-    //     return result;
-    // };
-};
-/**
- * \@param layer MapBox Style Spec Layer definition
- * \@return Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
- * @type {?}
- */
-var styleFunctionFactory = ((ɵ0$7));
+}
 
 /**
  * @fileoverview added by tsickle
@@ -3385,9 +3366,10 @@ function mapBoxVectorTileLayer(layer) {
         console.log("LayerFactory - Leaflet Vector Tiles plugin not found");
         return null;
     }
+    augmentSVGTile();
     /** @type {?} */
     let opts = {
-        rendererFactory: ((/** @type {?} */ (canvas))).tile
+        rendererFactory: ((/** @type {?} */ (svg))).tile //( L.canvas as any ).tile
         // ,
         // getFeatureId: function( feature : any ) { return feature.properties.id; }
     };
@@ -3485,14 +3467,189 @@ function fetchStyleDefinition(layerId, resource) {
     /** @type {?} */
     let client = new XHRHttpClient();
     /** @type {?} */
-    let request = client.createRequestOpts({
-        method: "GET",
-        url: url,
-        timeout: 5000,
-        json: true
-    });
+    let request = client.createRequestOpts({ method: "GET", url: url, timeout: 5000, json: true });
+    return client.execute(request).then((/**
+     * @param {?} styleDef
+     * @return {?}
+     */
+    (styleDef) => {
+        if (styleDef.sprite) {
+            /** @type {?} */
+            let spriteUrl = resolveRelativeUrl(url + '/', styleDef.sprite);
+            return fetchSpriteInfo(spriteUrl + '.json', client)
+                .then((/**
+             * @param {?} spriteDef
+             * @return {?}
+             */
+            (spriteDef) => {
+                styleDef.spriteJSON = spriteDef;
+                styleDef.spriteURL = spriteUrl + '.png';
+                return styleDef;
+            }));
+        }
+        return styleDef;
+    }));
+}
+/**
+ * load sprite JSON and embed inline...
+ * @param {?} spriteUrl
+ * @param {?} client
+ * @return {?}
+ */
+function fetchSpriteInfo(spriteUrl, client) {
+    /** @type {?} */
+    let request = client.createRequestOpts({ method: "GET", url: spriteUrl, timeout: 5000, json: true });
     return client.execute(request);
 }
+/**
+ *
+ * @param {?} baseUrl
+ * @param {?} url
+ * @return {?}
+ */
+function resolveRelativeUrl(baseUrl, url) {
+    if (!url)
+        return baseUrl;
+    return new URL(url, baseUrl).href; //won't work in IE11 but fine elsewhere
+}
+/**
+ * @return {?}
+ */
+function augmentSVGTile() {
+    /** @type {?} */
+    const Tile = ((/** @type {?} */ (SVG))).Tile;
+    if (Tile && !Tile._augmented) {
+        console.log("Augmenting Tile Layer");
+        Tile.include({
+            _augmented: true,
+            _addPath: (/**
+             * @param {?} layer
+             * @return {?}
+             */
+            function (layer) {
+                /** @type {?} */
+                let options = layer.options;
+                /** @type {?} */
+                let hasFillColor = !options.fillPattern && options.fillColor &&
+                    options.fillColor !== 'transparent';
+                if (this._rootGroup.firstChild && hasFillColor) {
+                    //move a non-fill pattern path to the front of its siblings so it
+                    // is rendered BEFORE any fill patterns are.  SVG does not support
+                    // z-index within it's elements and ordering is front to back (bottom to top).
+                    this._rootGroup.insertBefore(layer._path, this._rootGroup.firstChild);
+                }
+                else {
+                    this._rootGroup.appendChild(layer._path);
+                }
+                this._layers[stamp(layer)] = layer;
+            })
+        });
+    }
+}
+SVG.include({
+    _updateStyle: (/**
+     * @param {?} layer
+     * @return {?}
+     */
+    function (layer) {
+        /** @type {?} */
+        var path = layer._path;
+        /** @type {?} */
+        var options = layer.options;
+        if (!path) {
+            return;
+        }
+        if (options.stroke) {
+            path.setAttribute('stroke', options.color);
+            path.setAttribute('stroke-opacity', options.opacity);
+            path.setAttribute('stroke-width', options.weight);
+            path.setAttribute('stroke-linecap', options.lineCap);
+            path.setAttribute('stroke-linejoin', options.lineJoin);
+            if (options.dashArray) {
+                path.setAttribute('stroke-dasharray', options.dashArray);
+            }
+            else {
+                path.removeAttribute('stroke-dasharray');
+            }
+            if (options.dashOffset) {
+                path.setAttribute('stroke-dashoffset', options.dashOffset);
+            }
+            else {
+                path.removeAttribute('stroke-dashoffset');
+            }
+        }
+        else {
+            path.setAttribute('stroke', 'none');
+        }
+        if (options.fillPattern || (options.fillColor && options.fillColor !== 'transparent')) {
+            if (options.fillPattern && typeof (options.fillPattern) === "object") {
+                this.__fillPattern(layer);
+            }
+            else {
+                path.setAttribute('fill', options.fillColor || options.color);
+            }
+            path.setAttribute('fill-opacity', options.fillOpacity);
+            path.setAttribute('fill-rule', options.fillRule || 'evenodd');
+        }
+        else {
+            path.setAttribute('fill', 'none');
+        }
+    }),
+    __fillPattern: (/**
+     * @param {?} layer
+     * @return {?}
+     */
+    function (layer) {
+        /** @type {?} */
+        var path = layer._path;
+        /** @type {?} */
+        var options = layer.options;
+        if (!this._defs) {
+            this._defs = SVG.create('defs');
+            this._container.appendChild(this._defs);
+        }
+        /** @type {?} */
+        var imgUrl = options.fillPattern.url;
+        /** @type {?} */
+        var patternId = options.fillPattern.id + this._tileCoord.z + this._tileCoord.x + this._tileCoord.y;
+        /** @type {?} */
+        var patternEl = document.getElementById(patternId);
+        if (!patternEl) {
+            /** @type {?} */
+            var imgObj = new Image();
+            imgObj.src = imgUrl;
+            patternEl = SVG.create('pattern');
+            patternEl.setAttribute('id', patternId);
+            patternEl.setAttribute('x', options.fillPattern.x);
+            patternEl.setAttribute('y', options.fillPattern.y);
+            patternEl.setAttribute('patternUnits', 'userSpaceOnUse');
+            patternEl.setAttribute('width', options.fillPattern.width);
+            patternEl.setAttribute('height', options.fillPattern.height);
+            this._defs.appendChild(patternEl);
+            /** @type {?} */
+            var imgEl = SVG.create('image');
+            imgEl.setAttribute('x', '0');
+            imgEl.setAttribute('y', '0');
+            imgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', imgUrl);
+            imgEl.setAttribute('width', options.fillPattern.width);
+            imgEl.setAttribute('height', options.fillPattern.height);
+            /** @type {?} */
+            let tx = options.fillPattern.x > 0 ? ('-' + options.fillPattern.x) : 0;
+            /** @type {?} */
+            let ty = options.fillPattern.y > 0 ? ('-' + options.fillPattern.y) : 0;
+            imgEl.setAttribute("transform", "translate(" + tx + " " + ty + ")");
+            patternEl.appendChild(imgEl);
+            imgObj.onload = (/**
+             * @return {?}
+             */
+            function () {
+                imgEl.setAttribute('width', imgObj.width + '');
+                imgEl.setAttribute('height', imgObj.height + '');
+            });
+        }
+        path.setAttribute('fill', "url(#" + patternId + ")");
+    })
+});
 
 /**
  * @fileoverview added by tsickle
@@ -3806,7 +3963,7 @@ var LayerFactory$1 = new LayerFactory();
 const jQuery$2 = jquery;
 /** @type {?} */
 var EsriFeatureLayer = FeatureLayer;
-const ɵ0$8 = /**
+const ɵ0$7 = /**
  * @param {?} feature
  * @param {?} latlng
  * @return {?}
@@ -4038,7 +4195,7 @@ var FeatureLayer$2 = EsriFeatureLayer.extend({
      * @param latlng - L.LatLng
      * @return L.Marker
      */
-    pointToLayerFn: (ɵ0$8),
+    pointToLayerFn: (ɵ0$7),
     /**
      * for all non-point features, bind a popup
      * @param feature - GeoJSON feature

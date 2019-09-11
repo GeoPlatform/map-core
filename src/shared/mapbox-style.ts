@@ -6,6 +6,7 @@ interface LeafletStyle {
     dashArray   ?: number[];
     fillOpacity ?: number;
     fillColor   ?: string;
+    fillPattern ?: any; //custom extension for sprite fill patterns
 }
 
 interface LeafletStyleMap {
@@ -26,6 +27,9 @@ interface MapBoxStyle {
     glyphs      ?: string;  //A URL template for loading signed-distance-field glyph sets in PBF format. The URL must include {fontstack} and {range} tokens. This property is required if any layer uses the text-field layout property. The URL must be absolute, containing the scheme, authority and path components.
     transition  ?: any;     //A global transition definition to use as a default across properties, to be used for timing transitions between one value and the next when no property-specific transition is set. Collision-based symbol fading is controlled independently of the style's transition property.
     layers      ?: MapBoxStyleLayer[];   //Layers will be drawn in the order of this array.
+
+    spriteJSON  ?: any;     //custom extension of parsed sprite JSON definition
+    spriteURL   ?: string;  //custom extension of sprite IMG URL
 }
 
 interface MapBoxStyleLayer {
@@ -244,22 +248,22 @@ class Expression {
  * @param style MapBox Style definition
  * @return object associating Leaflet styles with layer ids
  */
-export default function parseMapBoxStyle( style : MapBoxStyle ) : { [key:string]:LeafletStyleMap } {
+export default function parseMapBoxStyle( styleDef : MapBoxStyle ) : { [key:string]:LeafletStyleMap } {
 
-    //TODO validate style.version to make sure we are parsing something we understand
+    //TODO validate styleDef.version to make sure we are parsing something we understand
 
     // console.log("Parsing MapBox Style");
-    // console.log(JSON.stringify(style, null, ' '));
+    // console.log(JSON.stringify(styleDef, null, ' '));
     // console.log("--------------------");
 
-    if( !style.layers || !Array.isArray(style.layers) || !style.layers.length) {
+    if( !styleDef.layers || !Array.isArray(styleDef.layers) || !styleDef.layers.length) {
         console.log("Style has no layer definitions");
         return {};   //empty styles
     }
 
     //have to group layers with same id but with different filters under the same style function
     let layers = {};
-    style.layers.forEach( layer => {
+    styleDef.layers.forEach( layer => {
         //use source-layer key first, fallback to layer id
         let id = (layer['source-layer'] || layer.id).trim();
         if(layers[id]) layers[id].push(layer);  //layer already exists
@@ -270,19 +274,18 @@ export default function parseMapBoxStyle( style : MapBoxStyle ) : { [key:string]
     let result = {};
     Object.keys(layers).forEach( id => {
         let styles = layers[id];    //array of 1 or more for given id (differentiated by filters)
-        result[id] = doThis(styles);
-    })
-    // style.layers.forEach( layer => {
-    //     result[ layer.id ] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
-    // });
+        result[id] = styleFunctionFactory(styles, styleDef);
+    });
     return result;
 }
 
 
 
-function doThis( layerStyles : MapBoxStyleLayer[] ) : Function {
+function styleFunctionFactory(
+    layerStyles : MapBoxStyleLayer[], styleDef : MapBoxStyle
+) : Function {
 
-    let styles = layerStyles.map( layerStyle => styleFunctionFactory(layerStyle) );
+    let styles = layerStyles.map( layerStyle => getLayerStyle(layerStyle, styleDef) );
 
     return function( properties : any, zoom: number, geomType : string ) {
 
@@ -316,14 +319,12 @@ function doThis( layerStyles : MapBoxStyleLayer[] ) : Function {
 
 
 /**
- * @param layer MapBox Style Spec Layer definition
+ * @param  layerStyle MapBox Style Spec Layer definition
+ * @param  styleDef MapBox Style document
  * @return Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
  */
-var styleFunctionFactory = ( function( layerStyle : MapBoxStyleLayer ) {
+function getLayerStyle( layerStyle : MapBoxStyleLayer, styleDef: MapBoxStyle ) {
 
-    /**
-     *
-     */
     let parseValue = function ( value : any, fallback ?: any ) {
         if( value && Array.isArray(value) && value.length ) {
             return new Expression(value);
@@ -332,47 +333,34 @@ var styleFunctionFactory = ( function( layerStyle : MapBoxStyleLayer ) {
         else return fallback || null;
     }
 
-    let filter : any = parseValue(layerStyle.filter);
 
     let layerPaint : MapBoxPaint  = layerStyle.paint;
-
     let lineWidth   = parseValue( layerPaint['line-width'], 1);
     let opacity     = parseValue( layerPaint['line-opacity'], 1.0);
     let color       = parseValue( layerPaint['line-color']   || layerPaint['fill-outline-color'] || layerPaint['fill-color'], '#000');
     let fillOpacity = parseValue( layerPaint['fill-opacity'] || layerPaint['background-opacity'], 1.0);
-    let fillColor   = parseValue( layerPaint['fill-color']   || layerPaint['background-color'], '#000');
+    let fillColor   = parseValue( layerPaint['fill-color']   || layerPaint['background-color'], 'transparent');
+    let fillPattern = parseValue( layerPaint['fill-pattern'] );
+
+    if(fillPattern && styleDef.spriteJSON && styleDef.spriteJSON[fillPattern]) {
+        let pid = fillPattern.toLowerCase().replace(/\-/g,'').replace(/\\/g,'').replace(/\//g,'').replace(/\s+/g,'');
+        //fill uses sprite referenced by the style doc
+        // (fillPattern value is the key of the sprite entry)
+        let pattern = styleDef.spriteJSON[fillPattern];
+        fillPattern = Object.assign({ id: pid, url: styleDef.spriteURL }, pattern);
+    }
 
     let style : LeafletStyle = {
-        color      : color,         //stroke color
-        opacity    : opacity,       //stroke opacity
-        weight     : lineWidth,     //stroke size
-        fillOpacity: fillOpacity,   //fill opacity
-        fillColor  : fillColor      //fill color
+        color       : color,         //stroke color
+        opacity     : opacity,       //stroke opacity
+        weight      : lineWidth,     //stroke size
+        fillOpacity : fillOpacity,   //fill opacity
+        fillColor   : fillColor,     //fill color
+        fillPattern : fillPattern
     };
 
     return {
-        filter: filter,
+        filter: parseValue(layerStyle.filter),
         style: style
     };
-
-    // return function( properties : any, zoom: number, geomType : string ) {
-    //     let result = {};
-    //
-    //     if(filter && typeof(filter.evaluate)) {
-    //         console.log("Style has a filter... " + filter.toString());
-    //         if(!filter.evaluate(properties, zoom, geomType)) {
-    //             console.log("Filter does not match");
-    //             return false;
-    //         }
-    //         console.log("Filter matches");
-    //     }
-    //
-    //     Object.keys(style).forEach( key => {
-    //         let styleVal = style[key];
-    //         if( styleVal && typeof(styleVal.evaluate) !== 'undefined')
-    //             result[key] = styleVal.evaluate(properties, zoom, geomType);
-    //         else result[key] = styleVal;
-    //     });
-    //     return result;
-    // };
-});
+}
