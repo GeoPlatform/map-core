@@ -268,8 +268,8 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
     loadStyle: function(gpLayerId) {
 
         if(this.options.styleLoader) {
-            this.options.styleLoader(gpLayerId)
-            .then( json => {
+
+            this.options.styleLoader(gpLayerId).then( json => {
 
                 if(!json) return;
 
@@ -306,9 +306,46 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
 
                 } else if(json && typeof(json.push) !== 'undefined') {
                     //multiple styles returned
-                    style = json[0];  //use first for now
+
+                    if(json[0].filter) {    //if the styles have filters associated...
+                        console.log("Using style function for multiple");
+
+                        //generate a function which will use those filters to assign styles per feature
+                        let styleFn = (feature) => {
+                            let match = json.find( stl => {
+                                let actual = feature.properties[stl.filter.property];
+                                if(actual === undefined || actual === null) return null;
+                                let min = isNaN(stl.filter.min) ? null : stl.filter.min*1;
+                                let max = isNaN(stl.filter.max) ? null : stl.filter.max*1;
+                                let expected = stl.filter.value;
+
+                                if( expected !== undefined && expected !== null && actual == expected) {
+                                    return stl;
+
+                                } else if( (min !== null || max !== null) && !isNaN(actual) ) {
+                                    if(min !== null && max !== null && min <= actual && actual <= max) {
+                                        return stl;
+                                    } else if(min !== null && min <= actual) {
+                                        return stl;
+                                    } else if(max !== null && actual <= max) {
+                                        return stl;
+                                    }
+                                }
+                                return null;
+                            });
+                            return match;
+                        };
+                        this.options.style = styleFn;
+                        setTimeout( (layer, style) => { layer.setStyle(style); }, 1000, this, styleFn);
+                        return;
+
+                    } else {
+                        console.log("Using first style of many");
+                        style = json[0];  //use first for now
+                    }
 
                 } else if(json) {
+                    console.log("Using singular style");
                     style = json;
 
                 } else {

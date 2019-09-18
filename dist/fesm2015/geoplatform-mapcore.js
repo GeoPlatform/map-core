@@ -1934,8 +1934,7 @@ function (style) {
  */
 function (gpLayerId) {
     if (this.options.styleLoader) {
-        this.options.styleLoader(gpLayerId)
-            .then((/**
+        this.options.styleLoader(gpLayerId).then((/**
          * @param {?} json
          * @return {?}
          */
@@ -1996,9 +1995,65 @@ function (gpLayerId) {
             }
             else if (json && typeof (json.push) !== 'undefined') {
                 //multiple styles returned
-                style = json[0]; //use first for now
+                if (json[0].filter) { //if the styles have filters associated...
+                    console.log("Using style function for multiple");
+                    //generate a function which will use those filters to assign styles per feature
+                    /** @type {?} */
+                    let styleFn = (/**
+                     * @param {?} feature
+                     * @return {?}
+                     */
+                    (feature) => {
+                        /** @type {?} */
+                        let match = json.find((/**
+                         * @param {?} stl
+                         * @return {?}
+                         */
+                        stl => {
+                            /** @type {?} */
+                            let actual = feature.properties[stl.filter.property];
+                            if (actual === undefined || actual === null)
+                                return null;
+                            /** @type {?} */
+                            let min = isNaN(stl.filter.min) ? null : stl.filter.min * 1;
+                            /** @type {?} */
+                            let max = isNaN(stl.filter.max) ? null : stl.filter.max * 1;
+                            /** @type {?} */
+                            let expected = stl.filter.value;
+                            if (expected !== undefined && expected !== null && actual == expected) {
+                                return stl;
+                            }
+                            else if ((min !== null || max !== null) && !isNaN(actual)) {
+                                if (min !== null && max !== null && min <= actual && actual <= max) {
+                                    return stl;
+                                }
+                                else if (min !== null && min <= actual) {
+                                    return stl;
+                                }
+                                else if (max !== null && actual <= max) {
+                                    return stl;
+                                }
+                            }
+                            return null;
+                        }));
+                        return match;
+                    });
+                    this.options.style = styleFn;
+                    setTimeout((/**
+                     * @param {?} layer
+                     * @param {?} style
+                     * @return {?}
+                     */
+                    (layer, style) => { layer.setStyle(style); }), 1000, this, styleFn);
+                    return;
+                }
+                else {
+                    console.log("Using first style of many");
+                    style = json[0]; //use first for now
+                }
             }
             else if (json) {
+                console.log("Using singular style");
                 style = json;
             }
             else {
@@ -3204,10 +3259,10 @@ function parseMapBoxStyle(style) {
     id => {
         /** @type {?} */
         let styles = layers[id];
-        result[id] = doThis(styles);
+        result[id] = styleFunctionFactory(styles);
     }));
     // style.layers.forEach( layer => {
-    //     result[ layer.id ] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
+    //     result[ layer.id ] = getLayerStyle(layer); //new LayerStyle( layer ).getStyleFunction()
     // });
     return result;
 }
@@ -3215,13 +3270,13 @@ function parseMapBoxStyle(style) {
  * @param {?} layerStyles
  * @return {?}
  */
-function doThis(layerStyles) {
+function styleFunctionFactory(layerStyles) {
     /** @type {?} */
     let styles = layerStyles.map((/**
      * @param {?} layerStyle
      * @return {?}
      */
-    layerStyle => styleFunctionFactory(layerStyle)));
+    layerStyle => getLayerStyle(layerStyle)));
     return (/**
      * @param {?} properties
      * @param {?} zoom
@@ -3346,7 +3401,7 @@ function (layerStyle) {
  * \@return Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
  * @type {?}
  */
-var styleFunctionFactory = ((ɵ0$7));
+var getLayerStyle = ((ɵ0$7));
 
 /**
  * @fileoverview added by tsickle

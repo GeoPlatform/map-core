@@ -1957,11 +1957,10 @@ This software has been approved for release by the U.S. Department of the Interi
      */ function (gpLayerId) {
         var _this = this;
         if (this.options.styleLoader) {
-            this.options.styleLoader(gpLayerId)
-                .then(( /**
-         * @param {?} json
-         * @return {?}
-         */function (json) {
+            this.options.styleLoader(gpLayerId).then(( /**
+             * @param {?} json
+             * @return {?}
+             */function (json) {
                 if (!json)
                     return;
                 /** @type {?} */
@@ -2014,9 +2013,62 @@ This software has been approved for release by the U.S. Department of the Interi
                 }
                 else if (json && typeof (json.push) !== 'undefined') {
                     //multiple styles returned
-                    style = json[0]; //use first for now
+                    if (json[0].filter) { //if the styles have filters associated...
+                        console.log("Using style function for multiple");
+                        //generate a function which will use those filters to assign styles per feature
+                        /** @type {?} */
+                        var styleFn = ( /**
+                         * @param {?} feature
+                         * @return {?}
+                         */function (feature) {
+                            /** @type {?} */
+                            var match = json.find(( /**
+                             * @param {?} stl
+                             * @return {?}
+                             */function (stl) {
+                                /** @type {?} */
+                                var actual = feature.properties[stl.filter.property];
+                                if (actual === undefined || actual === null)
+                                    return null;
+                                /** @type {?} */
+                                var min = isNaN(stl.filter.min) ? null : stl.filter.min * 1;
+                                /** @type {?} */
+                                var max = isNaN(stl.filter.max) ? null : stl.filter.max * 1;
+                                /** @type {?} */
+                                var expected = stl.filter.value;
+                                if (expected !== undefined && expected !== null && actual == expected) {
+                                    return stl;
+                                }
+                                else if ((min !== null || max !== null) && !isNaN(actual)) {
+                                    if (min !== null && max !== null && min <= actual && actual <= max) {
+                                        return stl;
+                                    }
+                                    else if (min !== null && min <= actual) {
+                                        return stl;
+                                    }
+                                    else if (max !== null && actual <= max) {
+                                        return stl;
+                                    }
+                                }
+                                return null;
+                            }));
+                            return match;
+                        });
+                        _this.options.style = styleFn;
+                        setTimeout(( /**
+                         * @param {?} layer
+                         * @param {?} style
+                         * @return {?}
+                         */function (layer, style) { layer.setStyle(style); }), 1000, _this, styleFn);
+                        return;
+                    }
+                    else {
+                        console.log("Using first style of many");
+                        style = json[0]; //use first for now
+                    }
                 }
                 else if (json) {
+                    console.log("Using singular style");
                     style = json;
                 }
                 else {
@@ -3360,10 +3412,10 @@ This software has been approved for release by the U.S. Department of the Interi
          */function (id) {
             /** @type {?} */
             var styles = layers[id];
-            result[id] = doThis(styles);
+            result[id] = styleFunctionFactory(styles);
         }));
         // style.layers.forEach( layer => {
-        //     result[ layer.id ] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
+        //     result[ layer.id ] = getLayerStyle(layer); //new LayerStyle( layer ).getStyleFunction()
         // });
         return result;
     }
@@ -3371,12 +3423,12 @@ This software has been approved for release by the U.S. Department of the Interi
      * @param {?} layerStyles
      * @return {?}
      */
-    function doThis(layerStyles) {
+    function styleFunctionFactory(layerStyles) {
         /** @type {?} */
         var styles = layerStyles.map(( /**
          * @param {?} layerStyle
          * @return {?}
-         */function (layerStyle) { return styleFunctionFactory(layerStyle); }));
+         */function (layerStyle) { return getLayerStyle(layerStyle); }));
         return ( /**
          * @param {?} properties
          * @param {?} zoom
@@ -3496,7 +3548,7 @@ This software has been approved for release by the U.S. Department of the Interi
      * \@return Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
      * @type {?}
      */
-    var styleFunctionFactory = ((ɵ0$7));
+    var getLayerStyle = ((ɵ0$7));
 
     /**
      * @fileoverview added by tsickle

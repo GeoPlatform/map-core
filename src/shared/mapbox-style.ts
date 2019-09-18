@@ -270,19 +270,19 @@ export default function parseMapBoxStyle( style : MapBoxStyle ) : { [key:string]
     let result = {};
     Object.keys(layers).forEach( id => {
         let styles = layers[id];    //array of 1 or more for given id (differentiated by filters)
-        result[id] = doThis(styles);
+        result[id] = styleFunctionFactory(styles);
     })
     // style.layers.forEach( layer => {
-    //     result[ layer.id ] = styleFunctionFactory(layer); //new LayerStyle( layer ).getStyleFunction()
+    //     result[ layer.id ] = getLayerStyle(layer); //new LayerStyle( layer ).getStyleFunction()
     // });
     return result;
 }
 
 
 
-function doThis( layerStyles : MapBoxStyleLayer[] ) : Function {
+function styleFunctionFactory( layerStyles : MapBoxStyleLayer[] ) : Function {
 
-    let styles = layerStyles.map( layerStyle => styleFunctionFactory(layerStyle) );
+    let styles = layerStyles.map( layerStyle => getLayerStyle(layerStyle) );
 
     return function( properties : any, zoom: number, geomType : string ) {
 
@@ -319,7 +319,7 @@ function doThis( layerStyles : MapBoxStyleLayer[] ) : Function {
  * @param layer MapBox Style Spec Layer definition
  * @return Function accepting feature properties, zoom level, and geometry type and returning a Leaflet style object
  */
-var styleFunctionFactory = ( function( layerStyle : MapBoxStyleLayer ) {
+var getLayerStyle = ( function( layerStyle : MapBoxStyleLayer ) {
 
     /**
      *
