@@ -308,8 +308,7 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
                     //multiple styles returned
 
                     if(json[0].filter) {    //if the styles have filters associated...
-                        console.log("Using style function for multiple");
-
+                        
                         //generate a function which will use those filters to assign styles per feature
                         let styleFn = (feature) => {
                             let match = json.find( stl => {
@@ -340,12 +339,10 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
                         return;
 
                     } else {
-                        console.log("Using first style of many");
                         style = json[0];  //use first for now
                     }
 
                 } else if(json) {
-                    console.log("Using singular style");
                     style = json;
 
                 } else {

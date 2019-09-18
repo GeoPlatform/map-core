@@ -1996,7 +1996,7 @@ function (gpLayerId) {
             else if (json && typeof (json.push) !== 'undefined') {
                 //multiple styles returned
                 if (json[0].filter) { //if the styles have filters associated...
-                    console.log("Using style function for multiple");
+                    //if the styles have filters associated...
                     //generate a function which will use those filters to assign styles per feature
                     /** @type {?} */
                     let styleFn = (/**
@@ -2048,12 +2048,10 @@ function (gpLayerId) {
                     return;
                 }
                 else {
-                    console.log("Using first style of many");
                     style = json[0]; //use first for now
                 }
             }
             else if (json) {
-                console.log("Using singular style");
                 style = json;
             }
             else {
