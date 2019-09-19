@@ -1482,7 +1482,11 @@ function (features) {
             newLayer.feature = GeoJSON.asFeature(geojson);
             newLayer.defaultOptions = newLayer.options;
             newLayer._leaflet_id = this._key + '_' + geojson.id;
-            this.resetStyle(newLayer.feature.id);
+            // this.resetStyle(newLayer.feature.id);
+            /** @type {?} */
+            var style = typeof (this.options.style) === 'function' ?
+                this.options.style(newLayer.feature) : this.options.style;
+            newLayer.setStyle(style);
             // cache the layer
             this._layers[newLayer.feature.id] = newLayer;
             this._leafletIds[newLayer._leaflet_id] = geojson.id;
@@ -1557,6 +1561,7 @@ function (id) {
  * @return {?}
  */
 function (style) {
+    this.options.style = style;
     this.eachFeature((/**
      * @param {?} layer
      * @return {?}
@@ -2004,18 +2009,6 @@ function (opacity) {
         }
     }
 }, ɵ9$3 = /**
- * @param {?} style
- * @return {?}
- */
-function (style) {
-    this.eachFeature((/**
-     * @param {?} layer
-     * @return {?}
-     */
-    function (layer) {
-        this.setFeatureStyle(layer.feature.id, style);
-    }), this);
-}, ɵ10$3 = /**
  * @param {?} gpLayerId
  * @return {?}
  */
@@ -2031,7 +2024,8 @@ function (gpLayerId) {
                 return;
             /** @type {?} */
             var style = null;
-            if (json && json.styles) {
+            if (json && json.styles) { //old style function, not sure if being used currently
+                console.log("Layer " + gpLayerId + " using older json.styles definition");
                 /** @type {?} */
                 var featureFn_1 = (/**
                  * @param {?} feature
@@ -2082,62 +2076,20 @@ function (gpLayerId) {
                 return;
             }
             else if (json && typeof (json.push) !== 'undefined') {
-                //multiple styles returned
-                if (json[0].filter) { //if the styles have filters associated...
-                    //if the styles have filters associated...
-                    //generate a function which will use those filters to assign styles per feature
-                    /** @type {?} */
-                    var styleFn = (/**
-                     * @param {?} feature
-                     * @return {?}
-                     */
-                    function (feature) {
-                        /** @type {?} */
-                        var match = json.find((/**
-                         * @param {?} stl
-                         * @return {?}
-                         */
-                        function (stl) {
-                            /** @type {?} */
-                            var actual = feature.properties[stl.filter.property];
-                            if (actual === undefined || actual === null)
-                                return null;
-                            /** @type {?} */
-                            var min = isNaN(stl.filter.min) ? null : stl.filter.min * 1;
-                            /** @type {?} */
-                            var max = isNaN(stl.filter.max) ? null : stl.filter.max * 1;
-                            /** @type {?} */
-                            var expected = stl.filter.value;
-                            if (expected !== undefined && expected !== null && actual == expected) {
-                                return stl;
-                            }
-                            else if ((min !== null || max !== null) && !isNaN(actual)) {
-                                if (min !== null && max !== null && min <= actual && actual <= max) {
-                                    return stl;
-                                }
-                                else if (min !== null && min <= actual) {
-                                    return stl;
-                                }
-                                else if (max !== null && actual <= max) {
-                                    return stl;
-                                }
-                            }
-                            return null;
-                        }));
-                        return match;
-                    });
-                    _this.options.style = styleFn;
-                    setTimeout((/**
-                     * @param {?} layer
-                     * @param {?} style
-                     * @return {?}
-                     */
-                    function (layer, style) { layer.setStyle(style); }), 1000, _this, styleFn);
-                    return;
-                }
-                else {
-                    style = json[0]; //use first for now
-                }
+                // multiple styles returned...
+                // generate a function which will use those filters to assign styles per feature
+                /** @type {?} */
+                var styleFn = _this.styleFunctionFactory(json);
+                _this.options.style = styleFn;
+                setTimeout((/**
+                 * @param {?} layer
+                 * @param {?} style
+                 * @return {?}
+                 */
+                function (layer, style) {
+                    layer.setStyle(style);
+                }), 1000, _this, styleFn);
+                return;
             }
             else if (json) {
                 style = json;
@@ -2163,8 +2115,8 @@ function (gpLayerId) {
          * @return {?}
          */
         function (e) {
-            console.log("Error fetching feature layer style");
-            console.log(e);
+            console.log("[ERROR] Error fetching FeatureLayer (" + gpLayerId + ") style:");
+            console.log(e.message);
         }));
     }
 };
@@ -2212,8 +2164,74 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
      * @param opacity
      */
     setOpacity: (ɵ8$3),
-    setStyle: (ɵ9$3),
-    loadStyle: (ɵ10$3)
+    /**
+     * @param gpLayerId - identifier of GP Layer Asset to load style for
+     */
+    loadStyle: (ɵ9$3),
+    styleFunctionFactory: /**
+     * @param {?} styles
+     * @return {?}
+     */
+    function (styles) {
+        return (/**
+         * @param {?} feature
+         * @return {?}
+         */
+        function (feature) {
+            if (!styles.length) {
+                console.log("[WARN] No styles defined");
+                return null; //empty styles
+            }
+            //if a default style is defined, remember it just in case
+            /** @type {?} */
+            var defaultStyle = styles[0];
+            //TODO look for 'defaultSymbol'
+            /** @type {?} */
+            var match = styles.find((/**
+             * @param {?} style
+             * @return {?}
+             */
+            function (style) {
+                if (!style.filter) {
+                    // console.log("Styles have no filter");
+                    return defaultStyle; //just return default
+                }
+                if (!style.filter.property) {
+                    // console.log("No filterable property defined");
+                    return defaultStyle; //just return default
+                }
+                /** @type {?} */
+                var actual = feature.properties[style.filter.property];
+                if (actual === undefined || actual === null) {
+                    // console.log("No filterable property value present");
+                    return defaultStyle; //just return default
+                }
+                /** @type {?} */
+                var min = isNaN(style.filter.min) ? null : style.filter.min * 1;
+                /** @type {?} */
+                var max = isNaN(style.filter.max) ? null : style.filter.max * 1;
+                /** @type {?} */
+                var expected = style.filter.value;
+                // console.log(`Comparing '${actual}' to '${expected}' and '${min}' - '${max}'`);
+                if (expected !== undefined && expected !== null && actual == expected) {
+                    return style;
+                }
+                else if ((min !== null || max !== null) && !isNaN(actual)) {
+                    if (min !== null && max !== null && min <= actual && actual <= max) {
+                        return style;
+                    }
+                    else if (min !== null && min <= actual) {
+                        return style;
+                    }
+                    else if (max !== null && actual <= max) {
+                        return style;
+                    }
+                }
+                return null; //don't return default here, just null (inside loop)
+            }));
+            return match || defaultStyle;
+        });
+    }
 });
 /**
  * @param {?} layer - GeoPlatform Layer object

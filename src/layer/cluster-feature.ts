@@ -19,6 +19,7 @@ import featureStyleResolver from '../shared/style-resolver';
 import featurePopupTemplate from '../shared/popup-template';
 
 
+
 /**
  * Clustered Feature Layer
  * Provides custom style loading and point-ilization as well
@@ -259,23 +260,20 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
         }
     },
 
-    setStyle: function(style) {
-        this.eachFeature(function (layer) {
-            this.setFeatureStyle(layer.feature.id, style);
-        }, this);
-    },
-
+    /**
+     * @param gpLayerId - identifier of GP Layer Asset to load style for
+     */
     loadStyle: function(gpLayerId) {
 
         if(this.options.styleLoader) {
 
             this.options.styleLoader(gpLayerId).then( json => {
-
                 if(!json) return;
 
                 let style = null;
 
-                if(json && json.styles) {
+                if(json && json.styles) {   //old style function, not sure if being used currently
+                    console.log("Layer " + gpLayerId + " using older json.styles definition");
 
                     let featureFn = function(feature) {
 
@@ -305,42 +303,14 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
                     return;
 
                 } else if(json && typeof(json.push) !== 'undefined') {
-                    //multiple styles returned
-
-                    if(json[0].filter) {    //if the styles have filters associated...
-                        
-                        //generate a function which will use those filters to assign styles per feature
-                        let styleFn = (feature) => {
-                            let match = json.find( stl => {
-                                let actual = feature.properties[stl.filter.property];
-                                if(actual === undefined || actual === null) return null;
-                                let min = isNaN(stl.filter.min) ? null : stl.filter.min*1;
-                                let max = isNaN(stl.filter.max) ? null : stl.filter.max*1;
-                                let expected = stl.filter.value;
-
-                                if( expected !== undefined && expected !== null && actual == expected) {
-                                    return stl;
-
-                                } else if( (min !== null || max !== null) && !isNaN(actual) ) {
-                                    if(min !== null && max !== null && min <= actual && actual <= max) {
-                                        return stl;
-                                    } else if(min !== null && min <= actual) {
-                                        return stl;
-                                    } else if(max !== null && actual <= max) {
-                                        return stl;
-                                    }
-                                }
-                                return null;
-                            });
-                            return match;
-                        };
-                        this.options.style = styleFn;
-                        setTimeout( (layer, style) => { layer.setStyle(style); }, 1000, this, styleFn);
-                        return;
-
-                    } else {
-                        style = json[0];  //use first for now
-                    }
+                    // multiple styles returned...
+                    // generate a function which will use those filters to assign styles per feature
+                    let styleFn = this.styleFunctionFactory(json);
+                    this.options.style = styleFn;
+                    setTimeout( (layer, style) => {
+                        layer.setStyle(style);
+                    }, 1000, this, styleFn);
+                    return;
 
                 } else if(json) {
                     style = json;
@@ -350,7 +320,7 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
                 }
 
                 if(style.shape) {
-                    var obj = jQuery.extend({}, style);
+                    var obj = jQuery.extend({}, style); //TODO remove jQuery dependency
                     obj.style = style;
                     this._gpStyle = style;
 
@@ -364,12 +334,69 @@ var ClusteredFeatureLayer = BaseClusteredFeatureLayer.extend({
                 }
             })
             .catch( e => {
-                console.log("Error fetching feature layer style");
-                console.log(e);
+                console.log("[ERROR] Error fetching FeatureLayer (" + gpLayerId + ") style:");
+                console.log(e.message);
             });
         }
+    },
+
+    styleFunctionFactory(styles) {
+
+        return function(feature) {
+
+            if( !styles.length ) {
+                console.log("[WARN] No styles defined");
+                return null;   //empty styles
+            }
+
+            //if a default style is defined, remember it just in case
+            let defaultStyle = styles[0];   //TODO look for 'defaultSymbol'
+
+            let match = styles.find( style => {
+
+                if( !style.filter ) {
+                    // console.log("Styles have no filter");
+                    return defaultStyle;    //just return default
+                }
+
+                if( !style.filter.property ) {
+                    // console.log("No filterable property defined");
+                    return defaultStyle;   //just return default
+                }
+
+                let actual = feature.properties[style.filter.property];
+                if( actual === undefined || actual === null ) {
+                    // console.log("No filterable property value present");
+                    return defaultStyle;   //just return default
+                }
+
+                let min = isNaN(style.filter.min) ? null : style.filter.min*1;
+                let max = isNaN(style.filter.max) ? null : style.filter.max*1;
+                let expected = style.filter.value;
+                // console.log(`Comparing '${actual}' to '${expected}' and '${min}' - '${max}'`);
+
+                if( expected !== undefined && expected !== null && actual == expected) {
+                    return style;
+
+                } else if( (min !== null || max !== null) && !isNaN(actual) ) {
+                    if(min !== null && max !== null && min <= actual && actual <= max) {
+                        return style;
+                    } else if(min !== null && min <= actual) {
+                        return style;
+                    } else if(max !== null && actual <= max) {
+                        return style;
+                    }
+                }
+
+                return null;    //don't return default here, just null (inside loop)
+            });
+
+            return match || defaultStyle;
+        };
     }
 });
+
+
 
 
 

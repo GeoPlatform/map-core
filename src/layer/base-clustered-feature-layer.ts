@@ -71,7 +71,10 @@ var BaseClusteredFeatureLayer = esri.FeatureManager.extend({
         newLayer.defaultOptions = newLayer.options;
         newLayer._leaflet_id = this._key + '_' + geojson.id;
 
-        this.resetStyle(newLayer.feature.id);
+        // this.resetStyle(newLayer.feature.id);
+        let style = typeof(this.options.style) === 'function' ?
+            this.options.style(newLayer.feature) : this.options.style;
+        newLayer.setStyle(style);
 
         // cache the layer
         this._layers[newLayer.feature.id] = newLayer;
@@ -143,10 +146,11 @@ var BaseClusteredFeatureLayer = esri.FeatureManager.extend({
   },
 
   setStyle: function (style) {
-    this.eachFeature(function (layer) {
-      this.setFeatureStyle(layer.feature.id, style);
-    }, this);
-    return this;
+      this.options.style = style;
+      this.eachFeature(function (layer) {
+          this.setFeatureStyle(layer.feature.id, style);
+      }, this);
+      return this;
   },
 
   setFeatureStyle: function (id, style) {
