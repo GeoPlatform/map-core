@@ -1,6 +1,6 @@
 
 //configure geoplatform env variables needed to interact with the API
-GeoPlatformClient.Config.configure({
+geoplatform.client.Config.configure({
     ualUrl : 'https://ual.geoplatform.gov'
 });
 
@@ -20,27 +20,22 @@ let mapOptions = {
 let leafletMap = L.map(elem, mapOptions);
 
 if(typeof(L.Control.MiniMap) !== 'undefined') {
-    let minimapBaseLayer = GeoPlatformMapCore.OSMLayerFactory();
+    let minimapBaseLayer = geoplatform.mapcore.OSMLayerFactory();
     new L.Control.MiniMap(minimapBaseLayer,{position:"bottomleft"}).addTo(leafletMap);
 }
 
-//referencing GeoPlatformMapCore.MousePosition control using Leaflet shorthand
+//referencing geoplatform.mapcore.MousePosition control using Leaflet shorthand
 L.control.mousePosition({ separator: ' , ', numDigits: 3 }).addTo(leafletMap);
 
 L.control.scale().addTo(leafletMap);
 
-let mapInstance = GeoPlatformMapCore.MapFactory.get();
+let mapInstance = geoplatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 //load OpenStreet Map layer using API and set as base layer
-GeoPlatformMapCore.OSM.get().then(osm => {
+geoplatform.mapcore.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
-
-
     handleCircularReference();
-
-
-
 }).catch(e => { console.log("Unable to get OSM base layer"); });
 
 
@@ -48,13 +43,13 @@ GeoPlatformMapCore.OSM.get().then(osm => {
 
 function handleCircularReference() {
     let service = {
-        type: GeoPlatformClient.ItemTypes.SERVICE,
+        type: geoplatform.client.ItemTypes.SERVICE,
         label: "Circular Reference Service",
-        serviceType: GeoPlatformMapCore.ServiceTypes.WMS,
+        serviceType: geoplatform.mapcore.ServiceTypes.WMS,
         href: "http://www.google.com"
     };
     let layer = {
-        type: GeoPlatformClient.ItemTypes.LAYER,
+        type: geoplatform.client.ItemTypes.LAYER,
         label: "Circular Reference Layer",
         services: [service],
         layerName: '0',

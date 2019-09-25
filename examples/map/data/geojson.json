@@ -1,0 +1,131 @@
+{
+"_score": 0.0016515281,
+"_modified": 1553798537664,
+"_versionId": 3,
+"_status": "current",
+"type": "Layer",
+"id": "241771f5dd0082286d6fef45541203fe",
+"uri": "http://www.geoplatform.gov/id/layer/dff1640e0081436c3f4423f553eff071",
+"modified": 1553798537664,
+"label": "NOAA Weather Alerts Layer",
+"title": "NOAA Weather Alerts Layer",
+"description": "Active weather alerts from National Weather Service.",
+"servicedBy": [
+"a9430e5956a6f0a1148986a74956f17b"
+],
+"services": [
+{
+"_score": 0.0017559268,
+"_modified": 1557489758474,
+"_versionId": 3,
+"_status": "current",
+"type": "regp:Service",
+"id": "a9430e5956a6f0a1148986a74956f17b",
+"uri": "http://www.geoplatform.gov/id/service/bc9a826bd7fc8a6ff891bba89e4370d5",
+"modified": 1553798537664,
+"label": "GeoPlatform GeoJSON Feed Service (endpoint)",
+"title": "GeoPlatform GeoJSON Feed Service (endpoint)",
+"description": "A GeoPlatform.gov built-in service to access external RSS/ATOM/CAP feed endpoints and return GeoJSON features like a Esri REST Feature Server.",
+"status": "submitted",
+"statistics": {
+"timestamp": 1557489617771,
+"online": false,
+"compliant": false,
+"days_online": 0,
+"days_in_service": 0,
+"percent_uptime": 0,
+"percent_uptime_7": 0,
+"speed": 0,
+"score": 0,
+"average_speed": 0,
+"average_speed_7": 0,
+"reliability": 0,
+"trend_7": 0
+},
+"temporal": {},
+"operatesOn": [
+"241771f5dd0082286d6fef45541203fe"
+],
+"_analyzed": false,
+"created": 1522341217909,
+"createdBy": "jvdavidson",
+"extent": {
+"minx": -180,
+"maxx": 180,
+"miny": -90,
+"maxy": 90
+},
+"href": "https://fh.geoplatform.gov/api/feeds/",
+"identifiers": [
+"ngp:db322a63-8161-4ff2-bda4-a00924426bf1"
+],
+"keywords": [
+"RSS",
+"CAP",
+"ATOM"
+],
+"lastModifiedBy": "unknown",
+"visibility": "public",
+"serviceType": {
+"id": "8edc61870e534a1f23dc967753da3b72",
+"uri": "http://www.geoplatform.gov/spec/feed",
+"type": "dct:Standard",
+"title": "GeoPlatform GeoJSON Feed Service",
+"description": "GeoPlatform GeoJSON Feed Service converts an Atom/RSS feed (including GeoRSS and CAP extensions) to GeoJSON",
+"label": "GeoPlatform GeoJSON Feed Service",
+"resourceType": [
+"ServiceType"
+],
+"_created": 1553797726679,
+"modified": 1553797726679,
+"_modified": 1553797726679,
+"_status": "current",
+"_createdBy": "gp-admin",
+"_lastModifiedBy": "gp-admin",
+"_versionId": 1
+}
+}
+],
+"status": "submitted",
+"statistics": {
+"timestamp": 1557489617771,
+"online": false,
+"compliant": false,
+"days_online": 0,
+"days_in_service": 0,
+"percent_uptime": 0,
+"percent_uptime_7": 0,
+"speed": 0,
+"score": 0,
+"average_speed": 0,
+"average_speed_7": 0,
+"reliability": 0,
+"trend_7": 0
+},
+"layerName": "0",
+"layerType": "FeatureLayer",
+"legend": {},
+"temporal": {},
+"_analyzed": false,
+"created": 1522341987098,
+"createdBy": "jvdavidson",
+"distributions": [
+{
+"type": "dcat:Distribution",
+"label": "NWS Weather Alert Feed",
+"title": "NWS Weather Alert Feed"
+}
+],
+"extent": {
+"minx": -180,
+"maxx": 180,
+"miny": -90,
+"maxy": 90
+},
+"keywords": [
+"RSS",
+"ATOM"
+],
+"lastModifiedBy": "unknown",
+"visibility": "public"
+}

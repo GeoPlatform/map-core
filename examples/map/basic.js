@@ -1,6 +1,6 @@
 
 //configure geoplatform env variables needed to interact with the API
-GeoPlatformClient.Config.configure({
+geoplatform.client.Config.configure({
     ualUrl : 'https://ual.geoplatform.gov'
 });
 
@@ -8,7 +8,7 @@ GeoPlatformClient.Config.configure({
  * Optionally, refresh list of service types after configuring API endpoint above
  * or continue to use default list provided in library
  */
-//GeoPlatformMapCore.ServiceTypes.refresh();
+//geoplatform.mapcore.ServiceTypes.refresh();
 
 
 let elem = document.getElementById('map');
@@ -26,21 +26,21 @@ let mapOptions = {
 let leafletMap = L.map(elem, mapOptions);
 
 if(typeof(L.Control.MiniMap) !== 'undefined') {
-    let minimapBaseLayer = GeoPlatformMapCore.OSMLayerFactory();
+    let minimapBaseLayer = geoplatform.mapcore.OSMLayerFactory();
     new L.Control.MiniMap(minimapBaseLayer,{position:"bottomleft"}).addTo(leafletMap);
 }
 
-//referencing GeoPlatformMapCore.MousePosition control using Leaflet shorthand
+//referencing geoplatform.mapcore.MousePosition control using Leaflet shorthand
 L.control.mousePosition({ separator: ' , ', numDigits: 3 }).addTo(leafletMap);
 
 L.control.scale().addTo(leafletMap);
 
-let mapInstance = GeoPlatformMapCore.MapFactory.get();
+let mapInstance = geoplatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 
 // //load OpenStreet Map layer using API and set as base layer
-// GeoPlatformMapCore.OSM.get().then(baseLayer => {
-GeoPlatformMapCore.DefaultBaseLayer.get().then(baseLayer => {
+// geoplatform.mapcore.OSM.get().then(baseLayer => {
+geoplatform.mapcore.DefaultBaseLayer.get().then(baseLayer => {
     mapInstance.setBaseLayer(baseLayer);
 }).catch(e => { console.log("Unable to get base layer"); });
 

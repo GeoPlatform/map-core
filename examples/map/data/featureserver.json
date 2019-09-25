@@ -1,0 +1,146 @@
+{
+"_score": 1,
+"_modified": 1545227802840,
+"_versionId": 2,
+"_status": "current",
+"type": "Layer",
+"id": "de7c39d1195dde556e5f0748f2f1efb9",
+"uri": "http://www.geoplatform.gov/id/layer/e013d436e31346e5cbe729e804075684",
+"modified": 1545227802357,
+"label": "360Hangar",
+"title": "360Hangar",
+"description": "360Hangar",
+"servicedBy": [
+"a8024aff01e9afbc893bcd475f75222c"
+],
+"services": [
+{
+"_score": 0.0017559268,
+"_modified": 1557489758474,
+"_versionId": 2,
+"_status": "current",
+"type": "regp:Service",
+"id": "a8024aff01e9afbc893bcd475f75222c",
+"uri": "http://www.geoplatform.gov/id/service/b9d4306625c75b04d46e125ba8a64311",
+"modified": 1553798537664,
+"label": "Hurricane Michael 360 Hangar Imagery",
+"title": "Hurricane Michael 360 Hangar Imagery",
+"description": "Features link to 360Hangar imagery for Hurricane Michael damage assessment.",
+"classifiers": {},
+"status": "valid",
+"statistics": {
+"timestamp": 1557489617771,
+"online": true,
+"compliant": true,
+"days_online": 143,
+"days_in_service": 124,
+"percent_uptime": 100,
+"percent_uptime_7": 100,
+"speed": 1.73,
+"score": 98.66,
+"average_speed": 0.54,
+"average_speed_7": 0.72,
+"reliability": 100,
+"trend_7": 0
+},
+"temporal": {},
+"operatesOn": [
+"de7c39d1195dde556e5f0748f2f1efb9"
+],
+"_analyzed": false,
+"created": 1545068302663,
+"createdBy": "JacobStephens",
+"extent": {
+"minx": -85.69525236111112,
+"maxx": -85.42150244444443,
+"miny": 30.114520876149427,
+"maxy": 30.403105066538785
+},
+"href": "https://services8.arcgis.com/36ruPEqsYhRhaWdn/arcgis/rest/services/360Hangar/FeatureServer",
+"identifiers": [
+"ngp:d8b4b500-c826-4147-bf17-f4c8281c66cf"
+],
+"keywords": [
+"DR4399"
+],
+"lastModifiedBy": "JacobStephens",
+"visibility": "public",
+"serviceType": {
+"id": "48980c5bad0c8d4666b393874eb5279a",
+"uri": "http://www.geoplatform.gov/spec/esri-feature-rest",
+"type": "dct:Standard",
+"title": "Esri REST Feature Service",
+"description": "Esri ArcGIS Feature Server REST API",
+"label": "Esri REST Feature Service",
+"resourceType": [
+"ServiceType"
+],
+"_created": 1553797726679,
+"modified": 1553797726679,
+"_modified": 1553797726679,
+"_status": "current",
+"_createdBy": "gp-admin",
+"_lastModifiedBy": "gp-admin",
+"_versionId": 1
+}
+}
+],
+"statistics": {
+"timestamp": 1557489617771,
+"online": true,
+"compliant": true,
+"days_online": 143,
+"days_in_service": 124,
+"percent_uptime": 100,
+"percent_uptime_7": 100,
+"speed": 1.73,
+"score": 98.66,
+"average_speed": 0.54,
+"average_speed_7": 0.72,
+"reliability": 100,
+"trend_7": 0
+},
+"layerName": "0",
+"layerType": "FeatureLayer",
+"usedBy": [
+{
+"_score": 0.0016515281,
+"id": "9785f0e5e20b86dbc752bda603ecc5a7",
+"uri": "http://www.geoplatform.gov/id/community/bdc6b64f43e1bc0831d1b0cb85cc0226",
+"type": "Community",
+"label": "Disasters",
+"title": "Disasters",
+"status": "submitted",
+"modified": 1553798537664,
+"_modified": 1553798537664,
+"landingPage": "https://disasters.geoplatform.gov/",
+"_analyzed": false,
+"_status": "current",
+"_versionId": 1,
+"created": 1538671104204,
+"createdBy": "laraduffy",
+"lastModifiedBy": "laraduffy",
+"resourceTypes": [
+"foaf:Group",
+"foaf:Agent",
+"Community"
+],
+"visibility": "public"
+}
+],
+"_analyzed": false,
+"created": 1545068303264,
+"createdBy": "JacobStephens",
+"extent": {
+"minx": -85.69525236111112,
+"maxx": -85.42150244444443,
+"miny": 30.114520876149427,
+"maxy": 30.403105066538785
+},
+"keywords": [
+"DR4399"
+],
+"lastModifiedBy": "JacobStephens",
+"minScale": 1155582,
+"maxScale": 0
+}

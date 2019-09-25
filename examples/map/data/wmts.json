@@ -1,0 +1,196 @@
+{
+"_score": 1,
+"_modified": 1549893234032,
+"_versionId": 2,
+"_status": "current",
+"type": "Layer",
+"id": "203224548affc2da4ba4a372066da614",
+"uri": "http://www.geoplatform.gov/id/layer/edac9e340036120362ea38effbbcc24d",
+"modified": 1543853292397,
+"label": "Evacuation_Zones_Tiled",
+"title": "Evacuation_Zones_Tiled",
+"description": "Evacuation_Zones_Tiled",
+"servicedBy": [
+"5998990dba669512f58fd457c12c29e6"
+],
+"services": [
+{
+"_score": 0.0016515281,
+"_modified": 1557489786216,
+"_versionId": 2,
+"_status": "current",
+"type": "regp:Service",
+"id": "5998990dba669512f58fd457c12c29e6",
+"uri": "http://www.geoplatform.gov/id/service/d9198b80714ded24fc3f50c63ba4227c",
+"modified": 1553798537664,
+"label": "Florida Evacuation Zones WMTS",
+"title": "Florida Evacuation Zones WMTS",
+"description": "serviceDescription: Designated Hurricane Evacuation Zones from Statewide Regional Evacuation Studies <a href=\"http://floridadisaster.org/res\"> http://floridadisaster.org/res</a>.\ndescription: Designated Hurricane Evacuation Zones from Statewide Regional Evacuation Studies <a href='https://www.floridadisaster.org/res' target='_blank'>https://www.floridadisaster.org/res</a>.\ndocumentInfo.Comments: Designated Hurricane Evacuation Zones from Statewide Regional Evacuation Studies <a href=\"http://floridadisaster.org/res\"> http://floridadisaster.org/res</a>.\ndocumentInfo.Subject: Designated Hurricane Evacuation Zones\ndocumentInfo.Title: Evacuation Zones\n",
+"classifiers": {},
+"status": "submitted",
+"statistics": {
+"timestamp": 1557489617801,
+"online": false,
+"compliant": false,
+"days_online": 0,
+"days_in_service": 0,
+"percent_uptime": 0,
+"percent_uptime_7": 0,
+"speed": -99.99,
+"score": -99.99,
+"average_speed": 0,
+"average_speed_7": 0,
+"reliability": 0,
+"trend_7": 0
+},
+"temporal": {},
+"operatesOn": [
+"203224548affc2da4ba4a372066da614"
+],
+"_analyzed": false,
+"created": 1540231665572,
+"createdBy": "JacobStephens",
+"extent": {
+"minx": -87.51736914559535,
+"maxx": -79.87975554956411,
+"miny": 24.486004089752953,
+"maxy": 30.85738209304772
+},
+"href": "https://tiles.arcgis.com/tiles/3wFbqsFPLeKqOlIK/arcgis/rest/services/Evacuation_Zones_Tiled/MapServer/WMTS/1.0.0/WMTSCapabilities.xml?cacheKey=8f8786bd14265ec0",
+"identifiers": [
+"ngp:5a432809-3ed2-4a2c-8dc0-4d422d786d60"
+],
+"lastModifiedBy": "JacobStephens",
+"visibility": "public",
+"serviceType": {
+"id": "757858ae77cf8c602b39294c27632dd7",
+"uri": "http://opengis.net/spec/wmts",
+"type": "dct:Standard",
+"title": "OGC Web Map Tile Service (WMTS)",
+"description": "OGC Web Map Tile Service (WMTS)",
+"label": "OGC Web Map Tile Service (WMTS)",
+"resourceType": [
+"ServiceType"
+],
+"_created": 1553797726679,
+"modified": 1553797726679,
+"_modified": 1553797726679,
+"_status": "current",
+"_createdBy": "gp-admin",
+"_lastModifiedBy": "gp-admin",
+"_versionId": 1
+}
+}
+],
+"statistics": {
+"timestamp": 1557489617801,
+"online": false,
+"compliant": false,
+"days_online": 0,
+"days_in_service": 0,
+"percent_uptime": 0,
+"percent_uptime_7": 0,
+"speed": -99.99,
+"score": -99.99,
+"average_speed": 0,
+"average_speed_7": 0,
+"reliability": 0,
+"trend_7": 0
+},
+"layerName": "Evacuation_Zones_Tiled",
+"layerType": "TileLayer",
+"usedBy": [
+{
+"_score": 0.0016515281,
+"id": "9785f0e5e20b86dbc752bda603ecc5a7",
+"uri": "http://www.geoplatform.gov/id/community/bdc6b64f43e1bc0831d1b0cb85cc0226",
+"type": "Community",
+"label": "Disasters",
+"title": "Disasters",
+"status": "submitted",
+"modified": 1553798537664,
+"_modified": 1553798537664,
+"landingPage": "https://disasters.geoplatform.gov/",
+"_analyzed": false,
+"_status": "current",
+"_versionId": 1,
+"created": 1538671104204,
+"createdBy": "laraduffy",
+"lastModifiedBy": "laraduffy",
+"resourceTypes": [
+"foaf:Group",
+"foaf:Agent",
+"Community"
+],
+"visibility": "public"
+}
+],
+"_analyzed": false,
+"created": 1540232534632,
+"createdBy": "JacobStephens",
+"distributions": [
+{
+"type": "dcat:Distribution",
+"label": "GetTile",
+"description": "This WMTS layer uses custom URL templates to expose tiles. Do not edit or remove this distribution or its parameters unless you know what you are doing as it may result in the layer not being usable in GeoPlatform and third-party applications.",
+"title": "GetTile",
+"mediaType": "image/png",
+"byteSize": 0,
+"format": {
+"label": "OTHER",
+"type": "dct:FileFormat"
+},
+"parameters": [
+{
+"name": "TileMatrixSet",
+"label": "Tile Matrix Set ID",
+"description": "The tile matrix set to use. Do not edit or remove this parameter unless you know what you are doing as it may result in the associated Layer no longer being usable in GeoPlatform and third-party applications",
+"type": "dcat:Distribution",
+"values": [
+"default028mm"
+],
+"defaultValue": "default028mm"
+},
+{
+"name": "Style",
+"label": "Style",
+"description": "The style to use in rendering the layer. Do not edit or remove this parameter unless you know what you are doing as it may result in the associated Layer no longer being usable in GeoPlatform and third-party applications",
+"type": "dcat:Distribution",
+"defaultValue": "default"
+}
+],
+"href": "https://tiles.arcgis.com/tiles/3wFbqsFPLeKqOlIK/arcgis/rest/services/Evacuation_Zones_Tiled/MapServer/WMTS/tile/1.0.0/Evacuation_Zones_Tiled/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.png"
+}
+],
+"extent": {
+"minx": -87.51736914559535,
+"maxx": -79.87975554956411,
+"miny": 24.486004089752953,
+"maxy": 30.85738209304772
+},
+"lastModifiedBy": "JacobStephens",
+"publishers": [
+{
+"_modified": 1521342479439,
+"id": "43a63a27a8ea03905a4bf010cfd71b3c",
+"uri": "http://www.geoplatform.gov/id/organization/24ebf243e052cdc704134d38666ca948",
+"type": "org:Organization",
+"label": "FDEM GIS",
+"name": "FDEM GIS",
+"modified": 1521342479439,
+"_analyzed": false,
+"_status": "current",
+"_versionId": 1,
+"created": 1521342479439,
+"createdBy": "jvdavidson",
+"lastModifiedBy": "unknown",
+"resourceTypes": [
+"foaf:Agent",
+"org:Organization"
+]
+}
+],
+"formats": [
+"image/png"
+]
+}

@@ -1,60 +1,15 @@
 
 //configure geoplatform env variables needed to interact with the API
-GeoPlatformClient.Config.configure({
+geoplatform.client.Config.configure({
     ualUrl : 'https://ual.geoplatform.gov'
 });
-
-var L = GeoPlatformMapCore.L;
-
-
-// /*
-//  * register a vector tile layer factory
-//  */
-// var LayerFactory = GeoPlatformMapCore.LayerFactory;
-// LayerFactory.register( (layer) => {
-//
-//     if(!layer) return null;
-//     let distros = layer.distributions || [];
-//     if(!distros.length) return null;
-//     let distro = distros[0];
-//     if(distro.href.indexOf(".pbf") < 0) return null;
-//
-//     let styleFn = function(featureProperties, z){
-//         let fill = '#AD816E';
-//         // console.log("NC Type: " + featureProperties.WETLAND_TYPE);
-//         switch(featureProperties.WETLAND_TYPE) {
-//             case "Estuarine and Marine Deepwater": fill = "#097F8B"; break;
-//             case "Estuarine and Marine Wetland": fill = "#73BAA7"; break;
-//             case "Freshwater Emergent Wetland": fill = "#87C023"; break;
-//             case "Freshwater Forested/Shrub Wetland": fill = "#108034"; break;
-//             case "Freshwater Pond": fill = "#688FB6"; break;
-//             case "Lake": fill = "#100673"; break;
-//             case "Riverine": fill = "#048DB9"; break;
-//             default: fill = "#AD816E";
-//         }
-//         return { color: fill, weight: 1 };
-//     };
-//
-//     var styles = {
-//         "nc_wetlands" : styleFn,
-//         "va_wetlands": styleFn
-//     };
-//     var vtUrl = distro.href;
-// 	var vtOpts = {
-// 		rendererFactory: L.canvas.tile,
-// 		vectorTileLayerStyles: styles,
-// 	};
-// 	return L.vectorGrid.protobuf(vtUrl, vtOpts);
-//
-// });
-
 
 
 /*
  * Optionally, refresh list of service types after configuring API endpoint above
  * or continue to use default list provided in library
  */
-//GeoPlatformMapCore.ServiceTypes.refresh();
+//geoplatform.mapcore.ServiceTypes.refresh();
 
 
 let elem = document.getElementById('map');
@@ -71,20 +26,20 @@ let mapOptions = {
 
 let leafletMap = L.map(elem, mapOptions);
 
-//referencing GeoPlatformMapCore.MousePosition control using Leaflet shorthand
+//referencing geoplatform.mapcore.MousePosition control using Leaflet shorthand
 L.control.mousePosition({ separator: ' , ', numDigits: 3 }).addTo(leafletMap);
 L.control.scale().addTo(leafletMap);
 // L.Control.loading().addTo(leafletMap);
 
 
-let mapInstance = GeoPlatformMapCore.MapFactory.get();
+let mapInstance = geoplatform.mapcore.MapFactory.get();
 mapInstance.setMap(leafletMap);
 mapInstance.setErrorHandler( (e) => {
     console.log("Error Handler : " + e.id + " - " + e.message);
 });
 
 //load OpenStreet Map layer using API and set as base layer
-GeoPlatformMapCore.OSM.get().then(osm => {
+geoplatform.mapcore.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
 
     // var gl = L.mapboxGL({
@@ -92,14 +47,33 @@ GeoPlatformMapCore.OSM.get().then(osm => {
     // 	accessToken: 'pk.eyJ1IjoidXNhY2UiLCJhIjoiY2o1MDZscms4MDI4MjMycG1wa3puc212MCJ9.CW7edZMtlx5vFLNF5P-zTA'
     // }).addTo(leafletMap);
 
+    // let vtLayer = {
+    //     id: "f41290dac72ecad35b5a039847edb44f",
+    //     type: "Layer",
+    //     label: "Wetlands Vector Tiles",
+    //     layerType: "TileLayer",
+    //     resourceTypes: ['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
+    //     href: "https://s3.amazonaws.com/usace-maptiles-tests/wetlands-gz/{z}/{x}/{y}.pbf"
+    // };
+
     let vtLayer = {
-        id: "f41290dac72ecad35b5a039847edb44f",
-        type: "Layer",
-        label: "Wetlands Vector Tiles",
-        layerType: "TileLayer",
-        resourceTypes: ['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
-        href: "https://s3.amazonaws.com/usace-maptiles-tests/wetlands-gz/{z}/{x}/{y}.pbf"
-    };
+        "_modified":1567791162355,"_versionId":2,"_status":"current","type":"Layer",
+        "id":"c07d196dbd72012056c88014c63766c2",
+        "uri":"http://www.geoplatform.gov/id/layer/189ea273b3514bd0feaf854b7c8e22c3",
+        "modified":1567791162355,"label":"test esri vt layer",
+        "title":"test esri vt layer","description":"test","classifiers":{},
+        "status":"submitted","thumbnail":{"mediaType":"image/png"},
+        "layerName":"1","layerType":"TileLayer","legend":{},"temporal":{},
+        "created":1567791140919,"createdBy":"patrickn","extent":{"minx":0,"maxx":0,"miny":0,"maxy":0},
+        "href":"https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Protected_Areas_By_Manager/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+        "lastModifiedBy":"patrickn","visibility":"public",
+        "resourceTypes":['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
+        "related": [{
+            role: { uri: "http://www.geoplatform.gov/def/OnlineFunction/default_styling" },
+            label: "default style",
+            "href": 'https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Protected_Areas_By_Manager/VectorTileServer/resources/styles'
+        }]
+    }
     mapInstance.addLayers(vtLayer);
 
 
