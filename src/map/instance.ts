@@ -739,17 +739,19 @@ export default class MapInstance extends Listener {
      */
     moveLayer (from : number, to : number) {
         if(!this._layerCache) return;
-
-        if(!this._layerCache) return;
-
         if(isNaN(from)) return;
-
-        //end of list
-        if(isNaN(to)) to = this._layerStates.length-1;
-
+        if(isNaN(to)) to = this._layerStates.length-1;      //end of list
         let copy = this._layerStates.splice(from, 1)[0];    //grab layer being moved
         this._layerStates.splice(to, 0, copy);
+        this.updateZIndices();
+        this.touch('layers:changed', this.getLayers());
+    }
 
+    /**
+     * set the z-index of each layer on the map based upon their position in the
+     * list of layers on the map
+     */
+    updateZIndices() {
         for(let z=1, i=this._layerStates.length-1; i>=0; --i,++z) {
             let layerState = this._layerStates[i];
             let layerInstance = this._layerCache[ layerState.layer.id ];
@@ -758,8 +760,6 @@ export default class MapInstance extends Listener {
                 layerState.zIndex = z;
             }
         }
-
-        this.touch('layers:changed', this.getLayers());
     }
 
     /**

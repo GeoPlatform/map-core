@@ -4,7 +4,7 @@
   "main": "bundles/geoplatform-mapcore.umd.js",
   "module": "fesm5/geoplatform-mapcore.js",
   "typings": "geoplatform-mapcore.d.ts",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "MIT",
   "whitelistedNonPeerDependencies": [
     "."

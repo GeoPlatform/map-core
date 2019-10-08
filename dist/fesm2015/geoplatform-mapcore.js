@@ -1,7 +1,7 @@
 import { Draw } from 'leaflet-draw';
 import 'leaflet.markercluster';
 import 'leaflet-timedimension/dist/leaflet.timedimension.src';
-import { FeatureManager, tiledMapLayer, imageMapLayer, FeatureLayer } from 'esri-leaflet';
+import { FeatureManager, FeatureLayer, tiledMapLayer, imageMapLayer } from 'esri-leaflet';
 import * as jquery from 'jquery';
 import * as L from 'leaflet';
 import { Control, Util, DomUtil, Map, DomEvent, layerGroup, polyline, CircleMarker, divIcon, marker, control, FeatureGroup, GeoJSON, MarkerClusterGroup, icon, circleMarker, SVG, svg, Canvas, canvas, TileLayer, popup, Browser, Layer, Point, LatLng, TimeDimension, featureGroup, geoJSON, LayerGroup } from 'leaflet';
@@ -4894,16 +4894,23 @@ class MapInstance extends Listener {
     moveLayer(from, to) {
         if (!this._layerCache)
             return;
-        if (!this._layerCache)
-            return;
         if (isNaN(from))
             return;
-        //end of list
         if (isNaN(to))
-            to = this._layerStates.length - 1;
+            to = this._layerStates.length - 1; //end of list
+        //end of list
         /** @type {?} */
         let copy = this._layerStates.splice(from, 1)[0];
         this._layerStates.splice(to, 0, copy);
+        this.updateZIndices();
+        this.touch('layers:changed', this.getLayers());
+    }
+    /**
+     * set the z-index of each layer on the map based upon their position in the
+     * list of layers on the map
+     * @return {?}
+     */
+    updateZIndices() {
         for (let z = 1, i = this._layerStates.length - 1; i >= 0; --i, ++z) {
             /** @type {?} */
             let layerState = this._layerStates[i];
@@ -4914,7 +4921,6 @@ class MapInstance extends Listener {
                 layerState.zIndex = z;
             }
         }
-        this.touch('layers:changed', this.getLayers());
     }
     /**
      *

@@ -5477,16 +5477,32 @@ var MapInstance = /** @class */ (function (_super) {
     function (from, to) {
         if (!this._layerCache)
             return;
-        if (!this._layerCache)
-            return;
         if (isNaN(from))
             return;
-        //end of list
         if (isNaN(to))
-            to = this._layerStates.length - 1;
+            to = this._layerStates.length - 1; //end of list
+        //end of list
         /** @type {?} */
         var copy = this._layerStates.splice(from, 1)[0];
         this._layerStates.splice(to, 0, copy);
+        this.updateZIndices();
+        this.touch('layers:changed', this.getLayers());
+    };
+    /**
+     * set the z-index of each layer on the map based upon their position in the
+     * list of layers on the map
+     */
+    /**
+     * set the z-index of each layer on the map based upon their position in the
+     * list of layers on the map
+     * @return {?}
+     */
+    MapInstance.prototype.updateZIndices = /**
+     * set the z-index of each layer on the map based upon their position in the
+     * list of layers on the map
+     * @return {?}
+     */
+    function () {
         for (var z = 1, i = this._layerStates.length - 1; i >= 0; --i, ++z) {
             /** @type {?} */
             var layerState = this._layerStates[i];
@@ -5497,7 +5513,6 @@ var MapInstance = /** @class */ (function (_super) {
                 layerState.zIndex = z;
             }
         }
-        this.touch('layers:changed', this.getLayers());
     };
     /**
      *

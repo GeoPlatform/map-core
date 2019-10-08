@@ -161,6 +161,11 @@ export default class MapInstance extends Listener {
      */
     moveLayer(from: number, to: number): void;
     /**
+     * set the z-index of each layer on the map based upon their position in the
+     * list of layers on the map
+     */
+    updateZIndices(): void;
+    /**
      *
      */
     removeLayer(id: any): void;
