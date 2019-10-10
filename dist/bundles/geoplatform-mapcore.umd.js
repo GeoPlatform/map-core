@@ -2908,7 +2908,6 @@ This software has been approved for release by the U.S. Department of the Interi
         /** @type {?} */
         var options = {
             layer: layer.layerName,
-            layers: layer.layerName,
             style: 'default',
             tileMatrixSet: "default",
             format: "image/png"

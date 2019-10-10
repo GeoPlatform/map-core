@@ -2991,7 +2991,6 @@ function wmts(layer) {
     /** @type {?} */
     var options = {
         layer: layer.layerName,
-        layers: layer.layerName,
         style: 'default',
         tileMatrixSet: "default",
         format: "image/png"
