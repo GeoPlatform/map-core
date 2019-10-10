@@ -2834,6 +2834,7 @@ function wmts(layer) {
     /** @type {?} */
     let options = {
         layer: layer.layerName,
+        layers: layer.layerName,
         style: 'default',
         tileMatrixSet: "default",
         format: "image/png"
@@ -2859,16 +2860,20 @@ function wmts(layer) {
          * @return {?}
          */
         param => {
+            /** @type {?} */
+            let value = param.defaultValue || param.values && param.values.length && param.values[0];
+            //ignore parameters without values and default values
+            if (value === null && value === undefined)
+                return;
             //ignore wmts specific parameters, WMTS layer will populate those values
             // based upon map state.
             /** @type {?} */
             let plc = param.name.toLowerCase();
             if ("tilematrix" === plc || "tilerow" === plc || "tilecol" === plc)
                 return;
-            //for all other parameters, try to fill in default or initial values
-            /** @type {?} */
-            let value = param.defaultValue || param.values && param.values.length && param.values[0];
-            if (value !== null && value !== undefined) {
+            else if ("tilematrixset" === plc)
+                options.tileMatrixSet = value;
+            else { //for all other parameters, try to fill in default or initial values
                 url = url.replace('{' + param.name + '}', value);
             }
         }));

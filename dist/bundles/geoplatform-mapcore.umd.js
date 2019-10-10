@@ -2908,6 +2908,7 @@ This software has been approved for release by the U.S. Department of the Interi
         /** @type {?} */
         var options = {
             layer: layer.layerName,
+            layers: layer.layerName,
             style: 'default',
             tileMatrixSet: "default",
             format: "image/png"
@@ -2931,16 +2932,20 @@ This software has been approved for release by the U.S. Department of the Interi
              * @param {?} param
              * @return {?}
              */function (param) {
+                /** @type {?} */
+                var value = param.defaultValue || param.values && param.values.length && param.values[0];
+                //ignore parameters without values and default values
+                if (value === null && value === undefined)
+                    return;
                 //ignore wmts specific parameters, WMTS layer will populate those values
                 // based upon map state.
                 /** @type {?} */
                 var plc = param.name.toLowerCase();
                 if ("tilematrix" === plc || "tilerow" === plc || "tilecol" === plc)
                     return;
-                //for all other parameters, try to fill in default or initial values
-                /** @type {?} */
-                var value = param.defaultValue || param.values && param.values.length && param.values[0];
-                if (value !== null && value !== undefined) {
+                else if ("tilematrixset" === plc)
+                    options.tileMatrixSet = value;
+                else { //for all other parameters, try to fill in default or initial values
                     url = url.replace('{' + param.name + '}', value);
                 }
             }));

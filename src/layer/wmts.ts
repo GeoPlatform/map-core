@@ -200,15 +200,17 @@ function wmts(layer) {
         let params = distro.parameters || [];
         params.forEach( param => {
 
+            let value = param.defaultValue || param.values && param.values.length && param.values[0];
+
+            //ignore parameters without values and default values
+            if(value === null && value === undefined) return;
+
             //ignore wmts specific parameters, WMTS layer will populate those values
             // based upon map state.
             let plc = param.name.toLowerCase();
-            if("tilematrix" === plc || "tilerow" === plc || "tilecol" === plc)
-                return;
-
-            //for all other parameters, try to fill in default or initial values
-            let value = param.defaultValue || param.values && param.values.length && param.values[0];
-            if(value !== null && value !== undefined) {
+            if("tilematrix" === plc || "tilerow" === plc || "tilecol" === plc) return;
+            else if("tilematrixset" === plc) options.tileMatrixSet = value;
+            else { //for all other parameters, try to fill in default or initial values
                 url = url.replace('{' + param.name + '}', value);
             }
         });

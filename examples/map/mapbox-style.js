@@ -81,16 +81,16 @@ let wetlandsResource = {
 geoplatform.mapcore.OSM.get().then(osm => {
     mapInstance.setBaseLayer(osm);
 
-    let vtLayer1 = {
-        id: "2ec9952c5c61671183c2199956d97da7",
-        type: "Layer",
-        label: "Wetlands Vector Tiles",
-        layerType: "TileLayer",
-        resourceTypes: ['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
-        href: "https://s3.amazonaws.com/usace-maptiles-tests/wetlands-gz/{z}/{x}/{y}.pbf"
-    };
-    vtLayer1.related = [wetlandsResource];
-    mapInstance.addLayers(vtLayer1);
+    // let vtLayer1 = {
+    //     id: "2ec9952c5c61671183c2199956d97da7",
+    //     type: "Layer",
+    //     label: "Wetlands Vector Tiles",
+    //     layerType: "TileLayer",
+    //     resourceTypes: ['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
+    //     href: "https://s3.amazonaws.com/usace-maptiles-tests/wetlands-gz/{z}/{x}/{y}.pbf"
+    // };
+    // vtLayer1.related = [wetlandsResource];
+    // mapInstance.addLayers(vtLayer1);
 
 
     // let vtLayer2 = {
