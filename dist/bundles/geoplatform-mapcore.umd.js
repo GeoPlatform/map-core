@@ -6258,6 +6258,14 @@ This software has been approved for release by the U.S. Department of the Interi
                 var south = !extent || isNaN(extent.miny) ? -89.0 : extent.miny * 1.0;
                 /** @type {?} */
                 var north = !extent || isNaN(extent.maxy) ? 89.0 : extent.maxy * 1.0;
+                //check for valid but useless extents (at least one dimension is all 0s)
+                if ((west > -0.05 && west < 0.05 && east > -0.05 && east < 0.05) ||
+                    (north > -0.05 && north < 0.05 && south > -0.05 && south < 0.05)) {
+                    east = 179;
+                    west = -179;
+                    north = 89;
+                    south = -89;
+                }
                 //ensure x,y is ordered correctly
                 /** @type {?} */
                 var t;
