@@ -31,7 +31,7 @@
     "@angular/core": "^8.1.2",
     "@angular/language-service": "^8.1.2",
     "@angular/platform-browser": "^8.1.2",
-    "@geoplatform/client": "git+https://github.com/GeoPlatform/client-api.git#0.3.0",
+    "@geoplatform/client": "git+https://github.com/GeoPlatform/client-api.git#0.4.0",
     "@types/geojson": "^7946.0.7",
     "@types/jasmine": "~2.8.3",
     "@types/jasminewd2": "~2.0.2",
