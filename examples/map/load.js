@@ -39,8 +39,9 @@ function loadMap(file) {
             console.log("Error loading map from file " + file +
                 " to the map: " + e.message);
         }
-    }).fail(function() {
+    }).fail(function(jqXhr, statusText, errorThrown) {
         console.log( "Error reading map from file " + file );
+        console.log(errorThrown);
     });
 }
 

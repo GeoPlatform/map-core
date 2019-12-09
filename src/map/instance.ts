@@ -739,17 +739,19 @@ export default class MapInstance extends Listener {
      */
     moveLayer (from : number, to : number) {
         if(!this._layerCache) return;
-
-        if(!this._layerCache) return;
-
         if(isNaN(from)) return;
-
-        //end of list
-        if(isNaN(to)) to = this._layerStates.length-1;
-
+        if(isNaN(to)) to = this._layerStates.length-1;      //end of list
         let copy = this._layerStates.splice(from, 1)[0];    //grab layer being moved
         this._layerStates.splice(to, 0, copy);
+        this.updateZIndices();
+        this.touch('layers:changed', this.getLayers());
+    }
 
+    /**
+     * set the z-index of each layer on the map based upon their position in the
+     * list of layers on the map
+     */
+    updateZIndices() {
         for(let z=1, i=this._layerStates.length-1; i>=0; --i,++z) {
             let layerState = this._layerStates[i];
             let layerInstance = this._layerCache[ layerState.layer.id ];
@@ -758,8 +760,6 @@ export default class MapInstance extends Listener {
                 layerState.zIndex = z;
             }
         }
-
-        this.touch('layers:changed', this.getLayers());
     }
 
     /**
@@ -1339,6 +1339,17 @@ export default class MapInstance extends Listener {
         let east  = !extent || isNaN(extent.maxx) ?  179.0 : extent.maxx*1.0;
         let south = !extent || isNaN(extent.miny) ?  -89.0 : extent.miny*1.0;
         let north = !extent || isNaN(extent.maxy) ?   89.0 : extent.maxy*1.0;
+        
+        //check for valid but useless extents (at least one dimension is all 0s)
+        if(
+            (west  > -0.05 && west  < 0.05 && east  > -0.05 && east  < 0.05) ||
+            (north > -0.05 && north < 0.05 && south > -0.05 && south < 0.05)
+        ) {
+            east =  179;
+            west = -179;
+            north =  89;
+            south = -89;
+        }
 
         //ensure x,y is ordered correctly
         let t;

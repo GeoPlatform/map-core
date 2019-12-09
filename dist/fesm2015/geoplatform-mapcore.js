@@ -2859,16 +2859,20 @@ function wmts(layer) {
          * @return {?}
          */
         param => {
+            /** @type {?} */
+            let value = param.defaultValue || param.values && param.values.length && param.values[0];
+            //ignore parameters without values and default values
+            if (value === null && value === undefined)
+                return;
             //ignore wmts specific parameters, WMTS layer will populate those values
             // based upon map state.
             /** @type {?} */
             let plc = param.name.toLowerCase();
             if ("tilematrix" === plc || "tilerow" === plc || "tilecol" === plc)
                 return;
-            //for all other parameters, try to fill in default or initial values
-            /** @type {?} */
-            let value = param.defaultValue || param.values && param.values.length && param.values[0];
-            if (value !== null && value !== undefined) {
+            else if ("tilematrixset" === plc)
+                options.tileMatrixSet = value;
+            else { //for all other parameters, try to fill in default or initial values
                 url = url.replace('{' + param.name + '}', value);
             }
         }));
@@ -4894,16 +4898,23 @@ class MapInstance extends Listener {
     moveLayer(from, to) {
         if (!this._layerCache)
             return;
-        if (!this._layerCache)
-            return;
         if (isNaN(from))
             return;
-        //end of list
         if (isNaN(to))
-            to = this._layerStates.length - 1;
+            to = this._layerStates.length - 1; //end of list
+        //end of list
         /** @type {?} */
         let copy = this._layerStates.splice(from, 1)[0];
         this._layerStates.splice(to, 0, copy);
+        this.updateZIndices();
+        this.touch('layers:changed', this.getLayers());
+    }
+    /**
+     * set the z-index of each layer on the map based upon their position in the
+     * list of layers on the map
+     * @return {?}
+     */
+    updateZIndices() {
         for (let z = 1, i = this._layerStates.length - 1; i >= 0; --i, ++z) {
             /** @type {?} */
             let layerState = this._layerStates[i];
@@ -4914,7 +4925,6 @@ class MapInstance extends Listener {
                 layerState.zIndex = z;
             }
         }
-        this.touch('layers:changed', this.getLayers());
     }
     /**
      *
@@ -5540,6 +5550,14 @@ class MapInstance extends Listener {
         let south = !extent || isNaN(extent.miny) ? -89.0 : extent.miny * 1.0;
         /** @type {?} */
         let north = !extent || isNaN(extent.maxy) ? 89.0 : extent.maxy * 1.0;
+        //check for valid but useless extents (at least one dimension is all 0s)
+        if ((west > -0.05 && west < 0.05 && east > -0.05 && east < 0.05) ||
+            (north > -0.05 && north < 0.05 && south > -0.05 && south < 0.05)) {
+            east = 179;
+            west = -179;
+            north = 89;
+            south = -89;
+        }
         //ensure x,y is ordered correctly
         /** @type {?} */
         let t;
