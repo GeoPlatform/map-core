@@ -4,7 +4,7 @@
     "main": "dist/",
     "module": "dist/esm2015/index.js",
     "typings": "dist/index.d.ts",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "license": "MIT",
     "ngPackage": {
         "lib": {
@@ -63,7 +63,7 @@
     "private": true,
     "peerDependencies": {
         "esri-leaflet": "2.2.3",
-        "@geoplatform/client": "0.4.0",
+        "@geoplatform/client": "0.5.0",
         "jquery": "^3.3.1",
         "leaflet": "1.0.3",
         "leaflet-draw": "0.4.12",

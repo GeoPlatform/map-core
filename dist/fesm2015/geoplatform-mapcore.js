@@ -2337,6 +2337,9 @@ class WMS extends TileLayer.WMS {
                 // var err = typeof data === 'string' ? null : data;
                 if (typeof (data) !== 'string')
                     data = parseGetFeatureInfo(data);
+                // () => {
+                this.showGetFeatureInfo(null, evt.latlng, data);
+                // }
             },
             /**
              * @param {?} xhr

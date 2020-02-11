@@ -56,6 +56,7 @@ geoplatform.mapcore.OSM.get().then(osm => {
     //     href: "https://s3.amazonaws.com/usace-maptiles-tests/wetlands-gz/{z}/{x}/{y}.pbf"
     // };
 
+
     let vtLayer = {
         "_modified":1567791162355,"_versionId":2,"_status":"current","type":"Layer",
         "id":"c07d196dbd72012056c88014c63766c2",
@@ -65,15 +66,35 @@ geoplatform.mapcore.OSM.get().then(osm => {
         "status":"submitted","thumbnail":{"mediaType":"image/png"},
         "layerName":"1","layerType":"TileLayer","legend":{},"temporal":{},
         "created":1567791140919,"createdBy":"patrickn","extent":{"minx":0,"maxx":0,"miny":0,"maxy":0},
-        "href":"https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Protected_Areas_By_Manager/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+        "href":"https://stg-gs.geoplatform.gov/geoserver/gwc/service/tms/1.0.0/National_Address_Database%3Anad-test@EPSG%3A4326@pbf/{z}/{y}/{x}.pbf",
         "lastModifiedBy":"patrickn","visibility":"public",
-        "resourceTypes":['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
-        "related": [{
-            role: { uri: "http://www.geoplatform.gov/def/OnlineFunction/default_styling" },
-            label: "default style",
-            "href": 'https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Protected_Areas_By_Manager/VectorTileServer/resources/styles'
-        }]
+        "resourceTypes":['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer']
+        // ,
+        // "related": [{
+        //     role: { uri: "http://www.geoplatform.gov/def/OnlineFunction/default_styling" },
+        //     label: "default style",
+        //     "href": 'https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Protected_Areas_By_Manager/VectorTileServer/resources/styles'
+        // }]
     }
+
+    // let vtLayer = {
+    //     "_modified":1567791162355,"_versionId":2,"_status":"current","type":"Layer",
+    //     "id":"c07d196dbd72012056c88014c63766c2",
+    //     "uri":"http://www.geoplatform.gov/id/layer/189ea273b3514bd0feaf854b7c8e22c3",
+    //     "modified":1567791162355,"label":"test esri vt layer",
+    //     "title":"test esri vt layer","description":"test","classifiers":{},
+    //     "status":"submitted","thumbnail":{"mediaType":"image/png"},
+    //     "layerName":"1","layerType":"TileLayer","legend":{},"temporal":{},
+    //     "created":1567791140919,"createdBy":"patrickn","extent":{"minx":0,"maxx":0,"miny":0,"maxy":0},
+    //     "href":"https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Protected_Areas_By_Manager/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+    //     "lastModifiedBy":"patrickn","visibility":"public",
+    //     "resourceTypes":['http://www.geoplatform.gov/ont/openlayer/MapBoxVectorTileLayer'],
+    //     "related": [{
+    //         role: { uri: "http://www.geoplatform.gov/def/OnlineFunction/default_styling" },
+    //         label: "default style",
+    //         "href": 'https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/PADUS_2018_Protected_Areas_By_Manager/VectorTileServer/resources/styles'
+    //     }]
+    // }
     mapInstance.addLayers(vtLayer);
 
 
