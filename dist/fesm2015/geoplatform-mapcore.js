@@ -2322,33 +2322,29 @@ class WMS extends TileLayer.WMS {
     getFeatureInfo(evt) {
         // Make an AJAX request to the server and hope for the best
         /** @type {?} */
-        var url = this.getFeatureInfoUrl(evt.latlng);
-        /** @type {?} */
-        var parseGetFeatureInfo = this.parseGetFeatureInfo;
+        let url = this.getFeatureInfoUrl(evt.latlng);
         jQuery$1.ajax({
             url: url,
-            /**
+            success: (/**
              * @param {?} data
              * @param {?} status
              * @param {?} xhr
              * @return {?}
              */
-            success(data, status, xhr) {
-                // var err = typeof data === 'string' ? null : data;
+            (data, status, xhr) => {
                 if (typeof (data) !== 'string')
-                    data = parseGetFeatureInfo(data);
-                // () => {
-                this.showGetFeatureInfo(null, evt.latlng, data);
-                // }
-            },
-            /**
+                    data = this.parseGetFeatureInfo(data);
+                this.showGetFeatureInfo(evt.latlng, data);
+            }),
+            error: (/**
              * @param {?} xhr
              * @param {?} status
              * @param {?} error
              * @return {?}
              */
-            error(xhr, status, error) {
-            }
+            (xhr, status, error) => {
+                console.log(error);
+            })
         });
     }
     /**
@@ -2398,16 +2394,11 @@ class WMS extends TileLayer.WMS {
         return '<div>' + fields.join(' ') + '</div>';
     }
     /**
-     * @param {?} err
      * @param {?} latlng
      * @param {?} content
      * @return {?}
      */
-    showGetFeatureInfo(err, latlng, content) {
-        if (err) {
-            console.log(err);
-            return;
-        } // do nothing if there's an error
+    showGetFeatureInfo(latlng, content) {
         // Otherwise show the content in a popup, or something.
         popup({ maxWidth: 800 })
             .setLatLng(latlng)

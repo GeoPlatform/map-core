@@ -10,7 +10,7 @@ declare class WMS extends TileLayer.WMS {
     getFeatureInfo(evt: any): void;
     getFeatureInfoUrl(latlng: LatLng): string;
     parseGetFeatureInfo(content: any): string;
-    showGetFeatureInfo(err: Error, latlng: LatLng, content: any): void;
+    showGetFeatureInfo(latlng: LatLng, content: any): void;
 }
 /**
  * short-form function for instantiating a WMS-based Layer's Leaflet instance

@@ -49,20 +49,16 @@ class WMS extends TileLayer.WMS {
 
     getFeatureInfo  (evt) {
         // Make an AJAX request to the server and hope for the best
-        var url = this.getFeatureInfoUrl(evt.latlng),
-        parseGetFeatureInfo = this.parseGetFeatureInfo;
+        let url = this.getFeatureInfoUrl(evt.latlng);
         jQuery.ajax({
             url: url,
-            success  (data, status, xhr) {
-                // var err = typeof data === 'string' ? null : data;
+            success : (data, status, xhr) => {
                 if(typeof(data) !== 'string')
-                data = parseGetFeatureInfo(data);
-                // () => {
-                    this.showGetFeatureInfo(null, evt.latlng, data);
-                // }
+                    data = this.parseGetFeatureInfo(data);
+                this.showGetFeatureInfo(evt.latlng, data);
             },
-            error  (xhr, status, error) {
-                () => { this.showGetFeatureInfo(error); }
+            error : (xhr, status, error) => {
+                console.log(error);
             }
         });
     }
@@ -103,8 +99,7 @@ class WMS extends TileLayer.WMS {
         return '<div>' + fields.join(' ') + '</div>';
     }
 
-    showGetFeatureInfo  (err : Error, latlng : LatLng, content: any) {
-        if (err) { console.log(err); return; } // do nothing if there's an error
+    showGetFeatureInfo  (latlng : LatLng, content: any) {
 
         // Otherwise show the content in a popup, or something.
         popup({ maxWidth: 800})

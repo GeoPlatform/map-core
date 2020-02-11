@@ -2342,33 +2342,30 @@ This software has been approved for release by the U.S. Department of the Interi
          * @return {?}
          */
             function (evt) {
+                var _this = this;
                 // Make an AJAX request to the server and hope for the best
                 /** @type {?} */
                 var url = this.getFeatureInfoUrl(evt.latlng);
-                /** @type {?} */
-                var parseGetFeatureInfo = this.parseGetFeatureInfo;
                 jQuery$1.ajax({
                     url: url,
-                    success: /**
+                    success: ( /**
                      * @param {?} data
                      * @param {?} status
                      * @param {?} xhr
                      * @return {?}
-                     */ function (data, status, xhr) {
-                        // var err = typeof data === 'string' ? null : data;
+                     */function (data, status, xhr) {
                         if (typeof (data) !== 'string')
-                            data = parseGetFeatureInfo(data);
-                        // () => {
-                        this.showGetFeatureInfo(null, evt.latlng, data);
-                        // }
-                    },
-                    error: /**
+                            data = _this.parseGetFeatureInfo(data);
+                        _this.showGetFeatureInfo(evt.latlng, data);
+                    }),
+                    error: ( /**
                      * @param {?} xhr
                      * @param {?} status
                      * @param {?} error
                      * @return {?}
-                     */ function (xhr, status, error) {
-                    }
+                     */function (xhr, status, error) {
+                        console.log(error);
+                    })
                 });
             };
         /**
@@ -2426,22 +2423,16 @@ This software has been approved for release by the U.S. Department of the Interi
                 return '<div>' + fields.join(' ') + '</div>';
             };
         /**
-         * @param {?} err
          * @param {?} latlng
          * @param {?} content
          * @return {?}
          */
         WMS.prototype.showGetFeatureInfo = /**
-         * @param {?} err
          * @param {?} latlng
          * @param {?} content
          * @return {?}
          */
-            function (err, latlng, content) {
-                if (err) {
-                    console.log(err);
-                    return;
-                } // do nothing if there's an error
+            function (latlng, content) {
                 // Otherwise show the content in a popup, or something.
                 L.popup({ maxWidth: 800 })
                     .setLatLng(latlng)
